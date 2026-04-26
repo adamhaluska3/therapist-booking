@@ -16,10 +16,34 @@ import { ImageCarousel } from "@/components/marketing/image-carousel";
 import { homeContent } from "./_content/home";
 
 const SERVICE_VISUALS = [
-  { icon: Brain,         primary: true,  bg: "bg-white",       iconBg: "bg-brand-700",   iconColor: "text-white"     },
-  { icon: Users,         primary: false, bg: "bg-surface-50",  iconBg: "bg-brand-100",   iconColor: "text-brand-700" },
-  { icon: GraduationCap, primary: false, bg: "bg-surface-200", iconBg: "bg-surface-300", iconColor: "text-brand-800" },
-  { icon: TrendingUp,    primary: false, bg: "bg-surface-50",  iconBg: "bg-brand-100",   iconColor: "text-brand-700" },
+  {
+    icon: Brain,
+    primary: true,
+    bg: "bg-white",
+    iconBg: "bg-brand-700",
+    iconColor: "text-white",
+  },
+  {
+    icon: Users,
+    primary: false,
+    bg: "bg-surface-50",
+    iconBg: "bg-brand-100",
+    iconColor: "text-brand-700",
+  },
+  {
+    icon: GraduationCap,
+    primary: false,
+    bg: "bg-white",
+    iconBg: "bg-surface-300",
+    iconColor: "text-brand-700",
+  },
+  {
+    icon: TrendingUp,
+    primary: false,
+    bg: "bg-surface-50",
+    iconBg: "bg-brand-100",
+    iconColor: "text-brand-700",
+  },
 ] as const;
 
 const { services, outdoorTherapy, about, contact } = homeContent;
@@ -28,7 +52,7 @@ export default function HomePage() {
   return (
     <>
       {/* ── Services ─────────────────────────────────────── warm → cooler */}
-      <section className="bg-linear-to-b from-surface-50 to-surface-100">
+      <section className="bg-linear-to-b from-white to-surface-100">
         <div className="mx-auto max-w-6xl px-8 pb-24 pt-20">
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
             {services.label}
