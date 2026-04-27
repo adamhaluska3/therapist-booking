@@ -4,14 +4,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { blogPosts, type BlogPost } from "../../_content/blog";
 
-const DUMMY_BODY = [
-  "Každý z nás čelí v živote momentom, keď sa cítime preťažení, stratení alebo jednoducho unavení z každodenného behu. Práve v týchto chvíľach je dôležité zastaviť sa, nadýchnuť a pozrieť sa dovnútra. Psychológia nám ponúka množstvo nástrojov, ktoré môžeme využiť na ceste k lepšiemu poznaniu seba samého.",
-  "Výskumy ukazujú, že ľudia, ktorí pravidelne reflektujú svoje emócie a myšlienky, majú vyššiu odolnosť voči stresu a lepšie zvládajú náročné životné situácie. Nejde pritom o žiadnu mystiku — ide o vedomé pestovanie návykov, ktoré posilňujú náš vnútorný svet.",
-  "Jednou z najúčinnejších metód je vedenie denníka. Keď myšlienky prenesieme na papier, prestanú krúžiť v hlave a môžeme ich vidieť s väčším odstupom. Tento jednoduchý úkon nám pomáha identifikovať vzorce správania, rozoznať spúšťače stresu a postupne meniť to, čo nám neslúži.",
-  "Rovnako dôležitá je aj fyzická aktivita. Pohyb nie je len o tele — je to jeden z najmocnejších regulátorov nálady, aké poznáme. Už 30 minút chôdze denne môže výrazne ovplyvniť hladinu kortizolu a zlepšiť kvalitu spánku. A lepší spánok znamená jasnejšiu myseľ a väčšiu emocionálnu stabilitu.",
-  "Na záver je dôležité pripomenúť, že zmena neprichádza cez noc. Je to postupný proces, plný malých krokov a občasných zakopnutí. Buďte k sebe láskaví. Dovoľte si byť nedokonalí a zároveň stále rastúci. Práve to je podstata duševného zdravia — nie dokonalosť, ale autentický vzťah k sebe samému.",
-];
-
 type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
@@ -69,7 +61,7 @@ export default async function BlogDetailPage({ params }: Props) {
             {post.excerpt}
           </p>
           <div className="space-y-5">
-            {DUMMY_BODY.map((paragraph, i) => (
+            {post.body.map((paragraph: string, i: number) => (
               <p key={i} className="text-sm leading-relaxed text-neutral-500">
                 {paragraph}
               </p>
