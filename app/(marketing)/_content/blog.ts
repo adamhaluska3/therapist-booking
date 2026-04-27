@@ -44,7 +44,7 @@ export const blogPosts: BlogPost[] = [
     featured: true,
   },
   {
-    slug: "umenie-spomalit-precо-je-nicnerobenie-dolezite",
+    slug: "umenie-spomalit-preco-je-nicnerobenie-dolezite",
     title: "Umenie spomalit: Prečo je ničnerobenie dôležité",
     excerpt:
       "V spoločnosti orientovanej na výkon sme zabudli na silu odpočinku. Zistite, ako pasívna relaxácia regeneruje váš mozog a prečo je nevynímateľná pre kreativitu.",
@@ -80,7 +80,7 @@ export const blogPosts: BlogPost[] = [
     image: { src: "/images/blog/blog-5.png", alt: "sebarozvoj" },
   },
   {
-    slug: "vedomé-dychanie-nastroj-pre-okamzity-pokoj",
+    slug: "vedome-dychanie-nastroj-pre-okamzity-pokoj",
     title: "Vedomé dýchanie: Nástroj pre okamžitý pokoj",
     excerpt:
       "Dych je most medzi telom a mysľou. Jednoduchá technika vedomého dýchania dokáže za minúty znížiť stres a ukotviť vás v prítomnom okamihu.",
