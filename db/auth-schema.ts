@@ -18,7 +18,7 @@ export const user = sqliteTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   role: text({ enum: ["user", "admin"] }).default("user"),
-  nickname: text("nickname"),
+  nickname: text("nickname"), // Set by therapist (optional, Google names might not be suitable)
   phone: text("phone"),
 });
 
