@@ -19,7 +19,7 @@ export default function MarketingLayout({
     >
       {/* Header */}
       <header className="sticky top-0 z-50 bg-surface-50/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
           <Link
             href="/"
             className="font-serif text-lg font-semibold italic text-brand-900"
@@ -27,7 +27,7 @@ export default function MarketingLayout({
             Terapeut - Ján Šolc
           </Link>
 
-          <nav className="flex items-center gap-8">
+          <nav className="hidden items-center gap-8 md:flex">
             <Link
               href="/"
               className="text-sm text-neutral-600 transition-colors hover:text-brand-700"
@@ -59,7 +59,7 @@ export default function MarketingLayout({
 
       {/* Footer */}
       <footer>
-        <div className="mx-auto max-w-6xl px-8 py-16">
+        <div className="mx-auto max-w-6xl px-4 py-12 md:px-8 md:py-16">
           <Separator className="my-8 bg-surface-200" />
           <div className="flex items-center justify-between">
             <p className="text-xs text-neutral-400">

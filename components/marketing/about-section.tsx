@@ -8,8 +8,8 @@ type Props = {
 export function AboutSection({ content }: Props) {
   return (
     <section className="bg-linear-to-b from-surface-50 to-surface-100">
-      <div className="mx-auto max-w-6xl px-8 py-24">
-        <div className="grid grid-cols-2 items-start gap-12">
+      <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start md:gap-12">
           <div className="relative">
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-surface-200">
               <Image
@@ -30,8 +30,8 @@ export function AboutSection({ content }: Props) {
             </div>
           </div>
 
-          <div className="pt-12">
-            <h2 className="mb-6 font-serif text-4xl font-semibold text-brand-900">
+          <div className="md:pt-12">
+            <h2 className="mb-6 font-serif text-2xl font-semibold text-brand-900 md:text-4xl">
               {content.name}
             </h2>
             {content.bio.map((paragraph, i) => (

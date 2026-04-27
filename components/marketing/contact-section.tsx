@@ -9,11 +9,11 @@ type Props = {
 export function ContactSection({ content }: Props) {
   return (
     <section className="bg-linear-to-b from-surface-100 to-surface-50">
-      <div className="mx-auto max-w-6xl px-8 py-24">
-        <div className="rounded-3xl bg-white p-12 shadow-sm">
-          <div className="grid grid-cols-2 gap-16">
+      <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
+        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8 md:rounded-3xl md:p-12">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
             <div>
-              <h2 className="mb-4 font-serif text-4xl font-semibold text-brand-900">
+              <h2 className="mb-4 font-serif text-2xl font-semibold text-brand-900 md:text-4xl">
                 {content.heading}
               </h2>
               <p className="mb-8 text-sm leading-relaxed text-neutral-500">

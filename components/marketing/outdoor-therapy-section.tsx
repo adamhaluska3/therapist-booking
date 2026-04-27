@@ -10,13 +10,13 @@ type Props = {
 export function OutdoorTherapySection({ content }: Props) {
   return (
     <section className="bg-linear-to-b from-surface-100 to-surface-50">
-      <div className="mx-auto max-w-6xl px-8 py-24">
-        <div className="grid grid-cols-2 items-center gap-16">
+      <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center md:gap-16">
           <div>
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
               {content.label}
             </p>
-            <h2 className="mb-6 font-serif text-4xl font-semibold leading-tight text-brand-900">
+            <h2 className="mb-6 font-serif text-2xl font-semibold leading-tight text-brand-900 md:text-4xl">
               {content.heading}
             </h2>
             <p className="mb-6 text-sm leading-relaxed text-neutral-500">
@@ -33,7 +33,7 @@ export function OutdoorTherapySection({ content }: Props) {
                 </li>
               ))}
             </ul>
-            <Button className="rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800">
+            <Button className="w-full rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800 sm:w-auto">
               {content.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           </div>
