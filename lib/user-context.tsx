@@ -2,7 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 
-export type UserRole = "admin" | "therapist" | "editor";
+export type UserRole = "user" | "admin";
 
 export type User = {
   id: string;

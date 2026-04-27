@@ -1,19 +1,34 @@
 import type { Metadata } from "next";
 import { UserProvider, type User } from "@/lib/user-context";
+import { auth } from "@/lib/auth";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { headers } from "next/headers";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Therapist Booking",
   description: "Book appointments with qualified therapists.",
 };
 
-// TODO: replace with a real session lookup
 async function getCurrentUser(): Promise<User | null> {
-  return null;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return {
+    id: session.user.id,
+    name: session.user.name ?? "User",
+    role: (session.user.role ?? "user") as User["role"],
+    email: session.user.email,
+    avatarUrl: session.user.image ?? undefined,
+  };
 }
 
 export default async function RootLayout({

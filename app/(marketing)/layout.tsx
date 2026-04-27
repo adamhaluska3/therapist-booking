@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Lora } from "next/font/google";
-import { Button } from "@/components/ui/button";
+import { AuthControls } from "@/components/marketing/auth-controls";
 import { Separator } from "@/components/ui/separator";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
@@ -48,9 +48,7 @@ export default function MarketingLayout({
             </Link>
           </nav>
 
-          <Button className="rounded-full bg-brand-700 px-5 text-white hover:bg-brand-800">
-            Prihlásiť sa
-          </Button>
+          <AuthControls />
         </div>
       </header>
 
