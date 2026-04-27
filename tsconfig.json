@@ -16,6 +16,7 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/components/*": ["./components/*"],
+      "@/db/*": ["./db/*"],
       "@/lib/*": ["./lib/*"],
       "@/server/*": ["./server/*"]
     }
