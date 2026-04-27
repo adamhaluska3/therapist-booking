@@ -12,14 +12,14 @@ export function BlogHeaderSection() {
 
   return (
     <section className="bg-linear-to-b from-white to-surface-100">
-      <div className="mx-auto max-w-6xl px-8 pb-12 pt-20">
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-12 md:px-8 md:pb-12 md:pt-20">
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
           {blogHeader.label}
         </p>
-        <h1 className="mb-4 font-serif text-5xl font-semibold leading-tight text-brand-900">
+        <h1 className="mb-4 font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl">
           {blogHeader.heading}
         </h1>
-        <p className="mb-10 max-w-lg text-sm leading-relaxed text-neutral-500">
+        <p className="mb-8 max-w-lg text-sm leading-relaxed text-neutral-500 md:mb-10">
           {blogHeader.subheading}
         </p>
 
