@@ -1,7 +1,20 @@
+import { Lora } from "next/font/google"
+import { SiteHeader } from "@/components/shared/site-header"
+
+const lora = Lora({ subsets: ["latin"], variable: "--font-lora" })
+
 export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return <>{children}</>;
+  return (
+    <div
+      className={`${lora.variable} min-h-screen bg-surface-50`}
+      style={{ "--font-serif": "var(--font-lora, ui-serif)" } as React.CSSProperties}
+    >
+      <SiteHeader />
+      <main>{children}</main>
+    </div>
+  )
 }
