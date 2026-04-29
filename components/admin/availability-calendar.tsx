@@ -9,15 +9,17 @@ import withDragAndDrop, {
 import { format, parse, startOfWeek, getDay, isToday } from "date-fns"
 import { sk } from "date-fns/locale"
 import { toast } from "sonner"
+import { Plus } from "lucide-react"
 
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
 import "./calendar.css"
 
 import { CalendarEventCard, type TherapistEvent } from "./calendar-event-card"
-import { CalendarToolbar } from "./calendar-toolbar"
+import { CalendarToolbar, type CalendarView } from "./calendar-toolbar"
 import { SlotSettingsDialog } from "./slot-settings-dialog"
 import { BookingDialog } from "./booking-dialog"
+import { NewEventDialog } from "./new-event-dialog"
 
 import {
   buildDisplayEvents,
@@ -113,10 +115,18 @@ export function AvailabilityCalendar({
   const persistedBookingIds = useRef(new Set(initialBookings.map((b) => b.id)))
 
   const [date, setDate] = useState(() => initialDate ?? new Date())
-  const [view, setView] = useState<"week" | "month">("week")
+  const [view, setView] = useState<CalendarView>("week")
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mobile = window.innerWidth < 768
+    setIsMobile(mobile)
+    if (mobile) setView("day")
+  }, [])
 
   const [slotDialogId,  setSlotDialogId]  = useState<string | null>(null)
   const [bookingDialog, setBookingDialog] = useState<{ booking?: Booking; defaultStart: Date; defaultEnd: Date } | null>(null)
+  const [newEventOpen,  setNewEventOpen]  = useState(false)
 
   const openSlot = slotDialogId ? slots.find((s) => s.id === slotDialogId) : undefined
 
@@ -129,7 +139,6 @@ export function AvailabilityCalendar({
 
   function persistSlots(toUpsert: SlotUpsert[], toDelete: string[]) {
     if (toUpsert.length === 0 && toDelete.length === 0) return
-    // Update persisted set optimistically
     toUpsert.forEach((s) => persistedSlotIds.current.add(s.id))
     toDelete.forEach((id) => persistedSlotIds.current.delete(id))
     startTransition(async () => {
@@ -215,6 +224,7 @@ export function AvailabilityCalendar({
         applyAndPersistBookingChange(target, bookings, slots)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [slots, bookings],
   )
 
@@ -294,37 +304,51 @@ export function AvailabilityCalendar({
     setBookingDialog(null)
   }, [])
 
+  const handleNewEventSlot = useCallback((start: Date, end: Date) => {
+    const id = crypto.randomUUID()
+    applyAndPersistSlotChange([...slots, { id, start, end, label: null }], id)
+    setNewEventOpen(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots])
+
+  const handleNewEventBooking = useCallback((start: Date, end: Date) => {
+    setNewEventOpen(false)
+    setBookingDialog({ defaultStart: start, defaultEnd: end })
+  }, [])
+
   const handleNavigate = useCallback(
     (action: "PREV" | "NEXT" | "TODAY") => {
       const base = action === "TODAY" ? new Date() : new Date(date)
       if (action !== "TODAY") {
-        const delta = view === "week" ? 7 : 30
+        const delta = view === "day" ? 1 : 7
         base.setDate(base.getDate() + (action === "NEXT" ? delta : -delta))
       }
-      const monday = startOfWeek(base, { weekStartsOn: 1 })
-      setDate(monday)
-      router.push(`/admin/calendar?from=${format(monday, "yyyy-MM-dd")}`)
+      const anchor = view === "week" ? startOfWeek(base, { weekStartsOn: 1 }) : base
+      setDate(anchor)
+      router.push(`/admin/calendar?from=${format(anchor, "yyyy-MM-dd")}`)
     },
     [date, view, router],
   )
 
   const draggableAccessor = useCallback(
-    (event: TherapistEvent) => view === "week" && (event.source === "booking" || event.isDraggable === true),
-    [view],
+    (event: TherapistEvent) => !isMobile && (event.source === "booking" || event.isDraggable === true),
+    [isMobile],
   )
 
   const resizableAccessor = useCallback(
-    (event: TherapistEvent) => view === "week" && (event.source === "booking" || event.isDraggable === true),
-    [view],
+    (event: TherapistEvent) => !isMobile && (event.source === "booking" || event.isDraggable === true),
+    [isMobile],
   )
 
   const components = useMemo(
     () => ({
       toolbar: () => null,
       week: { header: DayColumnHeader },
-      event: ({ event }: { event: TherapistEvent }) => <CalendarEventCard event={event} />,
+      event: ({ event }: { event: TherapistEvent }) => (
+        <CalendarEventCard event={event} compact={isMobile && view === "week"} />
+      ),
     }),
-    [],
+    [isMobile, view],
   )
 
   const eventPropGetter = useCallback(
@@ -344,9 +368,9 @@ export function AvailabilityCalendar({
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-8">
+    <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={setView} />
+        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} />
 
         <div style={{ height: 640 }}>
           <DnDCalendar
@@ -354,9 +378,9 @@ export function AvailabilityCalendar({
             events={displayEvents}
             date={date}
             onNavigate={setDate}
-            view={view === "week" ? Views.WEEK : Views.MONTH}
+            view={view === "day" ? Views.DAY : Views.WEEK}
             onView={() => {}}
-            selectable={view === "week"}
+            selectable={!isMobile}
             resizable
             onEventDrop={handleEventDrop}
             onEventResize={handleEventResize}
@@ -378,6 +402,26 @@ export function AvailabilityCalendar({
           />
         </div>
       </div>
+
+      {isMobile && (
+        <button
+          onClick={() => setNewEventOpen(true)}
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="Nová udalosť"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
+      {newEventOpen && (
+        <NewEventDialog
+          open
+          defaultDate={date}
+          onCreateSlot={handleNewEventSlot}
+          onCreateBooking={handleNewEventBooking}
+          onClose={() => setNewEventOpen(false)}
+        />
+      )}
 
       {openSlot && (
         <SlotSettingsDialog
