@@ -1,6 +1,6 @@
 "use client"
 
-import { AlignJustify, Plus } from "lucide-react"
+import { AlignJustify, Plus, User } from "lucide-react"
 
 export type EventType = "therapy" | "empty" | "blocked"
 
@@ -19,14 +19,40 @@ export interface TherapistEvent {
 
 interface CalendarEventCardProps {
   event: TherapistEvent
+  compact?: boolean
 }
 
-export function CalendarEventCard({ event }: CalendarEventCardProps) {
+export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
+  if (compact) {
+    if (event.type === "empty") {
+      return (
+        <div className="h-full w-full flex items-center justify-center text-brand-500">
+          <Plus className="h-3 w-3" />
+        </div>
+      )
+    }
+    if (event.type === "therapy") {
+      return (
+        <div className="h-full w-full flex items-center justify-center">
+          <User className="h-3 w-3 text-white" />
+        </div>
+      )
+    }
+    if (event.type === "blocked") {
+      return (
+        <div className="h-full w-full flex items-center justify-center">
+          <AlignJustify className="h-3 w-3 text-gray-400" />
+        </div>
+      )
+    }
+    return null
+  }
+
   if (event.type === "empty") {
     return (
-      <div className="h-full w-full flex items-center justify-center gap-1 text-brand-500">
+      <div className="h-full w-full flex items-center justify-center gap-1 text-brand-500 overflow-hidden px-1">
         <Plus className="h-3 w-3 shrink-0" />
-        <span className="text-[10px] font-semibold uppercase tracking-widest">
+        <span className="text-[10px] font-semibold tracking-widest truncate">
           Dostupný čas
         </span>
       </div>
@@ -35,12 +61,15 @@ export function CalendarEventCard({ event }: CalendarEventCardProps) {
 
   if (event.type === "therapy") {
     return (
-      <div className="h-full flex flex-col p-2">
-        <div className="text-[9px] font-bold uppercase tracking-widest text-brand-200 mb-0.5">
+      <div className="h-full flex flex-col p-2 overflow-hidden">
+        <div className="text-[9px] font-bold uppercase tracking-widest text-brand-200 mb-0.5 truncate">
           Terapia
         </div>
-        <div className="text-sm font-semibold text-white leading-snug">
-          {event.clientName ?? event.title}
+        <div className="flex items-center gap-1 overflow-hidden">
+          <User className="h-3 w-3 text-white/70 shrink-0" />
+          <span className="text-sm font-semibold text-white leading-snug truncate">
+            {event.clientName ?? event.title}
+          </span>
         </div>
       </div>
     )
