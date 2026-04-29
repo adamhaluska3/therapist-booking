@@ -1,5 +1,5 @@
 "use server";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, gt, inArray, lt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 
@@ -80,4 +80,33 @@ export async function saveBookings(
 
 export async function deleteBookingById(id: string): Promise<void> {
   await db.delete(booking).where(eq(booking.id, id));
+}
+
+export async function createClientBooking(
+  dateKey: string,
+  time: string,
+  clientName?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const [hh, mm] = time.split(":").map(Number);
+  const start = new Date(y, m - 1, d, hh, mm, 0, 0);
+  const end = new Date(start.getTime() + 3_600_000);
+
+  const conflicts = await db
+    .select({ id: booking.id })
+    .from(booking)
+    .where(and(lt(booking.start, end), gt(booking.end, start)));
+
+  if (conflicts.length > 0) {
+    return { ok: false, error: "Tento termín je už obsadený." };
+  }
+
+  await db.insert(booking).values({
+    start,
+    end,
+    status: "pending",
+    clientName: clientName?.trim() || null,
+  });
+
+  return { ok: true };
 }
