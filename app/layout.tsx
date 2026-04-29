@@ -39,7 +39,7 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="sk" className={cn("font-sans", geist.variable)}>
       <body>
         <UserProvider user={user}>{children}</UserProvider>
       </body>
