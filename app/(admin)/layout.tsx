@@ -10,7 +10,7 @@ export default function AdminLayout({
 }) {
   return (
     <div
-      className={`${lora.variable} min-h-screen bg-surface-50`}
+      className={`${lora.variable} min-h-screen`}
       style={{ "--font-serif": "var(--font-lora, ui-serif)" } as React.CSSProperties}
     >
       <SiteHeader />
