@@ -22,7 +22,8 @@ export async function getCalendarData(from: Date, to: Date) {
 export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate> {
   const { slots, bookings } = await getCalendarData(from, to);
   const HOUR_MS = 3_600_000;
-  const STEP_MS = 1_800_000; // 30-min steps, but each booking spans 1 hour
+  const STEP_MS = 1_800_000;
+  const now = Date.now();
   const result: SlotsByDate = {};
 
   for (const slot of slots) {
@@ -30,16 +31,18 @@ export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate
     const slotEnd = slot.end.getTime();
 
     while (cursor.getTime() + HOUR_MS <= slotEnd) {
-      const end = new Date(cursor.getTime() + HOUR_MS);
+      if (cursor.getTime() >= now) {
+        const end = new Date(cursor.getTime() + HOUR_MS);
 
-      const available = !bookings.some(
-        (b) => b.start.getTime() < end.getTime() && b.end.getTime() > cursor.getTime(),
-      );
+        const available = !bookings.some(
+          (b) => b.start.getTime() < end.getTime() && b.end.getTime() > cursor.getTime(),
+        );
 
-      const dateKey = toDateKey(cursor);
-      const time = `${String(cursor.getHours()).padStart(2, "0")}:${String(cursor.getMinutes()).padStart(2, "0")}`;
+        const dateKey = toDateKey(cursor);
+        const time = `${String(cursor.getHours()).padStart(2, "0")}:${String(cursor.getMinutes()).padStart(2, "0")}`;
 
-      (result[dateKey] ??= []).push({ time, available });
+        (result[dateKey] ??= []).push({ time, available });
+      }
       cursor = new Date(cursor.getTime() + STEP_MS);
     }
   }
