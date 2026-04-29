@@ -23,7 +23,7 @@ export function buildDisplayEvents(
 
   for (const slot of slots) {
     const slotStart = slot.start.getTime();
-    const slotEnd   = slot.end.getTime();
+    const slotEnd = slot.end.getTime();
 
     const within = bookings
       .filter((b) => b.start.getTime() < slotEnd && b.end.getTime() > slotStart)
@@ -36,8 +36,8 @@ export function buildDisplayEvents(
         id: `slot_${slot.id}`,
         title: slot.label ?? "Dostupný čas",
         start: slot.start,
-        end:   slot.end,
-        type:  "empty",
+        end: slot.end,
+        type: "empty",
         source: "slot",
         slotId: slot.id,
         isDraggable: true,
@@ -49,15 +49,15 @@ export function buildDisplayEvents(
 
     for (const b of within) {
       const bStart = new Date(Math.max(b.start.getTime(), slotStart));
-      const bEnd   = new Date(Math.min(b.end.getTime(),   slotEnd));
+      const bEnd = new Date(Math.min(b.end.getTime(), slotEnd));
 
       if (cursor < bStart) {
         events.push({
-          id:     `slot_${slot.id}_empty_${cursor.getTime()}`,
-          title:  slot.label ?? "Dostupný čas",
-          start:  cursor,
-          end:    bStart,
-          type:   "empty",
+          id: `slot_${slot.id}_empty_${cursor.getTime()}`,
+          title: slot.label ?? "Dostupný čas",
+          start: cursor,
+          end: bStart,
+          type: "empty",
           source: "slot",
           slotId: slot.id,
           isDraggable: false,
@@ -70,11 +70,11 @@ export function buildDisplayEvents(
 
     if (cursor < slot.end) {
       events.push({
-        id:     `slot_${slot.id}_empty_${cursor.getTime()}`,
-        title:  slot.label ?? "Dostupný čas",
-        start:  cursor,
-        end:    slot.end,
-        type:   "empty",
+        id: `slot_${slot.id}_empty_${cursor.getTime()}`,
+        title: slot.label ?? "Dostupný čas",
+        start: cursor,
+        end: slot.end,
+        type: "empty",
         source: "slot",
         slotId: slot.id,
         isDraggable: false,
@@ -134,15 +134,15 @@ export function trimSlotsAroundBooking(
   deleted: string[];
 } {
   const bStart = booking.start.getTime();
-  const bEnd   = booking.end.getTime();
+  const bEnd = booking.end.getTime();
 
-  const result:   AvailabilitySlot[] = [];
+  const result: AvailabilitySlot[] = [];
   const upserted: AvailabilitySlot[] = [];
-  const deleted:  string[]           = [];
+  const deleted: string[] = [];
 
   for (const slot of slots) {
     const sStart = slot.start.getTime();
-    const sEnd   = slot.end.getTime();
+    const sEnd = slot.end.getTime();
 
     if (bEnd <= sStart || bStart >= sEnd) {
       result.push(slot);
@@ -168,11 +168,11 @@ export function trimSlotsAroundBooking(
       continue;
     }
 
-    const left:  AvailabilitySlot = { ...slot, end: new Date(bStart) };
+    const left: AvailabilitySlot = { ...slot, end: new Date(bStart) };
     const right: AvailabilitySlot = {
-      id:    crypto.randomUUID(),
+      id: crypto.randomUUID(),
       start: new Date(bEnd),
-      end:   slot.end,
+      end: slot.end,
       label: slot.label,
     };
     result.push(left, right);

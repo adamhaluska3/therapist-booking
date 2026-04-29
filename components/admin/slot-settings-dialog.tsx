@@ -29,7 +29,7 @@ export function SlotSettingsDialog({
   onClose,
 }: SlotSettingsDialogProps) {
   const [startStr, setStartStr] = useState(() => format(slot.start, "HH:mm"))
-  const [endStr,   setEndStr]   = useState(() => format(slot.end,   "HH:mm"))
+  const [endStr, setEndStr] = useState(() => format(slot.end, "HH:mm"))
 
   function parseTime(base: Date, hhmm: string): Date {
     const [hh, mm] = hhmm.split(":").map(Number)
@@ -40,14 +40,14 @@ export function SlotSettingsDialog({
 
   function handleSave() {
     const start = parseTime(slot.start, startStr)
-    const end   = parseTime(slot.start, endStr)
+    const end = parseTime(slot.start, endStr)
     if (end <= start) return
     onSave({ ...slot, start, end })
   }
 
   function handleCreateBooking() {
     const start = parseTime(slot.start, startStr)
-    const end   = parseTime(slot.start, endStr)
+    const end = parseTime(slot.start, endStr)
     onCreateBooking(start, end > start ? end : slot.end)
   }
 

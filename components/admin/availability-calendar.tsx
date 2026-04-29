@@ -54,9 +54,9 @@ function getEventStyle(event: TherapistEvent): React.CSSProperties {
   const base: React.CSSProperties = { borderRadius: "10px", border: "none", padding: 0, overflow: "hidden" }
   switch (event.type) {
     case "therapy": return { ...base, backgroundColor: "#427a5c" }
-    case "empty":   return { ...base, backgroundColor: "#faf8f5", border: "2px dashed #92baa2" }
+    case "empty": return { ...base, backgroundColor: "#faf8f5", border: "2px dashed #92baa2" }
     case "blocked": return { ...base, backgroundColor: "#e8e3d9" }
-    default:        return base
+    default: return base
   }
 }
 
@@ -122,9 +122,9 @@ export function AvailabilityCalendar({
     if (mobile) setView("day")
   }, [])
 
-  const [slotDialogId,  setSlotDialogId]  = useState<string | null>(null)
+  const [slotDialogId, setSlotDialogId] = useState<string | null>(null)
   const [bookingDialog, setBookingDialog] = useState<{ booking?: Booking; defaultStart: Date; defaultEnd: Date } | null>(null)
-  const [newEventOpen,  setNewEventOpen]  = useState(false)
+  const [newEventOpen, setNewEventOpen] = useState(false)
 
   const openSlot = slotDialogId ? slots.find((s) => s.id === slotDialogId) : undefined
 

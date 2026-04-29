@@ -56,22 +56,22 @@ export async function saveBookings(
       await tx
         .insert(booking)
         .values({
-          id:         b.id,
-          start:      b.start,
-          end:        b.end,
-          status:     b.status ?? "confirmed",
+          id: b.id,
+          start: b.start,
+          end: b.end,
+          status: b.status ?? "confirmed",
           clientName: b.clientName ?? null,
-          notes:      b.notes ?? null,
-          userId:     b.userId ?? null,
+          notes: b.notes ?? null,
+          userId: b.userId ?? null,
         })
         .onConflictDoUpdate({
           target: booking.id,
           set: {
-            start:      b.start,
-            end:        b.end,
-            status:     b.status ?? "confirmed",
+            start: b.start,
+            end: b.end,
+            status: b.status ?? "confirmed",
             clientName: b.clientName ?? null,
-            notes:      b.notes ?? null,
+            notes: b.notes ?? null,
           },
         });
     }

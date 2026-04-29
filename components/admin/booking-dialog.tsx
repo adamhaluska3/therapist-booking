@@ -34,9 +34,9 @@ export function BookingDialog({
   const base = booking?.start ?? defaultStart ?? new Date()
 
   const [clientName, setClientName] = useState(booking?.clientName ?? "")
-  const [notes,      setNotes]      = useState(booking?.notes ?? "")
-  const [startStr,   setStartStr]   = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
-  const [endStr,     setEndStr]     = useState(() => format(booking?.end   ?? defaultEnd   ?? new Date(), "HH:mm"))
+  const [notes, setNotes] = useState(booking?.notes ?? "")
+  const [startStr, setStartStr] = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
+  const [endStr, setEndStr] = useState(() => format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"))
 
   const isEdit = !!booking
 
@@ -53,14 +53,14 @@ export function BookingDialog({
     if (end <= start) return
 
     onSave({
-      id:         booking?.id ?? crypto.randomUUID(),
+      id: booking?.id ?? crypto.randomUUID(),
       start,
       end,
-      status:     booking?.status ?? "confirmed",
+      status: booking?.status ?? "confirmed",
       clientName: clientName.trim() || null,
-      notes:      notes.trim() || null,
-      userId:     booking?.userId ?? null,
-      createdAt:  booking?.createdAt ?? new Date(),
+      notes: notes.trim() || null,
+      userId: booking?.userId ?? null,
+      createdAt: booking?.createdAt ?? new Date(),
     })
   }
 

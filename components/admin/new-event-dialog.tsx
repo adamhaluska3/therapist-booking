@@ -25,14 +25,14 @@ export function NewEventDialog({
   onCreateBooking,
   onClose,
 }: NewEventDialogProps) {
-  const [dateStr,  setDateStr]  = useState(() => format(defaultDate, "yyyy-MM-dd"))
+  const [dateStr, setDateStr] = useState(() => format(defaultDate, "yyyy-MM-dd"))
   const [startStr, setStartStr] = useState("09:00")
-  const [endStr,   setEndStr]   = useState("10:00")
+  const [endStr, setEndStr] = useState("10:00")
 
   function buildDates(): { start: Date; end: Date } | null {
     const [y, m, d] = dateStr.split("-").map(Number)
-    const [sh, sm]  = startStr.split(":").map(Number)
-    const [eh, em]  = endStr.split(":").map(Number)
+    const [sh, sm] = startStr.split(":").map(Number)
+    const [eh, em] = endStr.split(":").map(Number)
     if ([y, m, d, sh, sm, eh, em].some(Number.isNaN)) return null
     const start = new Date(y, m - 1, d, sh, sm, 0, 0)
     const end   = new Date(y, m - 1, d, eh, em, 0, 0)
