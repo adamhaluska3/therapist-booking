@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { format, startOfWeek, endOfWeek } from "date-fns"
 import { sk } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -12,9 +12,10 @@ interface CalendarToolbarProps {
   onNavigate: (action: "PREV" | "NEXT" | "TODAY") => void
   view: CalendarView
   onViewChange: (view: CalendarView) => void
+  onNewEvent: () => void
 }
 
-export function CalendarToolbar({ date, onNavigate, view, onViewChange }: CalendarToolbarProps) {
+export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEvent }: CalendarToolbarProps) {
   const weekStart = startOfWeek(date, { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(date,   { weekStartsOn: 1 })
 
@@ -40,6 +41,13 @@ export function CalendarToolbar({ date, onNavigate, view, onViewChange }: Calend
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={onNewEvent}
+            className="h-9 w-9 rounded-full bg-brand-600 text-white shadow-md flex items-center justify-center hover:bg-brand-700 active:scale-95 transition-all"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+
           <div className="flex items-center gap-0.5">
             <button
               onClick={() => onNavigate("PREV")}

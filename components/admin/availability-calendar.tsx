@@ -48,7 +48,6 @@ const localizer = dateFnsLocalizer({
   locales,
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DnDCalendar = withDragAndDrop<TherapistEvent>(Calendar as any)
 
 function getEventStyle(event: TherapistEvent): React.CSSProperties {
@@ -224,7 +223,6 @@ export function AvailabilityCalendar({
         applyAndPersistBookingChange(target, bookings, slots)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [slots, bookings],
   )
 
@@ -241,7 +239,6 @@ export function AvailabilityCalendar({
         applyAndPersistBookingChange(target, bookings, slots)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [slots, bookings],
   )
 
@@ -253,7 +250,6 @@ export function AvailabilityCalendar({
         id,
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [slots],
   )
 
@@ -272,7 +268,6 @@ export function AvailabilityCalendar({
       updated.id,
     )
     setSlotDialogId(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slots])
 
   const handleSlotDelete = useCallback((slotId: string) => {
@@ -282,7 +277,6 @@ export function AvailabilityCalendar({
       persistSlots([], [slotId])
     }
     setSlotDialogId(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSlotCreateBooking = useCallback((defaultStart: Date, defaultEnd: Date) => {
@@ -293,7 +287,6 @@ export function AvailabilityCalendar({
   const handleBookingSave = useCallback((saved: Booking) => {
     const ok = applyAndPersistBookingChange(saved, bookings, slots)
     if (ok) setBookingDialog(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookings, slots])
 
   const handleBookingDelete = useCallback((bookingId: string) => {
@@ -308,7 +301,6 @@ export function AvailabilityCalendar({
     const id = crypto.randomUUID()
     applyAndPersistSlotChange([...slots, { id, start, end, label: null }], id)
     setNewEventOpen(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slots])
 
   const handleNewEventBooking = useCallback((start: Date, end: Date) => {
@@ -370,7 +362,7 @@ export function AvailabilityCalendar({
   return (
     <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} />
+        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} onNewEvent={() => setNewEventOpen(true)} />
 
         <div style={{ height: 640 }}>
           <DnDCalendar
