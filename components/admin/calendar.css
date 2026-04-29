@@ -13,6 +13,14 @@
   background: #ffffff;
 }
 
+.rbc-allday-cell {
+  display: none !important;
+}
+
+.rbc-time-header-cell .rbc-header {
+  border-bottom: none !important;
+}
+
 /* Header row wrapper — must not clip the two-line day headers */
 .rbc-time-header {
   overflow: visible !important;
