@@ -4,11 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
 import { createClientBooking } from "@/server/actions/index";
-import type { SlotsByDate, TimeSlot } from "@/lib/booking-types";
-
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
+import { toDateKey, type SlotsByDate, type TimeSlot } from "@/lib/booking-types";
 
 function firstAvailableDate(slots: SlotsByDate): Date {
   const todayKey = toDateKey(new Date());

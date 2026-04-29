@@ -2,7 +2,7 @@ import "server-only";
 import { and, gte, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
-import type { SlotsByDate } from "@/lib/booking-types";
+import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 
 export async function getCalendarData(from: Date, to: Date) {
   const [slots, bookings] = await Promise.all([
@@ -50,6 +50,3 @@ export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate
   return result;
 }
 
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}

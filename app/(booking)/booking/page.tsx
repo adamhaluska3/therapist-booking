@@ -10,7 +10,6 @@ export default async function BookingPage() {
   const slots = await getBookingSlots(today, addDays(today, 90));
   return (
     <>
-      {/* Booking */}
       <section className="bg-linear-to-b from-white to-surface-100">
         <div className="mx-auto max-w-6xl px-8 pb-16 pt-12">
           <h1 className="mb-3 font-serif text-3xl font-semibold italic leading-tight text-brand-900 md:text-4xl">
@@ -24,7 +23,6 @@ export default async function BookingPage() {
         </div>
       </section>
 
-      {/* Banner */}
       <section className="bg-linear-to-br from-brand-900 to-brand-700">
         <div className="mx-auto max-w-6xl px-8 py-20">
           <h2 className="mb-4 max-w-lg font-serif text-3xl font-semibold italic leading-tight text-white md:text-4xl">

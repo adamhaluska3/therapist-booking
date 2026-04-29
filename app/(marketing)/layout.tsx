@@ -17,11 +17,8 @@ export default function MarketingLayout({
       }
     >
       <SiteHeader />
-
-      {/* Page content */}
       <main>{children}</main>
 
-      {/* Footer */}
       <footer>
         <div className="mx-auto max-w-6xl px-4 py-12 md:px-8 md:py-16">
           <Separator className="my-8 bg-surface-200" />

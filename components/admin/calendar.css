@@ -1,11 +1,8 @@
-/* ── Base overrides for react-big-calendar ─────────────────────────────────── */
-
 .rbc-calendar {
   background: transparent;
   font-family: inherit;
 }
 
-/* Time-view container */
 .rbc-time-view {
   border: 1px solid #dfd6c4;
   border-radius: 12px;
@@ -21,7 +18,6 @@
   border-bottom: none !important;
 }
 
-/* Header row wrapper — must not clip the two-line day headers */
 .rbc-time-header {
   overflow: visible !important;
 }
@@ -34,7 +30,6 @@
   min-height: 56px;
 }
 
-/* Day header row */
 .rbc-header {
   border-bottom: 1px solid #dfd6c4 !important;
   border-right: 1px solid #ede6d8 !important;
@@ -50,12 +45,10 @@
   border-right: none !important;
 }
 
-/* Today column highlight */
 .rbc-today {
   background-color: #f5f1ea !important;
 }
 
-/* Remove default event padding so our custom card fills the space */
 .rbc-event {
   padding: 0 !important;
   box-shadow: none !important;
@@ -66,12 +59,10 @@
   outline: none !important;
 }
 
-/* Hide the event time label react-big-calendar renders above the event title */
 .rbc-event-label {
   display: none !important;
 }
 
-/* Time gutter (left column with hour labels) */
 .rbc-time-gutter {
   background: #ffffff;
 }
@@ -88,7 +79,6 @@
   border-bottom: 1px solid #ede6d8 !important;
 }
 
-/* Time slot rows */
 .rbc-time-slot {
   border-top: none !important;
 }
@@ -101,7 +91,6 @@
   border-left: 1px solid #ede6d8 !important;
 }
 
-/* Current time indicator — brand green */
 .rbc-current-time-indicator {
   background-color: #427a5c !important;
   height: 2px;
@@ -112,24 +101,20 @@
   border-color: #427a5c !important;
 }
 
-/* Day column separator */
 .rbc-day-slot .rbc-time-slot {
   border-top: 1px solid #f5f1ea;
 }
 
-/* Slot selection highlight */
 .rbc-slot-selection {
   background-color: rgba(66, 122, 92, 0.08) !important;
   border: 1px solid rgba(66, 122, 92, 0.3) !important;
   border-radius: 6px;
 }
 
-/* Remove the ugly focus ring on events */
 .rbc-event.rbc-selected {
   box-shadow: 0 0 0 2px rgba(66, 122, 92, 0.4) !important;
 }
 
-/* DnD drag preview */
 .rbc-addons-dnd-drag-preview {
   opacity: 0.75;
 }
@@ -138,7 +123,6 @@
   background: rgba(66, 122, 92, 0.05) !important;
 }
 
-/* Month view cells */
 .rbc-month-view {
   border: 1px solid #dfd6c4;
   border-radius: 12px;

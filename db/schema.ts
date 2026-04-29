@@ -9,7 +9,6 @@ export const statusEnum = [
   "finished",
 ] as const;
 
-// Therapist's working-time windows. Clients cannot book outside these ranges.
 export const availabilitySlot = sqliteTable("availability_slot", {
   id: text("id")
     .primaryKey()
@@ -19,13 +18,10 @@ export const availabilitySlot = sqliteTable("availability_slot", {
   label: text("label"),
 });
 
-// A concrete appointment. Not tied 1-to-1 with an availability_slot.
-// start/end are stored directly; the slot relationship is resolved at render time.
 export const booking = sqliteTable("booking", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  // null when therapist creates the booking manually without a registered client
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),

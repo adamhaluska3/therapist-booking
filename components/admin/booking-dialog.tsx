@@ -53,7 +53,7 @@ export function BookingDialog({
     if (end <= start) return
 
     onSave({
-      id:         booking?.id ?? `new_${Date.now()}`,
+      id:         booking?.id ?? crypto.randomUUID(),
       start,
       end,
       status:     booking?.status ?? "confirmed",

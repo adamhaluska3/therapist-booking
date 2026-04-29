@@ -4,12 +4,9 @@ import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { bookingContent } from "../../app/(booking)/booking/_content/booking";
+import { toDateKey } from "@/lib/booking-types";
 
 const { calendar } = bookingContent;
-
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
 
 function isSameDay(a: Date, b: Date) {
   return (

@@ -33,7 +33,7 @@ export function NewEventDialog({
     const [y, m, d] = dateStr.split("-").map(Number)
     const [sh, sm]  = startStr.split(":").map(Number)
     const [eh, em]  = endStr.split(":").map(Number)
-    if ([y, m, d, sh, sm, eh, em].some(isNaN)) return null
+    if ([y, m, d, sh, sm, eh, em].some(Number.isNaN)) return null
     const start = new Date(y, m - 1, d, sh, sm, 0, 0)
     const end   = new Date(y, m - 1, d, eh, em, 0, 0)
     if (end <= start) return null

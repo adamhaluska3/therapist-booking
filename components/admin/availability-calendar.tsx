@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useCallback, useMemo, useTransition, useRef, useEffect } from "react"
+import { type ComponentType, useState, useCallback, useMemo, useTransition, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Calendar, dateFnsLocalizer, Views } from "react-big-calendar"
+import { Calendar, dateFnsLocalizer, Views, type CalendarProps } from "react-big-calendar"
 import withDragAndDrop, {
   type EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop"
@@ -48,7 +48,7 @@ const localizer = dateFnsLocalizer({
   locales,
 })
 
-const DnDCalendar = withDragAndDrop<TherapistEvent>(Calendar as any)
+const DnDCalendar = withDragAndDrop<TherapistEvent>(Calendar as ComponentType<CalendarProps<TherapistEvent>>)
 
 function getEventStyle(event: TherapistEvent): React.CSSProperties {
   const base: React.CSSProperties = { borderRadius: "10px", border: "none", padding: 0, overflow: "hidden" }
@@ -105,12 +105,10 @@ export function AvailabilityCalendar({
   const router = useRouter()
 
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
-
-  const [slots,    setSlots]    = useState<AvailabilitySlot[]>(initialSlots)
+  const [slots, setSlots] = useState<AvailabilitySlot[]>(initialSlots)
   const [bookings, setBookings] = useState<Booking[]>(initialBookings)
 
-  const persistedSlotIds    = useRef(new Set(initialSlots.map((s) => s.id)))
+  const persistedSlotIds = useRef(new Set(initialSlots.map((s) => s.id)))
   const persistedBookingIds = useRef(new Set(initialBookings.map((b) => b.id)))
 
   const [date, setDate] = useState(() => initialDate ?? new Date())
@@ -119,6 +117,7 @@ export function AvailabilityCalendar({
 
   useEffect(() => {
     const mobile = window.innerWidth < 768
+    setMounted(true)
     setIsMobile(mobile)
     if (mobile) setView("day")
   }, [])
@@ -210,23 +209,7 @@ export function AvailabilityCalendar({
     return true
   }
 
-  const handleEventDrop = useCallback(
-    ({ event, start, end }: EventInteractionArgs<TherapistEvent>) => {
-      if (event.source === "slot" && event.slotId && event.isDraggable) {
-        applyAndPersistSlotChange(
-          applySlotMove(slots, event.slotId, start as Date, end as Date),
-          event.slotId,
-        )
-      } else if (event.source === "booking" && event.bookingId) {
-        const moved = applyBookingMove(bookings, event.bookingId, start as Date, end as Date)
-        const target = moved.find((b) => b.id === event.bookingId)!
-        applyAndPersistBookingChange(target, bookings, slots)
-      }
-    },
-    [slots, bookings],
-  )
-
-  const handleEventResize = useCallback(
+  const handleEventInteraction = useCallback(
     ({ event, start, end }: EventInteractionArgs<TherapistEvent>) => {
       if (event.source === "slot" && event.slotId && event.isDraggable) {
         applyAndPersistSlotChange(
@@ -322,12 +305,7 @@ export function AvailabilityCalendar({
     [date, view, router],
   )
 
-  const draggableAccessor = useCallback(
-    (event: TherapistEvent) => !isMobile && (event.source === "booking" || event.isDraggable === true),
-    [isMobile],
-  )
-
-  const resizableAccessor = useCallback(
+  const interactiveAccessor = useCallback(
     (event: TherapistEvent) => !isMobile && (event.source === "booking" || event.isDraggable === true),
     [isMobile],
   )
@@ -374,14 +352,14 @@ export function AvailabilityCalendar({
             onView={() => {}}
             selectable={!isMobile}
             resizable
-            onEventDrop={handleEventDrop}
-            onEventResize={handleEventResize}
+            onEventDrop={handleEventInteraction}
+            onEventResize={handleEventInteraction}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
             components={components}
             eventPropGetter={eventPropGetter}
-            draggableAccessor={draggableAccessor}
-            resizableAccessor={resizableAccessor}
+            draggableAccessor={interactiveAccessor}
+            resizableAccessor={interactiveAccessor}
             step={30}
             timeslots={2}
             min={new Date(0, 0, 0, 7, 0)}

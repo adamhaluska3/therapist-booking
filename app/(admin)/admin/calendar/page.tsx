@@ -1,4 +1,4 @@
-import { startOfWeek, endOfWeek, addDays, parseISO, isValid } from "date-fns";
+import { startOfWeek, addDays, parseISO, isValid } from "date-fns";
 import { AvailabilityCalendar } from "@/components/admin/availability-calendar";
 import { getCalendarData } from "@/server/queries/index";
 
@@ -17,7 +17,7 @@ export default async function CalendarPage({ searchParams }: Props) {
   const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
 
   const rangeFrom = addDays(weekStart, -28);
-  const rangeTo   = addDays(weekStart,  28);
+  const rangeTo = addDays(weekStart, 28);
 
   const { slots, bookings } = await getCalendarData(rangeFrom, rangeTo);
 
