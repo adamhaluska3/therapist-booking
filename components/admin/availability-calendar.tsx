@@ -296,24 +296,26 @@ export function AvailabilityCalendar({
 
   const handleNavigate = useCallback(
     (action: "PREV" | "NEXT" | "TODAY") => {
-      if (action === "TODAY") { router.push("/admin/calendar"); return }
-      const delta = view === "week" ? 7 : 30
-      const next = new Date(date)
-      next.setDate(date.getDate() + (action === "NEXT" ? delta : -delta))
-      const monday = startOfWeek(next, { weekStartsOn: 1 })
+      const base = action === "TODAY" ? new Date() : new Date(date)
+      if (action !== "TODAY") {
+        const delta = view === "week" ? 7 : 30
+        base.setDate(base.getDate() + (action === "NEXT" ? delta : -delta))
+      }
+      const monday = startOfWeek(base, { weekStartsOn: 1 })
+      setDate(monday)
       router.push(`/admin/calendar?from=${format(monday, "yyyy-MM-dd")}`)
     },
     [date, view, router],
   )
 
   const draggableAccessor = useCallback(
-    (event: TherapistEvent) => event.source === "booking" || event.isDraggable === true,
-    [],
+    (event: TherapistEvent) => view === "week" && (event.source === "booking" || event.isDraggable === true),
+    [view],
   )
 
   const resizableAccessor = useCallback(
-    (event: TherapistEvent) => event.source === "booking" || event.isDraggable === true,
-    [],
+    (event: TherapistEvent) => view === "week" && (event.source === "booking" || event.isDraggable === true),
+    [view],
   )
 
   const components = useMemo(
@@ -354,7 +356,7 @@ export function AvailabilityCalendar({
             onNavigate={setDate}
             view={view === "week" ? Views.WEEK : Views.MONTH}
             onView={() => {}}
-            selectable
+            selectable={view === "week"}
             resizable
             onEventDrop={handleEventDrop}
             onEventResize={handleEventResize}
