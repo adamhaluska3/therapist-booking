@@ -3,13 +3,13 @@
 import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  bookingContent,
-  getSlotsForDate,
-  hasAvailability,
-} from "../../app/(booking)/booking/_content/booking";
+import { bookingContent } from "../../app/(booking)/booking/_content/booking";
 
 const { calendar } = bookingContent;
+
+function toDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
 function isSameDay(a: Date, b: Date) {
   return (
@@ -29,7 +29,7 @@ function isPast(date: Date, today: Date) {
 
 function buildCalendarGrid(year: number, month: number): (Date | null)[] {
   const firstOfMonth = new Date(year, month, 1);
-  const startDow = (firstOfMonth.getDay() + 6) % 7; // Mon=0
+  const startDow = (firstOfMonth.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const grid: (Date | null)[] = [];
@@ -43,39 +43,34 @@ export function BookingCalendar({
   today,
   selected,
   onSelect,
+  availableDates,
 }: {
   today: Date;
   selected: Date | null;
   onSelect: (d: Date) => void;
+  availableDates: Set<string>;
 }) {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const prevMonth = useCallback(() => {
     setViewMonth((m) => {
-      if (m === 0) {
-        setViewYear((y) => y - 1);
-        return 11;
-      }
+      if (m === 0) { setViewYear((y) => y - 1); return 11; }
       return m - 1;
     });
   }, []);
 
   const nextMonth = useCallback(() => {
     setViewMonth((m) => {
-      if (m === 11) {
-        setViewYear((y) => y + 1);
-        return 0;
-      }
+      if (m === 11) { setViewYear((y) => y + 1); return 0; }
       return m + 1;
     });
   }, []);
 
-  const grid: (Date | null)[] = buildCalendarGrid(viewYear, viewMonth);
+  const grid = buildCalendarGrid(viewYear, viewMonth);
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <p className="font-serif text-lg font-semibold italic text-brand-700">
           {calendar.label}
@@ -101,7 +96,6 @@ export function BookingCalendar({
         </div>
       </div>
 
-      {/* Week day headers */}
       <div className="mb-1 grid grid-cols-7">
         {calendar.weekDays.map((d) => (
           <div
@@ -113,17 +107,15 @@ export function BookingCalendar({
         ))}
       </div>
 
-      {/* Day grid */}
       <div className="grid grid-cols-7">
         {grid.map((date, i) => {
           if (!date) return <div key={i} />;
 
           const past = isPast(date, today);
-          const slots = getSlotsForDate(date);
-          const disabled = past || slots.length === 0;
+          const available = !past && availableDates.has(toDateKey(date));
+          const disabled = past;
           const isSelected = selected ? isSameDay(date, selected) : false;
           const isToday = isSameDay(date, today);
-          const available = !disabled && hasAvailability(date);
 
           return (
             <button
@@ -131,21 +123,29 @@ export function BookingCalendar({
               disabled={disabled}
               onClick={() => onSelect(date)}
               className={cn(
-                "relative flex flex-col items-center justify-center rounded-full py-1.5 text-sm transition-colors",
-                disabled
-                  ? "cursor-default text-neutral-300"
-                  : "hover:bg-surface-100",
-                isSelected
-                  ? "bg-brand-800 text-white hover:bg-brand-800"
-                  : isToday && !disabled
-                    ? "font-semibold text-brand-700"
-                    : "text-neutral-700",
+                "relative flex flex-col items-center justify-center py-1.5",
+                disabled ? "cursor-default" : "cursor-pointer",
               )}
             >
-              {date.getDate()}
-              {available && !isSelected && (
-                <span className="absolute bottom-0.5 h-1 w-4 rounded-full bg-brand-500" />
-              )}
+              <span
+                className={cn(
+                  "relative flex h-8 w-8 items-center justify-center rounded-full text-sm transition-colors",
+                  isSelected
+                    ? "bg-brand-700 font-semibold text-white"
+                    : disabled
+                      ? "text-neutral-300"
+                      : isToday
+                        ? "font-semibold text-brand-700 hover:bg-surface-100"
+                        : available
+                          ? "text-neutral-700 hover:bg-surface-100"
+                          : "text-neutral-400 hover:bg-surface-100",
+                )}
+              >
+                {date.getDate()}
+                {available && (
+                  <span className={cn("absolute -bottom-1 left-1/2 h-1 w-4 -translate-x-1/2 rounded-full", isSelected ? "bg-white/70" : "bg-brand-500")} />
+                )}
+              </span>
             </button>
           );
         })}
