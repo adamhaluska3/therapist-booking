@@ -32,8 +32,8 @@ export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEve
 
   return (
     <div className="mb-6 select-none">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="hidden sm:block">
           <h2 className="text-xl font-semibold text-gray-900">
             Definujte svoje voľné hodiny
           </h2>
@@ -43,7 +43,7 @@ export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEve
         <div className="flex items-center gap-2">
           <button
             onClick={onNewEvent}
-            className="h-9 w-9 rounded-full bg-brand-600 text-white shadow-md flex items-center justify-center hover:bg-brand-700 active:scale-95 transition-all"
+            className="hidden sm:flex h-9 w-9 rounded-full bg-brand-600 text-white shadow-md items-center justify-center hover:bg-brand-700 active:scale-95 transition-all"
           >
             <Plus className="h-4 w-4" />
           </button>
