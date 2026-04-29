@@ -1,9 +1,13 @@
+import { addDays } from "date-fns";
 import { bookingContent } from "./_content/booking";
 import { BookingWidget } from "@/components/booking/booking-widget";
+import { getBookingSlots } from "@/server/queries/index";
 
 const { hero, main } = bookingContent;
 
-export default function BookingPage() {
+export default async function BookingPage() {
+  const today = new Date();
+  const slots = await getBookingSlots(today, addDays(today, 90));
   return (
     <>
       {/* Booking */}
@@ -16,7 +20,7 @@ export default function BookingPage() {
             {main.subheading}
           </p>
 
-          <BookingWidget />
+          <BookingWidget slots={slots} />
         </div>
       </section>
 

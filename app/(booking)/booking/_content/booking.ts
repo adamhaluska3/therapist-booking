@@ -30,54 +30,10 @@ export const bookingContent = {
   slots: {
     label: "Dostupné časy",
     note: "Rezerváciu je možné zmeniť alebo zrušiť najneskôr 48 hodín vopred.",
-    confirmCta: "Confirm Booking",
-    footer: "SEDENIE TRVÁ 50 MINÚT • ONLINE ALEBO OSOBNE",
+    confirmCta: "Potvrdiť rezerváciu",
+    footer: "SEDENIE TRVÁ 60 MINÚT • ONLINE ALEBO OSOBNE",
     occupiedLabel: "Obsadené",
   },
 };
 
-export type BookingSlot = { time: string; occupied: boolean };
-
-const WEEKDAY_SLOTS: Record<number, BookingSlot[]> = {
-  0: [
-    // Monday
-    { time: "09:00", occupied: false },
-    { time: "10:30", occupied: false },
-    { time: "14:00", occupied: true },
-    { time: "15:30", occupied: false },
-  ],
-  1: [
-    // Tuesday
-    { time: "09:00", occupied: false },
-    { time: "10:30", occupied: true },
-    { time: "14:00", occupied: false },
-  ],
-  2: [
-    // Wednesday
-    { time: "09:00", occupied: true },
-    { time: "10:30", occupied: false },
-    { time: "14:00", occupied: false },
-    { time: "15:30", occupied: false },
-  ],
-  3: [
-    // Thursday
-    { time: "10:30", occupied: false },
-    { time: "14:00", occupied: false },
-    { time: "15:30", occupied: true },
-  ],
-  4: [
-    // Friday
-    { time: "09:00", occupied: false },
-    { time: "10:30", occupied: false },
-  ],
-};
-
-export function getSlotsForDate(date: Date): BookingSlot[] {
-  const dow = (date.getDay() + 6) % 7;
-  return WEEKDAY_SLOTS[dow] ?? [];
-}
-
-export function hasAvailability(date: Date): boolean {
-  const slots = getSlotsForDate(date);
-  return slots.some((s) => !s.occupied);
-}
+export type { TimeSlot, SlotsByDate } from "@/lib/booking-types";
