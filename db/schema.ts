@@ -9,25 +9,29 @@ export const statusEnum = [
   "finished",
 ] as const;
 
+// Therapist's working-time windows. Clients cannot book outside these ranges.
 export const availabilitySlot = sqliteTable("availability_slot", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
+  label: text("label"),
 });
 
+// A concrete appointment. Not tied 1-to-1 with an availability_slot.
+// start/end are stored directly; the slot relationship is resolved at render time.
 export const booking = sqliteTable("booking", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  availabilitySlotId: text("availability_slot_id")
-    .notNull()
-    .references(() => availabilitySlot.id),
+  // null when therapist creates the booking manually without a registered client
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  start: integer("start", { mode: "timestamp" }).notNull(),
+  end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
+  clientName: text("client_name"),
+  notes: text("notes"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -47,21 +51,10 @@ export const userNote = sqliteTable("user_note", {
     .$onUpdateFn(() => new Date()),
 });
 
-export const availabilitySlotRelations = relations(
-  availabilitySlot,
-  ({ one }) => ({
-    bookings: one(booking),
-  }),
-);
-
 export const bookingRelations = relations(booking, ({ one }) => ({
   user: one(user, {
     fields: [booking.userId],
     references: [user.id],
-  }),
-  slot: one(availabilitySlot, {
-    fields: [booking.availabilitySlotId],
-    references: [availabilitySlot.id],
   }),
 }));
 
