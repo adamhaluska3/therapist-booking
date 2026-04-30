@@ -1,8 +1,19 @@
 import "server-only";
-import { and, gte, lte } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
+
+export async function getDashboardBookings() {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  return db
+    .select()
+    .from(booking)
+    .where(and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")))
+    .orderBy(booking.start);
+}
 
 export async function getCalendarData(from: Date, to: Date) {
   const [slots, bookings] = await Promise.all([
