@@ -1,5 +1,5 @@
 "use server";
-import { and, eq, gt, inArray, lt } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 
@@ -80,6 +80,38 @@ export async function saveBookings(
 
 export async function deleteBookingById(id: string): Promise<void> {
   await db.delete(booking).where(eq(booking.id, id));
+}
+
+export async function updateBookingStatus(
+  id: string,
+  status: "cancelled" | "finished",
+): Promise<void> {
+  await db.update(booking).set({ status }).where(eq(booking.id, id));
+}
+
+export async function updateBookingTime(
+  id: string,
+  start: Date,
+  end: Date,
+): Promise<{ ok: boolean; error?: string }> {
+  const conflicts = await db
+    .select({ id: booking.id })
+    .from(booking)
+    .where(
+      and(
+        lt(booking.start, end),
+        gt(booking.end, start),
+        eq(booking.status, "confirmed"),
+        ne(booking.id, id),
+      ),
+    );
+
+  if (conflicts.length > 0) {
+    return { ok: false, error: "V tomto čase už existuje potvrdené sedenie." };
+  }
+
+  await db.update(booking).set({ start, end }).where(eq(booking.id, id));
+  return { ok: true };
 }
 
 export async function createClientBooking(
