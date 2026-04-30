@@ -89,6 +89,10 @@ export async function updateBookingStatus(
   await db.update(booking).set({ status }).where(eq(booking.id, id));
 }
 
+export async function confirmBooking(id: string): Promise<void> {
+  await db.update(booking).set({ status: "confirmed" }).where(eq(booking.id, id));
+}
+
 export async function updateBookingTime(
   id: string,
   start: Date,

@@ -1,6 +1,10 @@
 import { format, isToday, isTomorrow } from "date-fns"
 import { sk } from "date-fns/locale"
 
+export function formatBookingDate(date: Date): string {
+  return format(date, "d. MMMM yyyy", { locale: sk })
+}
+
 export type TimeGroup = "today" | "tomorrow" | "week"
 
 export function formatTime(date: Date): string {

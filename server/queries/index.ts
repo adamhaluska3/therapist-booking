@@ -1,8 +1,10 @@
 import "server-only";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { cache } from "react";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
+import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
 
 export async function getDashboardBookings() {
   const startOfToday = new Date();
@@ -61,3 +63,30 @@ export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate
   return result;
 }
 
+export const getPendingCount = cache(async (): Promise<number> => {
+  const [{ total }] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(booking)
+    .where(eq(booking.status, "pending"));
+  return Number(total);
+});
+
+export async function getPendingBookings(page = 1) {
+  const offset = (page - 1) * BOOKINGS_PAGE_SIZE;
+
+  const [items, [{ total }]] = await Promise.all([
+    db
+      .select()
+      .from(booking)
+      .where(eq(booking.status, "pending"))
+      .orderBy(booking.start)
+      .limit(BOOKINGS_PAGE_SIZE)
+      .offset(offset),
+    db
+      .select({ total: sql<number>`count(*)` })
+      .from(booking)
+      .where(eq(booking.status, "pending")),
+  ]);
+
+  return { bookings: items, total: Number(total) };
+}
