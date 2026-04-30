@@ -6,7 +6,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const geist = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Therapist Booking",
@@ -39,7 +39,7 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="sk" className={cn("font-sans", geist.variable)}>
       <body>
         <UserProvider user={user}>{children}</UserProvider>
       </body>
