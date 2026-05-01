@@ -14,8 +14,7 @@ import {
 import Link from "next/link";
 import { ChevronRight, Search } from "lucide-react";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getClientsTableRows } from "@/server/queries";
 
@@ -51,13 +50,9 @@ export default function ClientsTable({
           const row = getValue() as ClientItem;
           return (
             <div className="flex items-center gap-3">
-              <Avatar size="sm">
-                {row.avatarUrl ? (
-                  <AvatarImage src={row.avatarUrl} alt={row.name} />
-                ) : (
-                  <AvatarFallback>{row.name?.charAt(0)}</AvatarFallback>
-                )}
-              </Avatar>
+              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                {getInitials(row.name)}
+              </div>
               <div className="min-w-0">
                 <div className="text-sm font-medium text-neutral-800 truncate">
                   {row.name}

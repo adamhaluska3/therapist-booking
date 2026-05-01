@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import ClientNotes from "@/components/admin/client-notes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/formatting";
 
 type Props = { params: { id: string } };
 
@@ -72,13 +73,9 @@ export default async function Page({ params }: Props) {
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Avatar size="sm">
-                    {user.image ? (
-                      <AvatarImage src={user.image} alt={user.name} />
-                    ) : (
-                      <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
-                    )}
-                  </Avatar>
+                  <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                    {getInitials(user.nickname ?? user.name)}
+                  </div>
                   <div className="flex-1">
                     <CardTitle className="mb-1">
                       {user.nickname ?? user.name}
