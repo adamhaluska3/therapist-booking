@@ -1,0 +1,207 @@
+"use client";
+
+import * as React from "react";
+import { useState, useMemo } from "react";
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+  useReactTable,
+} from "@tanstack/react-table";
+import Link from "next/link";
+import { ChevronRight, Search } from "lucide-react";
+
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+
+type ClientItem = {
+  id: string | number;
+  name: string;
+  avatarUrl?: string | null;
+  lastSession?: string | null;
+  totalSessions?: number;
+};
+
+type ColumnClassMeta = {
+  className?: string;
+};
+
+export default function ClientsTable({ items }: { items: ClientItem[] }) {
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<any>([]);
+
+  const columns = useMemo<ColumnDef<ClientItem, any>[]>(
+    () => [
+      {
+        id: "client",
+        header: "Meno klienta",
+        accessorFn: (row) => row,
+        cell: ({ getValue }) => {
+          const row = getValue() as ClientItem;
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar size="sm">
+                {row.avatarUrl ? (
+                  <AvatarImage src={row.avatarUrl} alt={row.name} />
+                ) : (
+                  <AvatarFallback>{row.name?.charAt(0)}</AvatarFallback>
+                )}
+              </Avatar>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-neutral-800 truncate">
+                  {row.name}
+                </div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "lastSession",
+        header: "Posledné sedenie",
+        meta: { className: "hidden sm:table-cell" },
+        cell: ({ getValue }) => (
+          <div className="text-sm text-neutral-600">{getValue() ?? "-"}</div>
+        ),
+      },
+      {
+        accessorKey: "totalSessions",
+        header: "Celkový počet",
+        meta: { className: "hidden sm:table-cell" },
+        cell: ({ getValue }) => (
+          <div className="text-sm text-neutral-600">{getValue() ?? 0}</div>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Akcia",
+        meta: { className: "w-20 sm:w-auto" },
+        cell: ({ row }) => {
+          const item = row.original as ClientItem;
+          return (
+            <div className="flex items-center justify-center pt-2">
+              <Link
+                href={`/admin/clients/${item.id}`}
+                className="inline-flex  items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700"
+              >
+                <span className="hidden sm:inline">Detail profilu</span>
+                <ChevronRight size={16} />
+              </Link>
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: items ?? [],
+    columns,
+    state: {
+      globalFilter,
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    globalFilterFn: "includesString",
+  });
+
+  const getColumnClassName = (meta: unknown) =>
+    (meta as ColumnClassMeta | undefined)?.className ?? "";
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-4 gap-3">
+        <div className="relative flex-1 max-w-lg">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+          />
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Vyhľadať podľa mena alebo ID..."
+            className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-surface-200 bg-white">
+        <table className="w-full table-fixed text-left text-sm">
+          <thead className="bg-surface-100">
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className={`px-4 py-3 text-xs font-medium text-neutral-500 ${getColumnClassName(
+                      header.column.columnDef.meta,
+                    )}`}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="border-t border-surface-200 hover:bg-surface-50"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className={`px-4 py-4 align-top ${getColumnClassName(cell.column.columnDef.meta)}`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-sm text-neutral-500">
+          Zobrazené {table.getRowModel().rows.length} z {items.length} klientov
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            ‹
+          </Button>
+          <div className="px-3 text-sm text-neutral-600">
+            {table.getState().pagination.pageIndex + 1}
+          </div>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            ›
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
