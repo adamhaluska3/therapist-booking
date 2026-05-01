@@ -8,8 +8,8 @@ const client = createClient({
 });
 
 const USERS_COUNT = 20;
-const BOOKINGS_PER_USER = 20;
-const NOTES_PER_USER = 10;
+const AVAILABILITY_SLOTS_COUNT = 20;
+const MAY_FIRST_2026 = Math.floor(new Date(2026, 4, 1).getTime() / 1000);
 
 const seedNames = [
   "Anna Novak",
@@ -34,9 +34,29 @@ const seedNames = [
   "Adela Prochazka",
 ];
 
+const getRandomInt = (min, max) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+const isWeekday = (date) => {
+  const day = date.getDay();
+  return day !== 0 && day !== 6;
+};
+
+const getRandomWeekday = () => {
+  const start = new Date(2026, 3, 1); // April 1
+  const end = new Date(2026, 6, 1); // July 1
+  while (true) {
+    const date = new Date(
+      start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+    );
+    if (isWeekday(date)) return date;
+  }
+};
+
+// 1. Generate Users
 const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
   const id = `seed-user-${fullName.toLowerCase().replace(/\s+/g, "-")}`;
-  const createdAt = Date.parse(`2026-04-${12 + (i % 10)}T09:00:00.000Z`);
+  const createdAt = Date.parse(`2026-03-${10 + (i % 15)}T09:00:00.000Z`);
   const [firstName] = fullName.split(" ");
   return {
     id,
@@ -52,104 +72,113 @@ const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
   };
 });
 
-const availabilitySlots = [
-  {
-    id: "seed-slot-2026-05-04",
-    start: Math.floor(new Date(2026, 4, 4, 9, 0, 0, 0).getTime() / 1000),
-    end: Math.floor(new Date(2026, 4, 4, 17, 0, 0, 0).getTime() / 1000),
-    label: "Monday availability",
-  },
-  {
-    id: "seed-slot-2026-05-11",
-    start: Math.floor(new Date(2026, 4, 11, 9, 0, 0, 0).getTime() / 1000),
-    end: Math.floor(new Date(2026, 4, 11, 17, 0, 0, 0).getTime() / 1000),
-    label: "Monday availability",
-  },
-  {
-    id: "seed-slot-2026-05-18",
-    start: Math.floor(new Date(2026, 4, 18, 9, 0, 0, 0).getTime() / 1000),
-    end: Math.floor(new Date(2026, 4, 18, 17, 0, 0, 0).getTime() / 1000),
-    label: "Monday availability",
-  },
-  {
-    id: "seed-slot-2026-05-25",
-    start: Math.floor(new Date(2026, 4, 25, 9, 0, 0, 0).getTime() / 1000),
-    end: Math.floor(new Date(2026, 4, 25, 17, 0, 0, 0).getTime() / 1000),
-    label: "Monday availability",
-  },
-];
+// 2. Generate 20 Availability Slots (9 AM to 6 PM)
+const availabilitySlots = [];
+for (let i = 0; i < AVAILABILITY_SLOTS_COUNT; i++) {
+  const date = getRandomWeekday();
+  const start = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    9,
+    0,
+    0,
+  );
+  const end = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    18,
+    0,
+    0,
+  );
 
-// Generate bookings programmatically so each user gets at least BOOKINGS_PER_USER
+  availabilitySlots.push({
+    id: `seed-slot-${i}-${date.toISOString().split("T")[0]}`,
+    start: Math.floor(start.getTime() / 1000),
+    end: Math.floor(end.getTime() / 1000),
+    label: `Working Day Slot ${i + 1}`,
+  });
+}
+
+// 3. Generate Bookings
 const bookings = [];
 const notes = [];
 
-for (let ui = 0; ui < users.length; ui++) {
-  const user = users[ui];
-  // bookings spaced every 2 days starting May 1, 2026
-  for (let b = 0; b < BOOKINGS_PER_USER; b++) {
-    const dayOffset = b * 2 + ui; // stagger across users
-    const date = new Date(2026, 4, 1 + dayOffset);
-    const hour = 9 + (b % 8); // hours between 9..16
-    const start = Math.floor(
+users.forEach((user) => {
+  const numBookings = getRandomInt(3, 7);
+  let userBookingsCount = 0;
+  let attempts = 0;
+
+  while (userBookingsCount < numBookings && attempts < 100) {
+    attempts++;
+    const slot =
+      availabilitySlots[getRandomInt(0, availabilitySlots.length - 1)];
+    const randomHour = getRandomInt(9, 17);
+    const slotDate = new Date(slot.start * 1000);
+    const bStart = Math.floor(
       new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        hour,
+        slotDate.getFullYear(),
+        slotDate.getMonth(),
+        slotDate.getDate(),
+        randomHour,
         0,
         0,
       ).getTime() / 1000,
     );
-    const end = start + 60 * 60; // 1 hour
-    const bookingId = `seed-booking-${user.id}-${b}`;
-    bookings.push({
-      id: bookingId,
-      userId: user.id,
-      start,
-      end,
-      status: b % 7 === 0 ? "cancelled" : b % 5 === 0 ? "pending" : "confirmed",
-      clientName: user.name,
-      notes: `Seeded booking #${b + 1} for ${user.name}`,
-      createdAt: Date.parse(new Date(2026, 3, 20 + (b % 10)).toISOString()),
-    });
+    const bEnd = bStart + 3600;
+
+    const hasOverlap = bookings.some((b) => bStart < b.end && bEnd > b.start);
+
+    if (!hasOverlap) {
+      const statusRoll = Math.random();
+      let status;
+
+      // Logic: If older than May 1st, set to finished or cancelled
+      // If after May 1st, set to cancelled, pending, or confirmed
+      if (bStart < MAY_FIRST_2026) {
+        status = statusRoll < 0.15 ? "cancelled" : "finished";
+      } else {
+        if (statusRoll < 0.15) {
+          status = "cancelled";
+        } else if (statusRoll < 0.5) {
+          status = "pending";
+        } else {
+          status = "confirmed";
+        }
+      }
+
+      bookings.push({
+        id: `seed-booking-${user.id}-${userBookingsCount}`,
+        userId: user.id,
+        start: bStart,
+        end: bEnd,
+        status: status,
+        clientName: user.name,
+        notes: `Seeded ${status} booking for ${user.name}`,
+        createdAt: Date.now(),
+      });
+      userBookingsCount++;
+    }
   }
 
-  // user notes
-  for (let n = 0; n < NOTES_PER_USER; n++) {
-    const noteDate = Math.floor(new Date(2026, 3, 1 + n + ui).getTime() / 1000);
+  for (let n = 0; n < 10; n++) {
     notes.push({
       id: `seed-note-${user.id}-${n}`,
       userId: user.id,
-      date: noteDate,
+      date: Math.floor(Date.now() / 1000) - n * 86400,
       note: `Seed note ${n + 1} for ${user.name}`,
-      updatedAt: Date.parse(new Date(2026, 3, 1 + n + ui).toISOString()),
+      updatedAt: Date.now(),
     });
   }
-}
+});
 
+// Upsert functions remain the same to maintain schema compatibility
 async function upsertUsers() {
   for (const user of users) {
     await client.execute({
-      sql: `
-        INSERT INTO user (
-          id,
-          name,
-          email,
-          email_verified,
-          created_at,
-          updated_at,
-          role,
-          phone,
-          image
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(email) DO UPDATE SET
-          name = excluded.name,
-          email_verified = excluded.email_verified,
-          updated_at = excluded.updated_at,
-          role = excluded.role,
-          phone = excluded.phone,
-          image = excluded.image
-      `,
+      sql: `INSERT INTO user (id, name, email, email_verified, created_at, updated_at, role, phone, image) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(email) DO UPDATE SET name = excluded.name`,
       args: [
         user.id,
         user.name,
@@ -168,14 +197,8 @@ async function upsertUsers() {
 async function upsertAvailabilitySlots() {
   for (const slot of availabilitySlots) {
     await client.execute({
-      sql: `
-        INSERT INTO availability_slot (id, start, end, label)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          start = excluded.start,
-          end = excluded.end,
-          label = excluded.label
-      `,
+      sql: `INSERT INTO availability_slot (id, start, end, label) VALUES (?, ?, ?, ?) 
+            ON CONFLICT(id) DO UPDATE SET start = excluded.start, end = excluded.end`,
       args: [slot.id, slot.start, slot.end, slot.label],
     });
   }
@@ -184,18 +207,8 @@ async function upsertAvailabilitySlots() {
 async function upsertBookings() {
   for (const booking of bookings) {
     await client.execute({
-      sql: `
-        INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          user_id = excluded.user_id,
-          start = excluded.start,
-          end = excluded.end,
-          status = excluded.status,
-          client_name = excluded.client_name,
-          notes = excluded.notes,
-          created_at = excluded.created_at
-      `,
+      sql: `INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET status = excluded.status`,
       args: [
         booking.id,
         booking.userId,
@@ -213,15 +226,8 @@ async function upsertBookings() {
 async function upsertNotes() {
   for (const n of notes) {
     await client.execute({
-      sql: `
-        INSERT INTO user_note (id, user_id, date, note, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          user_id = excluded.user_id,
-          date = excluded.date,
-          note = excluded.note,
-          updated_at = excluded.updated_at
-      `,
+      sql: `INSERT INTO user_note (id, user_id, date, note, updated_at) VALUES (?, ?, ?, ?, ?) 
+            ON CONFLICT(id) DO UPDATE SET note = excluded.note`,
       args: [n.id, n.userId, n.date, n.note, n.updatedAt],
     });
   }
@@ -233,11 +239,11 @@ async function main() {
   await upsertBookings();
   await upsertNotes();
   console.log(
-    `Seeded ${users.length} users, ${availabilitySlots.length} availability slots, ${bookings.length} bookings, and ${notes.length} notes.`,
+    `Seeding complete: ${users.length} users, ${availabilitySlots.length} slots, ${bookings.length} bookings.`,
   );
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
