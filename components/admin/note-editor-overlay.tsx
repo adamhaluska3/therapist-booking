@@ -94,7 +94,7 @@ export default function NoteEditorOverlay({
                 type="date"
                 value={dateValue}
                 onChange={(event) => setDateValue(event.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                className="h-9 rounded-md ml-2 border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               />
             </div>
 
@@ -145,7 +145,11 @@ export default function NoteEditorOverlay({
             <div className="ml-auto flex gap-2">
               {readOnlyInitially && !isEditing ? (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => onClose?.()}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onClose?.()}
+                  >
                     Zavrieť
                   </Button>
                   <Button size="sm" onClick={() => setIsEditing(true)}>
