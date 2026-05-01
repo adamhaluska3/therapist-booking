@@ -105,7 +105,7 @@ export default function ClientNotes({
         const note = getValue<string>();
 
         return (
-          <div className="max-w-2xl text-sm text-neutral-800">
+          <div className="max-w-2xl max-h-60 text-sm text-neutral-800 truncate">
             <p className="truncate whitespace-pre-wrap">{note}</p>
           </div>
         );
@@ -122,7 +122,7 @@ export default function ClientNotes({
             size="sm"
             onClick={() => handleEdit(row.original)}
           >
-            Upraviť
+            Detail
           </Button>
           <Button
             variant="destructive"
@@ -155,6 +155,10 @@ export default function ClientNotes({
 
     try {
       await onDelete?.(id);
+      if (editing?.id === id) {
+        setOpen(false);
+        setEditing(null);
+      }
     } catch (e) {
       console.error(e);
       setNotesState(prev);
@@ -285,18 +289,24 @@ export default function ClientNotes({
 
       <NoteEditorOverlay
         open={open}
+        readOnlyInitially={Boolean(editing)}
         initialNote={editing?.note}
         initialDate={editing ? new Date(editing.date) : new Date()}
         onClose={() => setOpen(false)}
         onDelete={editing ? () => confirmDelete(editing.id) : undefined}
         onSave={async (text: string, date: Date) => {
-          setOpen(false);
           if (editing) {
             const prev = notesState;
+            const prevEditing = editing;
             setNotesState((s) =>
               s.map((it) =>
                 it.id === editing.id ? { ...it, note: text, date } : it,
               ),
+            );
+            setEditing((curr) =>
+              curr && curr.id === editing.id
+                ? { ...curr, note: text, date }
+                : curr,
             );
             try {
               if (onUpdate) {
@@ -316,8 +326,10 @@ export default function ClientNotes({
             } catch (e) {
               console.error(e);
               setNotesState(prev);
+              setEditing(prevEditing);
             }
           } else {
+            setOpen(false);
             const tempId = "temp-" + Math.random().toString(36).slice(2);
             const newNote: NoteItem = { id: tempId, date, note: text };
             const prev = notesState;
