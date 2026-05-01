@@ -97,9 +97,7 @@ export default function ClientBookings({
           const status = row.original.status;
 
           return (
-            <div className="text-sm text-muted-foreground">
-              {status === "confirmed" ? "ONLINE" : (status ?? "-")}
-            </div>
+            <div className="text-sm text-muted-foreground">{status ?? "-"}</div>
           );
         },
       },
