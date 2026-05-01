@@ -15,6 +15,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/admin/pagination-controls";
 import { formatTime } from "@/lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
 
@@ -33,6 +34,7 @@ export default function ClientBookings({
   bookings?: BookingItem[];
 }) {
   const [filter, setFilter] = useState<"upcoming" | "past">("upcoming");
+  const [isPending, setIsPending] = useState(false);
 
   const now = useMemo(() => Date.now(), []);
   const rows = useMemo(
@@ -197,31 +199,25 @@ export default function ClientBookings({
           </table>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-neutral-500">
-            {filteredRows.length} {formatSedenia(filteredRows.length)}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              ‹
-            </Button>
-            <div className="px-3 text-sm text-neutral-600">
-              {pagination.pageIndex + 1}
-            </div>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              ›
-            </Button>
-          </div>
+        <div className="mt-4">
+          <PaginationControls
+            page={pagination.pageIndex + 1}
+            totalPages={table.getPageCount()}
+            rangeStart={
+              filteredRows.length === 0
+                ? 0
+                : pagination.pageIndex * pagination.pageSize + 1
+            }
+            rangeEnd={Math.min(
+              (pagination.pageIndex + 1) * pagination.pageSize,
+              filteredRows.length,
+            )}
+            total={filteredRows.length}
+            isPending={isPending}
+            onNavigate={(page) => {
+              table.setPageIndex(page - 1);
+            }}
+          />
         </div>
       </CardContent>
     </Card>

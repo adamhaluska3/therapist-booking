@@ -16,6 +16,7 @@ import { ChevronRight, Search } from "lucide-react";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getClientsTableRows } from "@/server/queries";
 
 type ClientItem = {
@@ -38,6 +39,7 @@ export default function ClientsTable({
   const [search, setSearch] = useState("");
   const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
   const [sorting, setSorting] = useState<any>([]);
+  const [isPending, setIsPending] = useState(false);
 
   const columns = useMemo<ColumnDef<ClientItem, any>[]>(
     () => [
@@ -123,14 +125,18 @@ export default function ClientsTable({
   useEffect(() => {
     if (search === "") {
       setData(initialItems ?? []);
+      setIsPending(false);
       return;
     }
+    setIsPending(true);
     const id = setTimeout(async () => {
       try {
         const items = await getClientsTableRows(search || undefined);
         setData(items ?? []);
       } catch (e) {
         // ignore
+      } finally {
+        setIsPending(false);
       }
     }, 300);
     return () => clearTimeout(id);
@@ -196,31 +202,28 @@ export default function ClientsTable({
         </table>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="text-sm text-neutral-500">
-          Zobrazené {table.getRowModel().rows.length} z {data.length} klientov
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            ‹
-          </Button>
-          <div className="px-3 text-sm text-neutral-600">
-            {table.getState().pagination.pageIndex + 1}
-          </div>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            ›
-          </Button>
-        </div>
+      <div className="mt-4">
+        <PaginationControls
+          page={table.getState().pagination.pageIndex + 1}
+          totalPages={table.getPageCount()}
+          rangeStart={
+            data.length === 0
+              ? 0
+              : table.getState().pagination.pageIndex *
+                  table.getState().pagination.pageSize +
+                1
+          }
+          rangeEnd={Math.min(
+            (table.getState().pagination.pageIndex + 1) *
+              table.getState().pagination.pageSize,
+            data.length,
+          )}
+          total={data.length}
+          isPending={isPending}
+          onNavigate={(page) => {
+            table.setPageIndex(page - 1);
+          }}
+        />
       </div>
     </div>
   );
