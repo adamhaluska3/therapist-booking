@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 
 import { and, count, desc, eq, max, or, sql } from "drizzle-orm";
 
@@ -14,8 +14,18 @@ export type ClientTableRow = {
   totalSessions: number;
 };
 
-export async function getClientsTableRows(): Promise<ClientTableRow[]> {
-  const rows = await db
+const handleLastSession = (lastSessionAt: Date | null): number | null => {
+  if (!lastSessionAt) return null;
+  if (lastSessionAt.getTime() > Date.now()) return null;
+  return lastSessionAt.getTime();
+};
+
+export async function getClientsTableRows(
+  search?: string,
+): Promise<ClientTableRow[]> {
+  const like = search ? `%${search}%` : null;
+
+  const baseSelect = db
     .select({
       id: user.id,
       name: sql<string>`coalesce(${user.nickname}, ${user.name})`,
@@ -31,15 +41,26 @@ export async function getClientsTableRows(): Promise<ClientTableRow[]> {
         or(eq(booking.status, "confirmed"), eq(booking.status, "finished")),
       ),
     )
-    .where(eq(user.role, "user"))
     .groupBy(user.id, user.name, user.nickname, user.image)
     .orderBy(desc(sql`coalesce(${user.nickname}, ${user.name})`));
 
+  const rows = like
+    ? await baseSelect.where(
+        and(
+          eq(user.role, "user"),
+          or(
+            sql`${user.name} LIKE ${like}`,
+            sql`${user.nickname} LIKE ${like}`,
+            sql`${user.email} LIKE ${like}`,
+            eq(user.id, search ?? ""),
+          ),
+        ),
+      )
+    : await baseSelect.where(eq(user.role, "user"));
+
   return rows.map((row) => ({
     ...row,
-    lastSessionAt: row.lastSessionAt
-      ? (row.lastSessionAt as Date).getTime()
-      : null,
+    lastSessionAt: handleLastSession(row.lastSessionAt),
     totalSessions: Number(row.totalSessions ?? 0),
   }));
 }

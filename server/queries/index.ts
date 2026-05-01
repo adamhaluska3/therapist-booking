@@ -1,4 +1,4 @@
-import "server-only";
+"use server";
 import { cache } from "react";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";

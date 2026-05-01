@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -16,6 +16,7 @@ import { ChevronRight, Search } from "lucide-react";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { getClientsTableRows } from "@/server/queries";
 
 type ClientItem = {
   id: string | number;
@@ -29,8 +30,13 @@ type ColumnClassMeta = {
   className?: string;
 };
 
-export default function ClientsTable({ items }: { items: ClientItem[] }) {
-  const [globalFilter, setGlobalFilter] = useState("");
+export default function ClientsTable({
+  items: initialItems,
+}: {
+  items: ClientItem[];
+}) {
+  const [search, setSearch] = useState("");
+  const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
   const [sorting, setSorting] = useState<any>([]);
 
   const columns = useMemo<ColumnDef<ClientItem, any>[]>(
@@ -99,10 +105,9 @@ export default function ClientsTable({ items }: { items: ClientItem[] }) {
   );
 
   const table = useReactTable({
-    data: items ?? [],
+    data: data ?? [],
     columns,
     state: {
-      globalFilter,
       sorting,
     },
     onSortingChange: setSorting,
@@ -110,11 +115,26 @@ export default function ClientsTable({ items }: { items: ClientItem[] }) {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    globalFilterFn: "includesString",
   });
 
   const getColumnClassName = (meta: unknown) =>
     (meta as ColumnClassMeta | undefined)?.className ?? "";
+
+  useEffect(() => {
+    if (search === "") {
+      setData(initialItems ?? []);
+      return;
+    }
+    const id = setTimeout(async () => {
+      try {
+        const items = await getClientsTableRows(search || undefined);
+        setData(items ?? []);
+      } catch (e) {
+        // ignore
+      }
+    }, 300);
+    return () => clearTimeout(id);
+  }, [search]);
 
   return (
     <div className="w-full">
@@ -125,8 +145,8 @@ export default function ClientsTable({ items }: { items: ClientItem[] }) {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
           />
           <input
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            value={search ?? ""}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Vyhľadať podľa mena alebo ID..."
             className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
           />
@@ -178,7 +198,7 @@ export default function ClientsTable({ items }: { items: ClientItem[] }) {
 
       <div className="flex items-center justify-between mt-4">
         <div className="text-sm text-neutral-500">
-          Zobrazené {table.getRowModel().rows.length} z {items.length} klientov
+          Zobrazené {table.getRowModel().rows.length} z {data.length} klientov
         </div>
         <div className="flex items-center gap-2">
           <Button
