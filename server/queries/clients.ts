@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, max, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, max, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { booking } from "@/db/schema";
@@ -42,7 +42,10 @@ export async function getClientsTableRows(
       ),
     )
     .groupBy(user.id, user.name, user.nickname, user.image)
-    .orderBy(desc(sql`coalesce(${user.nickname}, ${user.name})`));
+    .orderBy(
+      desc(max(booking.start)),
+      asc(sql`coalesce(${user.nickname}, ${user.name})`),
+    );
 
   const rows = like
     ? await baseSelect.where(
