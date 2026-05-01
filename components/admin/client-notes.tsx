@@ -173,7 +173,7 @@ export default function ClientNotes({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Súkromné poznámky mentora</CardTitle>
+          <CardTitle>Súkromné poznámky</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-3 flex justify-end">
