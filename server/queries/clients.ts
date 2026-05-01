@@ -36,10 +36,7 @@ export async function getClientsTableRows(
     .from(user)
     .leftJoin(
       booking,
-      and(
-        eq(booking.userId, user.id),
-        or(eq(booking.status, "confirmed"), eq(booking.status, "finished")),
-      ),
+      and(eq(booking.userId, user.id), eq(booking.status, "finished")),
     )
     .groupBy(user.id, user.name, user.nickname, user.image)
     .orderBy(
