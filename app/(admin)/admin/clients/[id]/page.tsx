@@ -4,6 +4,8 @@ import { ChevronLeft } from "lucide-react";
 import { getUserById, getUserNotes, getUserBookings } from "@/server/queries";
 import { saveUserNote, deleteUserNote } from "@/server/actions/notes";
 import ClientBookings from "@/components/admin/client-bookings";
+import { NicknameChangeDialog } from "@/components/admin/nickname-change-dialog";
+import { RemoveNicknameButton } from "@/components/admin/remove-nickname-button";
 import {
   Card,
   CardContent,
@@ -68,7 +70,7 @@ export default async function Page({ params }: Props) {
         <div className="w-full lg:col-span-4">
           <Card>
             <CardHeader>
-              <CardTitle>
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Avatar size="sm">
                     {user.image ? (
@@ -77,10 +79,25 @@ export default async function Page({ params }: Props) {
                       <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                     )}
                   </Avatar>
-                  {user.nickname ?? user.name}
+                  <div className="flex-1">
+                    <CardTitle className="mb-1">
+                      {user.nickname ?? user.name}
+                    </CardTitle>
+                    {user.nickname && (
+                      <p className="text-xs text-muted-foreground">
+                        {user.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </CardTitle>
-              <CardDescription />
+                <div className="flex gap-1">
+                  <NicknameChangeDialog
+                    userId={user.id}
+                    currentNickname={user.nickname}
+                  />
+                  {user.nickname && <RemoveNicknameButton userId={user.id} />}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-3">

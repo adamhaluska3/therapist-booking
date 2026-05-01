@@ -2,6 +2,7 @@
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
+import { user } from "@/db/auth-schema";
 
 export type SlotUpsert = {
   id: string;
@@ -24,7 +25,12 @@ export async function saveAvailabilitySlots(
     for (const slot of upserted) {
       await tx
         .insert(availabilitySlot)
-        .values({ id: slot.id, start: slot.start, end: slot.end, label: slot.label ?? null })
+        .values({
+          id: slot.id,
+          start: slot.start,
+          end: slot.end,
+          label: slot.label ?? null,
+        })
         .onConflictDoUpdate({
           target: availabilitySlot.id,
           set: { start: slot.start, end: slot.end, label: slot.label ?? null },
@@ -90,7 +96,10 @@ export async function updateBookingStatus(
 }
 
 export async function confirmBooking(id: string): Promise<void> {
-  await db.update(booking).set({ status: "confirmed" }).where(eq(booking.id, id));
+  await db
+    .update(booking)
+    .set({ status: "confirmed" })
+    .where(eq(booking.id, id));
 }
 
 export async function updateBookingTime(
@@ -145,4 +154,14 @@ export async function createClientBooking(
   });
 
   return { ok: true };
+}
+
+export async function updateUserNickname(
+  userId: string,
+  nickname: string,
+): Promise<void> {
+  await db
+    .update(user)
+    .set({ nickname: nickname || null })
+    .where(eq(user.id, userId));
 }
