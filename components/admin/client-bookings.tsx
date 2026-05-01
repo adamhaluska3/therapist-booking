@@ -214,6 +214,7 @@ export default function ClientBookings({
             )}
             total={filteredRows.length}
             isPending={isPending}
+            label="sedení"
             onNavigate={(page) => {
               table.setPageIndex(page - 1);
             }}

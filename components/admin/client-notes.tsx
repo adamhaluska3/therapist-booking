@@ -258,6 +258,7 @@ export default function ClientNotes({
               )}
               total={rows.length}
               isPending={isPending}
+              label="poznámok"
               onNavigate={(page) => {
                 table.setPageIndex(page - 1);
               }}
