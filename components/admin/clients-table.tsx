@@ -75,7 +75,7 @@ export default function ClientsTable({
       },
       {
         accessorKey: "totalSessions",
-        header: "Celkový počet",
+        header: "Počet sedení",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
           <div className="text-sm text-neutral-600">{getValue() ?? 0}</div>
