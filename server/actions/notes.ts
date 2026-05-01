@@ -1,0 +1,37 @@
+"use server";
+
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { userNote } from "@/db/schema";
+
+export type UserNotePayload = {
+  id?: string;
+  userId: string;
+  date: Date;
+  note: string;
+};
+
+export async function saveUserNote(payload: UserNotePayload) {
+  if (payload.id) {
+    await db
+      .update(userNote)
+      .set({ note: payload.note, date: payload.date })
+      .where(eq(userNote.id, payload.id));
+    return payload.id;
+  }
+
+  const id = crypto.randomUUID();
+  await db.insert(userNote).values({
+    id,
+    userId: payload.userId,
+    date: payload.date,
+    note: payload.note,
+  });
+
+  return id;
+}
+
+export async function deleteUserNote(id: string) {
+  await db.delete(userNote).where(eq(userNote.id, id));
+  return true;
+}

@@ -5,7 +5,11 @@ import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
-export { getClientsTableRows } from "./clients";
+import { getClientsTableRows } from "./clients";
+import { getUserNotes } from "./notes";
+import { getUserById, getUserBookings } from "./users";
+
+export { getClientsTableRows, getUserNotes, getUserById, getUserBookings };
 
 export async function getDashboardBookings() {
   const startOfToday = new Date();
