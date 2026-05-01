@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { getUserById, getUserNotes, getUserBookings } from "@/server/queries";
 import { saveUserNote, deleteUserNote } from "@/server/actions/notes";
 import ClientBookings from "@/components/admin/client-bookings";
@@ -50,57 +52,69 @@ export default async function Page({ params }: Props) {
   if (!user) return <div className="p-6">Klient nenájdený</div>;
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-12">
-      <div className="w-full lg:col-span-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>{user.nickname ?? user.name}</CardTitle>
-            <CardDescription />
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3">
-              <div>
-                <div className="text-sm text-muted-foreground">
-                  Emailová adresa
-                </div>
-                <div className="font-medium">{user.email}</div>
-              </div>
-              {user.phone && (
+    <>
+      <div className="mx-auto max-w-6xl px-6 pt-6">
+        <Link
+          href="/admin/clients"
+          className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-700"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="ml-2">Späť na zoznam</span>
+        </Link>
+      </div>
+
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-12">
+        <div className="w-full lg:col-span-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{user.nickname ?? user.name}</CardTitle>
+              <CardDescription />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3">
                 <div>
                   <div className="text-sm text-muted-foreground">
-                    Telefónne číslo
+                    Emailová adresa
                   </div>
-                  <div className="font-medium">{user.phone}</div>
+                  <div className="font-medium">{user.email}</div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                {user.phone && (
+                  <div>
+                    <div className="text-sm text-muted-foreground">
+                      Telefónne číslo
+                    </div>
+                    <div className="font-medium">{user.phone}</div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="flex w-full flex-col gap-6 lg:col-span-8">
-        <ClientBookings
-          bookings={bookings.map((b: any) => ({
-            id: b.id,
-            start: b.start,
-            end: b.end,
-            status: b.status,
-            clientName: b.clientName,
-          }))}
-        />
+        <div className="flex w-full flex-col gap-6 lg:col-span-8">
+          <ClientBookings
+            bookings={bookings.map((b: any) => ({
+              id: b.id,
+              start: b.start,
+              end: b.end,
+              status: b.status,
+              clientName: b.clientName,
+            }))}
+          />
 
-        <ClientNotes
-          notes={notes.map((n: any) => ({
-            id: n.id,
-            date: n.date,
-            note: n.note,
-          }))}
-          userId={id}
-          onAdd={addNote}
-          onUpdate={updateNote}
-          onDelete={deleteNote}
-        />
+          <ClientNotes
+            notes={notes.map((n: any) => ({
+              id: n.id,
+              date: n.date,
+              note: n.note,
+            }))}
+            userId={id}
+            onAdd={addNote}
+            onUpdate={updateNote}
+            onDelete={deleteNote}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
