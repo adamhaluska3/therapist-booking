@@ -21,7 +21,7 @@ import { authClient } from "@/lib/auth-client"
 const navItems = [
   { label: "Prehľad", href: "/admin", icon: LayoutGrid },
   { label: "Kalendár", href: "/admin/calendar", icon: Calendar },
-  { label: "Žiadosti", href: "/admin/requests", icon: Bell },
+  { label: "Žiadosti", href: "/admin/requests", icon: Bell, badgeKey: "pending" as const },
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
@@ -29,8 +29,10 @@ const navItems = [
 
 function SidebarContent({
   onNavigate,
+  pendingCount,
 }: {
   onNavigate?: () => void
+  pendingCount: number
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -52,6 +54,7 @@ function SidebarContent({
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
+          const badge = item.badgeKey === "pending" ? pendingCount : 0
           return (
             <Link
               key={item.href}
@@ -64,7 +67,14 @@ function SidebarContent({
                   : "font-normal text-neutral-500 hover:text-neutral-700"
               )}
             >
-              <Icon size={18} className={cn(isActive ? "text-brand-600" : "text-neutral-400")} />
+              <span className="relative shrink-0">
+                <Icon size={18} className={cn(isActive ? "text-brand-600" : "text-neutral-400")} />
+                {badge > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold leading-none text-white">
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
+              </span>
               {item.label}
             </Link>
           )
@@ -92,14 +102,14 @@ function SidebarContent({
   )
 }
 
-export function AdminSidebar() {
+export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 shrink-0 border-r border-surface-200 bg-surface-50 flex-col border-l-4 border-l-brand-600 sticky top-0 h-screen">
-        <SidebarContent />
+        <SidebarContent pendingCount={pendingCount} />
       </aside>
 
       {/* Mobile top bar */}
@@ -136,7 +146,7 @@ export function AdminSidebar() {
             <X size={18} />
           </button>
         </div>
-        <SidebarContent onNavigate={() => setIsOpen(false)} />
+        <SidebarContent pendingCount={pendingCount} onNavigate={() => setIsOpen(false)} />
       </aside>
     </>
   )

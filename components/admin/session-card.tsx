@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Check, Video, Pencil, X, Clock } from "lucide-react"
 import type { Booking } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
+import { getInitials } from "@/lib/formatting"
 import { updateBookingStatus } from "@/server/actions"
 import { EditBookingDialog } from "@/components/admin/edit-booking-dialog"
 import {
@@ -40,9 +41,6 @@ const CONFIRM_CONFIG: Record<ConfirmAction, {
   },
 }
 
-function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-}
 
 export function SessionCard({ booking }: { booking: Booking }) {
   const router = useRouter()
