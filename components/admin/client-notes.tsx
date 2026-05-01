@@ -1,5 +1,14 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import NoteEditorOverlay from "@/components/admin/note-editor-overlay";
@@ -10,7 +19,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
 
 type NoteItem = {
   id: string;
@@ -60,6 +68,83 @@ export default function ClientNotes({
     setConfirmOpen(true);
   };
 
+  const rows = useMemo(
+    () =>
+      notesState.map((note) => ({
+        ...note,
+        dateValue: new Date(note.date),
+      })),
+    [notesState],
+  );
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+
+  useEffect(() => {
+    setPagination((p) => (p.pageIndex === 0 ? p : { ...p, pageIndex: 0 }));
+  }, [rows.length]);
+
+  const columns: ColumnDef<(typeof rows)[number]>[] = [
+    {
+      accessorKey: "dateValue",
+      header: "Dátum",
+      meta: { className: "whitespace-nowrap" },
+      cell: ({ getValue }) => {
+        const value = getValue<Date>();
+
+        return (
+          <div className="text-sm text-neutral-600">
+            {value.toLocaleDateString()}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "note",
+      header: "Poznámka",
+      cell: ({ getValue }) => {
+        const note = getValue<string>();
+
+        return (
+          <div className="max-w-2xl text-sm text-neutral-800">
+            <p className="truncate whitespace-pre-wrap">{note}</p>
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Akcie",
+      meta: { className: "whitespace-nowrap" },
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(row.original)}
+          >
+            Upraviť
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => confirmDelete(row.original.id)}
+          >
+            Vymazať
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   const handleConfirmDelete = async () => {
     if (!pendingDeleteId) return;
     const id = pendingDeleteId;
@@ -78,6 +163,12 @@ export default function ClientNotes({
     }
   };
 
+  const formatPoznamky = (n: number) => {
+    if (n === 1) return "poznámka";
+    if (n >= 2 && n <= 4) return "poznámky";
+    return "poznámok";
+  };
+
   return (
     <>
       <Card>
@@ -91,39 +182,86 @@ export default function ClientNotes({
             </Button>
           </div>
 
-          <div className="flex flex-col gap-4">
-            {notesState.length === 0 && (
-              <div className="text-muted-foreground">Žiadne poznámky</div>
-            )}
+          <div className="overflow-hidden rounded-lg border border-surface-200 bg-white">
+            <table className="w-full table-fixed text-left text-sm">
+              <thead className="bg-surface-100">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className={`px-4 py-3 text-xs font-medium text-neutral-500 ${(header.column.columnDef.meta as { className?: string } | undefined)?.className ?? ""}`}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="px-4 py-6 text-sm text-muted-foreground"
+                    >
+                      Žiadne poznámky
+                    </td>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-t border-surface-200 hover:bg-surface-50"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className={`px-4 py-4 align-top ${(cell.column.columnDef.meta as { className?: string } | undefined)?.className ?? ""}`}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-            {notesState.map((n) => (
-              <div key={n.id} className="rounded-lg border p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {new Date(n.date).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(n)}
-                    >
-                      Upraviť
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => confirmDelete(n.id)}
-                    >
-                      Vymazať
-                    </Button>
-                  </div>
-                </div>
-                <div className="whitespace-pre-wrap w-[80%]">
-                  <p className="truncate">{n.note}</p>
-                </div>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-neutral-500">
+              {rows.length} {formatPoznamky(rows.length)}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                ‹
+              </Button>
+              <div className="px-3 text-sm text-neutral-600">
+                {pagination.pageIndex + 1}
               </div>
-            ))}
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                ›
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

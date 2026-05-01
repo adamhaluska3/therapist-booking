@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -27,13 +34,98 @@ export default function ClientBookings({
 }) {
   const [filter, setFilter] = React.useState<"upcoming" | "past">("upcoming");
 
-  const now = Date.now();
-  const parsed = bookings.map((b) => ({ ...b, start: new Date(b.start) }));
+  // Keep a stable reference to "now" for the lifetime of the component
+  // so that time-based filtering doesn't change on every render and
+  // cause pagination to be reset repeatedly.
+  const now = React.useMemo(() => Date.now(), []);
+  const rows = React.useMemo(
+    () =>
+      bookings.map((booking) => ({
+        ...booking,
+        start: new Date(booking.start),
+        end: new Date(booking.end),
+      })),
+    [bookings],
+  );
 
-  const upcoming = parsed.filter((b) => (b.start as Date).getTime() >= now);
-  const past = parsed.filter((b) => (b.start as Date).getTime() < now);
+  const filteredRows = React.useMemo(
+    () =>
+      rows.filter((booking) =>
+        filter === "upcoming"
+          ? booking.start.getTime() >= now
+          : booking.start.getTime() < now,
+      ),
+    [filter, now, rows],
+  );
 
-  const list = filter === "upcoming" ? upcoming : past;
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
+  React.useEffect(() => {
+    // reset to first page when filteredRows change to avoid empty page
+    setPagination((p) => (p.pageIndex === 0 ? p : { ...p, pageIndex: 0 }));
+  }, [filteredRows.length]);
+
+  const columns = React.useMemo<ColumnDef<(typeof rows)[number]>[]>(
+    () => [
+      {
+        id: "session",
+        header: "Sedenie",
+        cell: ({ row }) => {
+          const booking = row.original;
+
+          return (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-100 font-medium text-sm text-brand-900">
+                {booking.start.getDate()}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate font-medium text-neutral-800">
+                  {booking.clientName ?? "Individuálna terapia"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {booking.start.toLocaleDateString()} ·{" "}
+                  {formatTime(booking.start)} — {formatTime(booking.end)}
+                </div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        id: "status",
+        header: "Stav",
+        meta: { className: "whitespace-nowrap" },
+        cell: ({ row }) => {
+          const status = row.original.status;
+
+          return (
+            <div className="text-sm text-muted-foreground">
+              {status === "confirmed" ? "ONLINE" : (status ?? "-")}
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: filteredRows,
+    columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  const formatSedenia = (n: number) => {
+    if (n === 1) return "sedenie";
+    if (n >= 2 && n <= 4) return "sedenia";
+    return "sedení";
+  };
 
   return (
     <Card>
@@ -57,34 +149,86 @@ export default function ClientBookings({
           </Button>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {list.length === 0 && (
-            <div className="text-muted-foreground">Žiadne záznamy</div>
-          )}
-          {list.map((b) => (
-            <div
-              key={b.id}
-              className="flex items-center justify-between rounded-lg bg-muted/40 p-3"
+        <div className="overflow-hidden rounded-lg border border-surface-200 bg-white">
+          <table className="w-full table-fixed text-left text-sm">
+            <thead className="bg-surface-100">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className={`px-4 py-3 text-xs font-medium text-neutral-500 ${(header.column.columnDef.meta as { className?: string } | undefined)?.className ?? ""}`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="px-4 py-6 text-sm text-muted-foreground"
+                  >
+                    Žiadne záznamy
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-t border-surface-200 hover:bg-surface-50"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={`px-4 py-4 align-top ${(cell.column.columnDef.meta as { className?: string } | undefined)?.className ?? ""}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-neutral-500">
+            {filteredRows.length} {formatSedenia(filteredRows.length)}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-100 font-medium text-sm">
-                  {(b.start as Date).getDate()}
-                </div>
-                <div>
-                  <div className="font-medium">
-                    {b.clientName ?? "Individuálna terapia"}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatTime(b.start as Date)} —{" "}
-                    {formatTime(new Date(b.end))}
-                  </div>
-                </div>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {b.status === "confirmed" ? "ONLINE" : b.status}
-              </div>
+              ‹
+            </Button>
+            <div className="px-3 text-sm text-neutral-600">
+              {pagination.pageIndex + 1}
             </div>
-          ))}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              ›
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
