@@ -8,7 +8,7 @@ const client = createClient({
 });
 
 const USERS_COUNT = 20;
-const AVAILABILITY_SLOTS_COUNT = 20;
+const SLOTS_COUNT = 20;
 const MAY_FIRST_2026 = Math.floor(new Date(2026, 4, 1).getTime() / 1000);
 
 const seedNames = [
@@ -43,8 +43,8 @@ const isWeekday = (date) => {
 };
 
 const getRandomWeekday = () => {
-  const start = new Date(2026, 3, 1); // April 1
-  const end = new Date(2026, 6, 1); // July 1
+  const start = new Date(2026, 3, 1);
+  const end = new Date(2026, 6, 1);
   while (true) {
     const date = new Date(
       start.getTime() + Math.random() * (end.getTime() - start.getTime()),
@@ -53,197 +53,145 @@ const getRandomWeekday = () => {
   }
 };
 
-// 1. Generate Users
-const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
-  const id = `seed-user-${fullName.toLowerCase().replace(/\s+/g, "-")}`;
-  const createdAt = Date.parse(`2026-03-${10 + (i % 15)}T09:00:00.000Z`);
-  const [firstName] = fullName.split(" ");
-  return {
-    id,
-    name: fullName,
-    email: `${fullName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
-    emailVerified: 1,
-    createdAt,
-    updatedAt: createdAt,
-    role: "user",
-    nickname: firstName,
-    phone: `+420 900 ${100000 + i}`,
-    image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(firstName)}`,
-  };
-});
+async function main() {
+  const statements = [];
 
-// 2. Generate 20 Availability Slots (9 AM to 6 PM)
-const availabilitySlots = [];
-for (let i = 0; i < AVAILABILITY_SLOTS_COUNT; i++) {
-  const date = getRandomWeekday();
-  const start = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    9,
-    0,
-    0,
-  );
-  const end = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    18,
-    0,
-    0,
-  );
-
-  availabilitySlots.push({
-    id: `seed-slot-${i}-${date.toISOString().split("T")[0]}`,
-    start: Math.floor(start.getTime() / 1000),
-    end: Math.floor(end.getTime() / 1000),
-    label: `Working Day Slot ${i + 1}`,
+  // 1. Generate Deterministic Users
+  const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
+    const id = `seed-user-${i}`; // Deterministic ID
+    const createdAt = Date.parse(`2026-03-01T09:00:00.000Z`);
+    const [firstName] = fullName.split(" ");
+    return {
+      id,
+      name: fullName,
+      email: `${fullName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+      phone: `+420 900 ${100000 + i}`,
+      image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(firstName)}`,
+      createdAt,
+    };
   });
-}
 
-// 3. Generate Bookings
-const bookings = [];
-const notes = [];
+  for (const u of users) {
+    statements.push({
+      sql: `INSERT INTO user (id, name, email, email_verified, created_at, updated_at, role, phone, image) 
+            VALUES (?, ?, ?, 1, ?, ?, 'user', ?, ?) 
+            ON CONFLICT(id) DO UPDATE SET name=excluded.name, email=excluded.email`,
+      args: [u.id, u.name, u.email, u.createdAt, u.createdAt, u.phone, u.image],
+    });
+  }
 
-users.forEach((user) => {
-  const numBookings = getRandomInt(3, 7);
-  let userBookingsCount = 0;
-  let attempts = 0;
-
-  while (userBookingsCount < numBookings && attempts < 100) {
-    attempts++;
-    const slot =
-      availabilitySlots[getRandomInt(0, availabilitySlots.length - 1)];
-    const randomHour = getRandomInt(9, 17);
-    const slotDate = new Date(slot.start * 1000);
-    const bStart = Math.floor(
+  // 2. Generate Deterministic Availability Slots
+  const availabilitySlots = [];
+  for (let i = 0; i < SLOTS_COUNT; i++) {
+    const date = getRandomWeekday();
+    const start = Math.floor(
       new Date(
-        slotDate.getFullYear(),
-        slotDate.getMonth(),
-        slotDate.getDate(),
-        randomHour,
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        9,
         0,
         0,
       ).getTime() / 1000,
     );
-    const bEnd = bStart + 3600;
+    const end = Math.floor(
+      new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        18,
+        0,
+        0,
+      ).getTime() / 1000,
+    );
 
-    const hasOverlap = bookings.some((b) => bStart < b.end && bEnd > b.start);
+    const slotId = `seed-slot-${i}`; // Deterministic ID
+    availabilitySlots.push({ id: slotId, start, end });
 
-    if (!hasOverlap) {
-      const statusRoll = Math.random();
-      let status;
-
-      // Logic: If older than May 1st, set to finished or cancelled
-      // If after May 1st, set to cancelled, pending, or confirmed
-      if (bStart < MAY_FIRST_2026) {
-        status = statusRoll < 0.15 ? "cancelled" : "finished";
-      } else {
-        if (statusRoll < 0.15) {
-          status = "cancelled";
-        } else if (statusRoll < 0.5) {
-          status = "pending";
-        } else {
-          status = "confirmed";
-        }
-      }
-
-      bookings.push({
-        id: `seed-booking-${user.id}-${userBookingsCount}`,
-        userId: user.id,
-        start: bStart,
-        end: bEnd,
-        status: status,
-        clientName: user.name,
-        notes: `Seeded ${status} booking for ${user.name}`,
-        createdAt: Date.now(),
-      });
-      userBookingsCount++;
-    }
-  }
-
-  for (let n = 0; n < 10; n++) {
-    notes.push({
-      id: `seed-note-${user.id}-${n}`,
-      userId: user.id,
-      date: Math.floor(Date.now() / 1000) - n * 86400,
-      note: `Seed note ${n + 1} for ${user.name}`,
-      updatedAt: Date.now(),
-    });
-  }
-});
-
-// Upsert functions remain the same to maintain schema compatibility
-async function upsertUsers() {
-  for (const user of users) {
-    await client.execute({
-      sql: `INSERT INTO user (id, name, email, email_verified, created_at, updated_at, role, phone, image) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(email) DO UPDATE SET name = excluded.name`,
-      args: [
-        user.id,
-        user.name,
-        user.email,
-        user.emailVerified,
-        user.createdAt,
-        user.updatedAt,
-        user.role,
-        user.phone,
-        user.image,
-      ],
-    });
-  }
-}
-
-async function upsertAvailabilitySlots() {
-  for (const slot of availabilitySlots) {
-    await client.execute({
+    statements.push({
       sql: `INSERT INTO availability_slot (id, start, end, label) VALUES (?, ?, ?, ?) 
-            ON CONFLICT(id) DO UPDATE SET start = excluded.start, end = excluded.end`,
-      args: [slot.id, slot.start, slot.end, slot.label],
+            ON CONFLICT(id) DO UPDATE SET start=excluded.start, end=excluded.end`,
+      args: [slotId, start, end, `Working Day ${i + 1}`],
     });
+  }
+
+  // 3. Generate Bookings (3-7 per user)
+  const bookings = [];
+  users.forEach((user, userIdx) => {
+    const numBookings = getRandomInt(3, 7);
+    let count = 0;
+    let attempts = 0;
+
+    while (count < numBookings && attempts < 100) {
+      attempts++;
+      const slot =
+        availabilitySlots[getRandomInt(0, availabilitySlots.length - 1)];
+      const randomHour = getRandomInt(9, 17);
+      const slotDate = new Date(slot.start * 1000);
+      const bStart = Math.floor(
+        new Date(
+          slotDate.getFullYear(),
+          slotDate.getMonth(),
+          slotDate.getDate(),
+          randomHour,
+          0,
+          0,
+        ).getTime() / 1000,
+      );
+      const bEnd = bStart + 3600;
+
+      // Check overlap
+      const hasOverlap = bookings.some((b) => bStart < b.end && bEnd > b.start);
+
+      if (!hasOverlap) {
+        const bookingId = `seed-booking-${userIdx}-${count}`; // Deterministic ID
+        const statusRoll = Math.random();
+        let status;
+
+        if (bStart < MAY_FIRST_2026) {
+          status = statusRoll < 0.1 ? "cancelled" : "finished";
+        } else {
+          status =
+            statusRoll < 0.15
+              ? "cancelled"
+              : statusRoll < 0.4
+                ? "pending"
+                : "confirmed";
+        }
+
+        const booking = { id: bookingId, start: bStart, end: bEnd };
+        bookings.push(booking);
+
+        statements.push({
+          sql: `INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
+          args: [
+            bookingId,
+            user.id,
+            bStart,
+            bEnd,
+            status,
+            user.name,
+            `Seeded ${status} booking`,
+            Date.now(),
+          ],
+        });
+        count++;
+      }
+    }
+  });
+
+  // 4. Batch Execute
+  console.log("Starting database sync...");
+  try {
+    await client.batch(statements, "write");
+    console.log(
+      `Success! Synced ${users.length} users and ${bookings.length} bookings.`,
+    );
+  } catch (e) {
+    console.error("Batch failed:", e);
   }
 }
 
-async function upsertBookings() {
-  for (const booking of bookings) {
-    await client.execute({
-      sql: `INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET status = excluded.status`,
-      args: [
-        booking.id,
-        booking.userId,
-        booking.start,
-        booking.end,
-        booking.status,
-        booking.clientName,
-        booking.notes,
-        booking.createdAt,
-      ],
-    });
-  }
-}
-
-async function upsertNotes() {
-  for (const n of notes) {
-    await client.execute({
-      sql: `INSERT INTO user_note (id, user_id, date, note, updated_at) VALUES (?, ?, ?, ?, ?) 
-            ON CONFLICT(id) DO UPDATE SET note = excluded.note`,
-      args: [n.id, n.userId, n.date, n.note, n.updatedAt],
-    });
-  }
-}
-
-async function main() {
-  await upsertUsers();
-  await upsertAvailabilitySlots();
-  await upsertBookings();
-  await upsertNotes();
-  console.log(
-    `Seeding complete: ${users.length} users, ${availabilitySlots.length} slots, ${bookings.length} bookings.`,
-  );
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main().catch(console.error);
