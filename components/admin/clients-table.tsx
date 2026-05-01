@@ -147,7 +147,7 @@ export default function ClientsTable({
           <input
             value={search ?? ""}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Vyhľadať podľa mena alebo ID..."
+            placeholder="Vyhľadať podľa mena"
             className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
           />
         </div>

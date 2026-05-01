@@ -26,9 +26,6 @@ export default async function ClientsPage() {
         <h1 className="font-serif text-3xl font-semibold italic text-brand-900">
           Klienti
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-500">
-          Prehľad klientov, posledného sedenia a počtu absolvovaných stretnutí.
-        </p>
       </div>
 
       <ClientsTable items={items} />

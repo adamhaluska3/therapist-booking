@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   type ColumnDef,
   flexRender,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/date-utils";
+import { useEffect, useMemo, useState } from "react";
 
 type BookingItem = {
   id: string;
@@ -32,13 +32,10 @@ export default function ClientBookings({
 }: {
   bookings?: BookingItem[];
 }) {
-  const [filter, setFilter] = React.useState<"upcoming" | "past">("upcoming");
+  const [filter, setFilter] = useState<"upcoming" | "past">("upcoming");
 
-  // Keep a stable reference to "now" for the lifetime of the component
-  // so that time-based filtering doesn't change on every render and
-  // cause pagination to be reset repeatedly.
-  const now = React.useMemo(() => Date.now(), []);
-  const rows = React.useMemo(
+  const now = useMemo(() => Date.now(), []);
+  const rows = useMemo(
     () =>
       bookings.map((booking) => ({
         ...booking,
@@ -48,7 +45,7 @@ export default function ClientBookings({
     [bookings],
   );
 
-  const filteredRows = React.useMemo(
+  const filteredRows = useMemo(
     () =>
       rows.filter((booking) =>
         filter === "upcoming"
@@ -58,17 +55,16 @@ export default function ClientBookings({
     [filter, now, rows],
   );
 
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
   });
 
-  React.useEffect(() => {
-    // reset to first page when filteredRows change to avoid empty page
+  useEffect(() => {
     setPagination((p) => (p.pageIndex === 0 ? p : { ...p, pageIndex: 0 }));
   }, [filteredRows.length]);
 
-  const columns = React.useMemo<ColumnDef<(typeof rows)[number]>[]>(
+  const columns = useMemo<ColumnDef<(typeof rows)[number]>[]>(
     () => [
       {
         id: "session",
@@ -78,12 +74,9 @@ export default function ClientBookings({
 
           return (
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-100 font-medium text-sm text-brand-900">
-                {booking.start.getDate()}
-              </div>
               <div className="min-w-0">
                 <div className="truncate font-medium text-neutral-800">
-                  {booking.clientName ?? "Individuálna terapia"}
+                  {"Individuálna terapia"}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {booking.start.toLocaleDateString()} ·{" "}

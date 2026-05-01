@@ -12,6 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import ClientNotes from "@/components/admin/client-notes";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type Props = { params: { id: string } };
 
@@ -67,7 +68,18 @@ export default async function Page({ params }: Props) {
         <div className="w-full lg:col-span-4">
           <Card>
             <CardHeader>
-              <CardTitle>{user.nickname ?? user.name}</CardTitle>
+              <CardTitle>
+                <div className="flex items-center gap-3">
+                  <Avatar size="sm">
+                    {user.image ? (
+                      <AvatarImage src={user.image} alt={user.name} />
+                    ) : (
+                      <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  {user.nickname ?? user.name}
+                </div>
+              </CardTitle>
               <CardDescription />
             </CardHeader>
             <CardContent>
