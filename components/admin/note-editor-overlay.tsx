@@ -95,7 +95,7 @@ export default function NoteEditorOverlay({
               value={value}
               onChange={(event) => setValue(event.target.value)}
               placeholder="Napíšte poznámku..."
-              className="min-h-28 w-full whitespace-pre-wrap wrap-anywhere"
+              className="min-h-28 max-h-60 w-full whitespace-pre-wrap wrap-anywhere"
             />
           </div>
         </div>
