@@ -118,7 +118,7 @@ export default function ClientNotes({
       header: "Akcie",
       meta: { className: "whitespace-nowrap" },
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex flex-col md:flex-row items-center justify-end gap-2">
           <Button
             variant="ghost"
             size="sm"

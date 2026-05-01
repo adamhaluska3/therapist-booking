@@ -94,8 +94,11 @@ export function NicknameChangeDialog({
               />
 
               <DialogFooter className="flex gap-2">
-                <DialogClose>
-                  <Button variant="outline">Zrušiť</Button>
+                <DialogClose
+                  render={<Button variant="outline" />}
+                  disabled={isPending}
+                >
+                  Zrušiť
                 </DialogClose>
                 <Button type="submit" disabled={isPending}>
                   {isPending ? "Ukladám..." : "Uložiť"}

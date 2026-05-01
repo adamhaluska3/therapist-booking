@@ -75,7 +75,7 @@ export default function NoteEditorOverlay({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <DialogContent className="flex h-auto min-h-[50vh]! w-[50vw]! max-h-[75vh]! max-w-[50vw]! flex-col overflow-hidden sm:max-w-[50vw]!">
+      <DialogContent className="flex h-auto min-h-[50vh] w-[90vw] md:w-[75vw] lg:max-w-[50vw] max-h-[75vh] lg:max-h-[75vh] flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

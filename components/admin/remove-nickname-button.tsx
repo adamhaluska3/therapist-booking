@@ -48,10 +48,11 @@ export function RemoveNicknameButton({ userId }: { userId: string }) {
           </DialogHeader>
 
           <DialogFooter className="flex gap-2">
-            <DialogClose>
-              <Button type="button" variant="outline">
-                Zrušiť
-              </Button>
+            <DialogClose
+              render={<Button variant="outline" />}
+              disabled={isPending}
+            >
+              Zrušiť
             </DialogClose>
             <Button
               variant="destructive"
