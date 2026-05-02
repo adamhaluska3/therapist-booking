@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react"
 import { format } from "date-fns"
-import { ChevronDown, Search, UserPlus, Check } from "lucide-react"
+import { Check, ChevronDown, Clock, Search, UserPlus } from "lucide-react"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog"
@@ -164,7 +164,22 @@ export function BookingDialog({
       <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isEdit ? "Nastavenia terapie" : "Nová terapia"}</DialogTitle>
+            <div className="flex items-center gap-3">
+              <DialogTitle>{isEdit ? "Nastavenia terapie" : "Nová terapia"}</DialogTitle>
+              {isEdit && booking?.status && (
+                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  booking.status === "confirmed" ? "bg-brand-100 text-brand-700" :
+                  booking.status === "pending"   ? "bg-yellow-100 text-yellow-700" :
+                  "bg-surface-100 text-neutral-500"
+                }`}>
+                  {booking.status === "confirmed" && <Check className="h-3 w-3" />}
+                  {booking.status === "pending"   && <Clock className="h-3 w-3" />}
+                  {booking.status === "confirmed" ? "Potvrdené" :
+                   booking.status === "pending"   ? "Čaká na potvrdenie" :
+                   "Dokončené"}
+                </span>
+              )}
+            </div>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">

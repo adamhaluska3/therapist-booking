@@ -13,6 +13,7 @@ function bookingToEvent(b: BookingWithUser): TherapistEvent {
     bookingId: b.id,
     clientName: displayName,
     bookingTypeId: b.bookingTypeId ?? null,
+    status: b.status,
   };
 }
 

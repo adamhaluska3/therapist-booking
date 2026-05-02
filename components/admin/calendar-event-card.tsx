@@ -1,6 +1,9 @@
 "use client";
 
-import { AlignJustify, Plus, User } from "lucide-react";
+import { AlignJustify, Check, Clock, Plus, User } from "lucide-react";
+import type { statusEnum } from "@/db/schema";
+
+export type BookingStatus = (typeof statusEnum)[number];
 
 export type EventType = "therapy" | "empty" | "blocked";
 
@@ -28,6 +31,7 @@ export interface TherapistEvent {
   isDraggable?: boolean;
   clientName?: string;
   bookingTypeId?: string | null;
+  status?: BookingStatus | null;
 }
 
 interface CalendarEventCardProps {
@@ -46,8 +50,9 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
     }
     if (event.type === "therapy") {
       return (
-        <div className="h-full w-full flex items-center justify-center">
+        <div className="relative h-full w-full flex items-center justify-center">
           <User className="h-3 w-3 text-white" />
+          {event.status === "pending" && <Clock className="absolute top-0.5 right-0.5 h-2 w-2 text-white/60" />}
         </div>
       );
     }
@@ -74,13 +79,19 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
 
   if (event.type === "therapy") {
     const durationMin = (event.end.getTime() - event.start.getTime()) / 60000;
+    const isPending = event.status === "pending";
     const typeInfo = event.bookingTypeId
       ? BOOKING_TYPE_COLORS[event.bookingTypeId]
       : null;
+
     return (
-      <div className="h-full flex flex-col justify-center p-2 overflow-hidden">
+      <div className="relative h-full flex flex-col justify-center p-2 overflow-hidden">
+        {isPending
+          ? <Clock className="absolute top-1 right-1 h-3 w-3 text-white/60 shrink-0" />
+          : <Check className="absolute top-1 right-1 h-3 w-3 text-white/60 shrink-0" />
+        }
         {durationMin > 30 && (
-          <div className="text-[8px] font-bold uppercase tracking-widest text-white/60 truncate">
+          <div className="text-[11px] font-bold tracking-wide text-white/60 truncate">
             {typeInfo?.label ?? "Terapia"}
           </div>
         )}
