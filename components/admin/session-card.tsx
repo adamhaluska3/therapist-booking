@@ -7,6 +7,8 @@ import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { updateBookingStatus } from "@/server/actions"
+import { UNKNOWN_CLIENT } from "@/lib/constants"
+import { AdminCard } from "@/components/admin/admin-card"
 import { EditBookingDialog } from "@/components/admin/edit-booking-dialog"
 import {
   Dialog,
@@ -48,7 +50,7 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
 
-  const clientName = booking.user?.nickname ?? booking.user?.name ?? "Neznámy klient"
+  const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null
 
   function handleConfirm() {
@@ -62,7 +64,7 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
 
   return (
     <>
-      <div className="flex flex-col gap-3 rounded-xl bg-white border border-surface-200 px-5 py-4 shadow-sm sm:px-6 lg:flex-row lg:items-center lg:gap-4 lg:gap-y-0">
+      <AdminCard className="lg:flex-row lg:items-center lg:gap-6">
         <div className="flex items-center gap-4 lg:contents">
           <div className="w-12 shrink-0 text-center border-r border-surface-200 pr-4">
             <p className="text-2xl font-bold text-neutral-800 leading-none">{booking.start.getDate()}</p>
@@ -110,7 +112,7 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
             <span>Zrušiť</span>
           </button>
         </div>
-      </div>
+      </AdminCard>
 
       <EditBookingDialog booking={booking} open={editOpen} onOpenChange={setEditOpen} />
 

@@ -1,6 +1,25 @@
 import { format, isToday, isTomorrow, isThisWeek } from "date-fns"
 import { sk } from "date-fns/locale"
 
+export type MonthGroup = {
+  label: string
+  bookings: { start: Date }[]
+}
+
+export function groupByMonth<T extends { start: Date }>(items: T[]): { label: string; bookings: T[] }[] {
+  const map = new Map<string, T[]>()
+  for (const item of items) {
+    const key = format(item.start, "yyyy-MM")
+    const arr = map.get(key) ?? []
+    arr.push(item)
+    map.set(key, arr)
+  }
+  return Array.from(map.entries()).map(([key, group]) => ({
+    label: format(new Date(key + "-01"), "LLLL", { locale: sk }),
+    bookings: group,
+  }))
+}
+
 export function formatBookingDate(date: Date): string {
   return format(date, "d. MMMM yyyy", { locale: sk })
 }

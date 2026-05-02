@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import {
   useReactTable,
@@ -13,7 +13,7 @@ import {
 import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
-import { BOOKINGS_PAGE_SIZE } from "@/lib/constants"
+import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants"
 import { confirmBooking, updateBookingStatus } from "@/server/actions"
 import {
   Dialog,
@@ -36,6 +36,7 @@ interface Props {
 
 export function RequestsView({ bookings, total, page }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -45,7 +46,9 @@ export function RequestsView({ bookings, total, page }: Props) {
   const rangeEnd = (page - 1) * BOOKINGS_PAGE_SIZE + bookings.length
 
   function navigatePage(newPage: number) {
-    router.push(`/admin/requests?page=${newPage}`)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", String(newPage))
+    router.push(`/admin/requests?${params}`)
   }
 
   const handleConfirm = useCallback((id: string) => {
@@ -68,10 +71,7 @@ export function RequestsView({ bookings, total, page }: Props) {
     })
   }
 
-  const columns = useMemo(
-    () => getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending }),
-    [handleConfirm, handleCancelOpen, isPending],
-  )
+  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending })
 
   const table = useReactTable({
     data: bookings,
@@ -91,8 +91,7 @@ export function RequestsView({ bookings, total, page }: Props) {
           Administratíva
         </p>
         <h1
-          className="font-serif text-4xl font-bold text-neutral-800 mb-2"
-          style={{ fontFamily: "var(--font-serif)" }}
+          className="font-serif text-4xl font-bold text-neutral-800 mb-2 [font-family:var(--font-serif)]"
         >
           Nové žiadosti o terapiu
         </h1>
@@ -119,7 +118,7 @@ export function RequestsView({ bookings, total, page }: Props) {
           </p>
         )}
         {bookings.map((b) => {
-          const clientName = b.user?.nickname ?? b.user?.name ?? "Neznámy klient"
+          const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT
           return (
             <div
               key={b.id}
@@ -243,7 +242,7 @@ export function RequestsView({ bookings, total, page }: Props) {
             <DialogDescription>
               Žiadosť klienta{" "}
               <span className="font-medium text-neutral-800">
-                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? "Neznámy klient"}
+                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? UNKNOWN_CLIENT}
               </span>{" "}
               bude zamietnutá a označená ako zrušená.
             </DialogDescription>

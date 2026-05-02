@@ -32,7 +32,7 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
   const [debouncedSearch] = useDebounce(search, 300)
   const [selectedDate, setSelectedDate] = useState("")
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery({
       queryKey: ["dashboard-bookings", debouncedSearch],
       queryFn: ({ pageParam }) => fetchDashboardBookings(pageParam, debouncedSearch),
@@ -74,7 +74,7 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
         <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
           Administratíva
         </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-4 [font-family:var(--font-serif)]">
           Potvrdené sedenia
         </h1>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -121,7 +121,11 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
         </div>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <p className="text-sm text-red-500 py-12 text-center">
+          Nepodarilo sa načítať sedenia. Skúste obnoviť stránku.
+        </p>
+      ) : isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 size={24} className="animate-spin text-neutral-400" />
         </div>
