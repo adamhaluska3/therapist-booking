@@ -1,12 +1,11 @@
 "use client"
 
 import { type ComponentType, useState, useCallback, useMemo, useTransition, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Calendar, dateFnsLocalizer, Views, type CalendarProps } from "react-big-calendar"
 import withDragAndDrop, {
   type EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop"
-import { format, parse, startOfWeek, getDay, isToday } from "date-fns"
+import { format, parse, startOfWeek, getDay, isToday, addDays } from "date-fns"
 import { sk } from "date-fns/locale"
 import { toast } from "sonner"
 import { Plus } from "lucide-react"
@@ -32,6 +31,7 @@ import {
 import {
   saveAvailabilitySlots,
   saveBookings,
+  fetchCalendarData,
   type SlotUpsert,
   type BookingUpsert,
 } from "@/server/actions/index"
@@ -112,8 +112,6 @@ export function AvailabilityCalendar({
   initialUsers,
   bookingTypes,
 }: AvailabilityCalendarProps) {
-  const router = useRouter()
-
   const [mounted, setMounted] = useState(false)
   const [slots, setSlots] = useState<AvailabilitySlot[]>(initialSlots)
   const [bookings, setBookings] = useState<BookingWithUser[]>(initialBookings)
@@ -317,17 +315,31 @@ export function AvailabilityCalendar({
   }, [])
 
   const handleNavigate = useCallback(
-    (action: "PREV" | "NEXT" | "TODAY") => {
+    async (action: "PREV" | "NEXT" | "TODAY") => {
       const base = action === "TODAY" ? new Date() : new Date(date)
       if (action !== "TODAY") {
         const delta = view === "day" ? 1 : 7
         base.setDate(base.getDate() + (action === "NEXT" ? delta : -delta))
       }
+
       const anchor = view === "week" ? startOfWeek(base, { weekStartsOn: 1 }) : base
+      // week: Mon 00:00 → Sun+1 00:00 (7 days); day: day 00:00 → day+1 00:00
+      const rangeFrom = view === "week" ? anchor : anchor
+      const rangeTo = view === "week" ? addDays(anchor, 7) : addDays(anchor, 1)
+
       setDate(anchor)
-      router.push(`/admin/calendar?from=${format(anchor, "yyyy-MM-dd")}`)
+
+      try {
+        const { slots: newSlots, bookings: newBookings } = await fetchCalendarData(rangeFrom, rangeTo)
+        setSlots(newSlots)
+        setBookings(newBookings)
+        persistedSlotIds.current = new Set(newSlots.map((s: AvailabilitySlot) => s.id))
+        persistedBookingIds.current = new Set(newBookings.map((b: BookingWithUser) => b.id))
+      } catch {
+        toast.error("Nepodarilo sa načítať dáta")
+      }
     },
-    [date, view, router],
+    [date, view],
   )
 
   const interactiveAccessor = useCallback(

@@ -1,9 +1,37 @@
 "use server";
-import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
+import { and, eq, gt, gte, inArray, lt, lte, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 import type { UserOption } from "@/server/queries/users";
+import type { BookingWithUser, AvailabilitySlot } from "@/db/schema";
+
+export async function fetchCalendarData(
+  from: Date,
+  to: Date,
+): Promise<{ slots: AvailabilitySlot[]; bookings: BookingWithUser[] }> {
+  const [slots, bookingRows] = await Promise.all([
+    db
+      .select()
+      .from(availabilitySlot)
+      .where(and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from))),
+    db
+      .select()
+      .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
+      .where(and(lte(booking.start, to), gte(booking.end, from))),
+  ]);
+
+  return {
+    slots,
+    bookings: bookingRows.map((row) => ({
+      ...row.booking,
+      user: row.user
+        ? { id: row.user.id, name: row.user.name, nickname: row.user.nickname, email: row.user.email }
+        : null,
+    })),
+  };
+}
 
 export type SlotUpsert = {
   id: string;

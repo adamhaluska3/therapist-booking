@@ -27,7 +27,6 @@ export default async function CalendarPage({ searchParams }: Props) {
 
   return (
     <AvailabilityCalendar
-      key={weekStart.toISOString()}
       initialSlots={slots}
       initialBookings={bookings}
       initialDate={weekStart}
