@@ -346,49 +346,45 @@ export function AvailabilityCalendar({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="h-10 mb-4 rounded-lg bg-surface-100" />
-          <div style={{ height: 640 }} className="rounded-xl bg-surface-50 border border-surface-200" />
-        </div>
+      <div className="max-w-5xl mx-auto">
+        <div className="h-10 mb-4 rounded-lg bg-surface-100" />
+        <div style={{ height: "calc(100vh - 160px)" }} className="rounded-xl bg-surface-50 border border-surface-200" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto">
-        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} onNewEvent={() => setNewEventOpen(true)} />
+    <div className="max-w-5xl mx-auto">
+      <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} onNewEvent={() => setNewEventOpen(true)} />
 
-        <div style={{ height: 640 }}>
-          <DnDCalendar
-            localizer={localizer}
-            events={displayEvents}
-            date={date}
-            onNavigate={setDate}
-            view={view === "day" ? Views.DAY : Views.WEEK}
-            onView={() => {}}
-            selectable={!isMobile}
-            resizable
-            onEventDrop={handleEventInteraction}
-            onEventResize={handleEventInteraction}
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
-            components={components}
-            eventPropGetter={eventPropGetter}
-            draggableAccessor={interactiveAccessor}
-            resizableAccessor={interactiveAccessor}
-            step={30}
-            timeslots={2}
-            min={new Date(0, 0, 0, 7, 0)}
-            max={new Date(0, 0, 0, 20, 0)}
-            formats={{
-              timeGutterFormat: (d: Date, culture?: string, loc?: typeof localizer) =>
-                loc ? loc.format(d, "HH:mm", culture ?? "") : format(d, "HH:mm"),
-            }}
-            culture="sk"
-          />
-        </div>
+      <div style={{ height: "calc(100vh - 160px)" }}>
+        <DnDCalendar
+          localizer={localizer}
+          events={displayEvents}
+          date={date}
+          onNavigate={setDate}
+          view={view === "day" ? Views.DAY : Views.WEEK}
+          onView={() => {}}
+          selectable={!isMobile}
+          resizable
+          onEventDrop={handleEventInteraction}
+          onEventResize={handleEventInteraction}
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          components={components}
+          eventPropGetter={eventPropGetter}
+          draggableAccessor={interactiveAccessor}
+          resizableAccessor={interactiveAccessor}
+          step={30}
+          timeslots={2}
+          min={new Date(0, 0, 0, 7, 0)}
+          max={new Date(0, 0, 0, 20, 0)}
+          formats={{
+            timeGutterFormat: (d: Date, culture?: string, loc?: typeof localizer) =>
+              loc ? loc.format(d, "HH:mm", culture ?? "") : format(d, "HH:mm"),
+          }}
+          culture="sk"
+        />
       </div>
 
       {isMobile && (

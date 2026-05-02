@@ -60,14 +60,17 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
   }
 
   if (event.type === "therapy") {
+    const durationMin = (event.end.getTime() - event.start.getTime()) / 60000
     return (
-      <div className="h-full flex flex-col p-2 overflow-hidden">
-        <div className="text-[9px] font-bold uppercase tracking-widest text-brand-200 mb-0.5 truncate">
-          Terapia
-        </div>
+      <div className="h-full flex flex-col justify-center p-2 overflow-hidden">
+        {durationMin > 30 && (
+          <div className="text-[8px] font-bold uppercase tracking-widest text-brand-200 truncate">
+            Terapia
+          </div>
+        )}
         <div className="flex items-center gap-1 overflow-hidden">
           <User className="h-3 w-3 text-white/70 shrink-0" />
-          <span className="text-sm font-semibold text-white leading-snug truncate">
+          <span className="text-xs font-semibold text-white leading-snug truncate">
             {event.clientName ?? event.title}
           </span>
         </div>
