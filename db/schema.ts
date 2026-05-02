@@ -9,6 +9,13 @@ export const statusEnum = [
   "finished",
 ] as const;
 
+export const bookingType = sqliteTable("booking_type", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(),
+});
+
 export const availabilitySlot = sqliteTable("availability_slot", {
   id: text("id")
     .primaryKey()
@@ -23,6 +30,7 @@ export const booking = sqliteTable("booking", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  bookingTypeId: text("booking_type_id").references(() => bookingType.id, { onDelete: "set null" }),
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
@@ -51,6 +59,10 @@ export const bookingRelations = relations(booking, ({ one }) => ({
     fields: [booking.userId],
     references: [user.id],
   }),
+  bookingType: one(bookingType, {
+    fields: [booking.bookingTypeId],
+    references: [bookingType.id],
+  }),
 }));
 
 export const userNoteRelations = relations(userNote, ({ one }) => ({
@@ -63,6 +75,7 @@ export const userNoteRelations = relations(userNote, ({ one }) => ({
 export type Booking = typeof booking.$inferSelect;
 export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
 export type UserNote = typeof userNote.$inferSelect;
+export type BookingType = typeof bookingType.$inferSelect;
 
 export type BookingUser = {
   id: string;

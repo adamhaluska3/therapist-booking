@@ -11,9 +11,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import type { Booking, BookingWithUser } from "@/db/schema"
+import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
 import { createNonOAuthUser } from "@/server/actions"
+import { BOOKING_TYPE_COLORS as _btColors } from "@/components/admin/calendar-event-card"
+
+const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(_btColors).map(([id, v]) => [id, v.bg])
+)
 
 interface BookingDialogProps {
   open: boolean
@@ -21,6 +26,7 @@ interface BookingDialogProps {
   defaultStart?: Date
   defaultEnd?: Date
   users: UserOption[]
+  bookingTypes: BookingType[]
   onSave: (booking: Booking) => void
   onDelete?: () => void
   onClose: () => void
@@ -33,6 +39,7 @@ export function BookingDialog({
   defaultStart,
   defaultEnd,
   users: initialUsers,
+  bookingTypes,
   onSave,
   onDelete,
   onClose,
@@ -41,6 +48,7 @@ export function BookingDialog({
   const base = booking?.start ?? defaultStart ?? new Date()
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(booking?.userId ?? null)
+  const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<string | null>(booking?.bookingTypeId ?? null)
   const [notes, setNotes] = useState(booking?.notes ?? "")
   const [startStr, setStartStr] = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
   const [endStr, setEndStr] = useState(() => format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"))
@@ -120,6 +128,7 @@ export function BookingDialog({
       status: booking?.status ?? "confirmed",
       notes: notes.trim() || null,
       userId: selectedUserId,
+      bookingTypeId: selectedBookingTypeId,
       createdAt: booking?.createdAt ?? new Date(),
     })
   }
@@ -244,6 +253,28 @@ export function BookingDialog({
                   Zrušiť výber
                 </button>
               )}
+            </div>
+
+            {/* Booking type select */}
+            <div className="grid gap-1.5">
+              <Label>Typ stretnutia</Label>
+              <div className="flex flex-wrap gap-2">
+                {bookingTypes.map((bt) => (
+                  <button
+                    key={bt.id}
+                    type="button"
+                    onClick={() => setSelectedBookingTypeId(selectedBookingTypeId === bt.id ? null : bt.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      selectedBookingTypeId === bt.id
+                        ? "text-white border-transparent"
+                        : "text-neutral-600 border-surface-200 bg-white hover:bg-surface-50"
+                    }`}
+                    style={selectedBookingTypeId === bt.id ? { backgroundColor: BOOKING_TYPE_PILL_COLORS[bt.id] ?? "#427a5c" } : undefined}
+                  >
+                    {bt.name}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

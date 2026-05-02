@@ -15,7 +15,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css"
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
 import "./calendar.css"
 
-import { CalendarEventCard, type TherapistEvent } from "./calendar-event-card"
+import { CalendarEventCard, BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR, type TherapistEvent } from "./calendar-event-card"
 import { CalendarToolbar, type CalendarView } from "./calendar-toolbar"
 import { SlotSettingsDialog } from "./slot-settings-dialog"
 import { BookingDialog } from "./booking-dialog"
@@ -35,7 +35,7 @@ import {
   type SlotUpsert,
   type BookingUpsert,
 } from "@/server/actions/index"
-import type { AvailabilitySlot, Booking, BookingWithUser } from "@/db/schema"
+import type { AvailabilitySlot, Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
 
 
@@ -54,7 +54,12 @@ const DnDCalendar = withDragAndDrop<TherapistEvent>(Calendar as ComponentType<Ca
 function getEventStyle(event: TherapistEvent): React.CSSProperties {
   const base: React.CSSProperties = { borderRadius: "10px", border: "none", padding: 0, overflow: "hidden" }
   switch (event.type) {
-    case "therapy": return { ...base, backgroundColor: "#427a5c" }
+    case "therapy": {
+      const color = event.bookingTypeId
+        ? (BOOKING_TYPE_COLORS[event.bookingTypeId]?.bg ?? DEFAULT_THERAPY_COLOR)
+        : DEFAULT_THERAPY_COLOR
+      return { ...base, backgroundColor: color }
+    }
     case "empty": return { ...base, backgroundColor: "#faf8f5", border: "2px dashed #92baa2" }
     case "blocked": return { ...base, backgroundColor: "#e8e3d9" }
     default: return base
@@ -97,6 +102,7 @@ interface AvailabilityCalendarProps {
   initialBookings: BookingWithUser[]
   initialDate?: Date
   initialUsers: UserOption[]
+  bookingTypes: BookingType[]
 }
 
 export function AvailabilityCalendar({
@@ -104,6 +110,7 @@ export function AvailabilityCalendar({
   initialBookings,
   initialDate,
   initialUsers,
+  bookingTypes,
 }: AvailabilityCalendarProps) {
   const router = useRouter()
 
@@ -425,6 +432,7 @@ export function AvailabilityCalendar({
           defaultStart={bookingDialog.defaultStart}
           defaultEnd={bookingDialog.defaultEnd}
           users={users}
+          bookingTypes={bookingTypes}
           onSave={handleBookingSave}
           onDelete={bookingDialog.booking ? () => handleBookingDelete(bookingDialog.booking!.id) : undefined}
           onClose={() => setBookingDialog(null)}

@@ -2,16 +2,20 @@
 import { cache } from "react";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { availabilitySlot, booking } from "@/db/schema";
+import { availabilitySlot, booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
 import { getClientsTableRows } from "./clients";
 import { getUserNotes } from "./notes";
 import { getUserById, getUserBookings, getAllUsers } from "./users";
-import type { BookingWithUser } from "@/db/schema";
+import type { BookingWithUser, BookingType } from "@/db/schema";
 
 export { getClientsTableRows, getUserNotes, getUserById, getUserBookings, getAllUsers };
+
+export async function getBookingTypes(): Promise<BookingType[]> {
+  return db.select().from(bookingType).orderBy(bookingType.name);
+}
 
 function toBookingWithUser(row: {
   booking: typeof booking.$inferSelect;

@@ -12,6 +12,7 @@ function bookingToEvent(b: BookingWithUser): TherapistEvent {
     source: "booking",
     bookingId: b.id,
     clientName: displayName,
+    bookingTypeId: b.bookingTypeId ?? null,
   };
 }
 

@@ -47,6 +47,7 @@ export type BookingUpsert = {
   status?: "pending" | "confirmed" | "cancelled" | "finished";
   notes?: string | null;
   userId?: string | null;
+  bookingTypeId?: string | null;
 };
 
 export async function saveBookings(
@@ -68,6 +69,7 @@ export async function saveBookings(
           status: b.status ?? "confirmed",
           notes: b.notes ?? null,
           userId: b.userId ?? null,
+          bookingTypeId: b.bookingTypeId ?? null,
         })
         .onConflictDoUpdate({
           target: booking.id,
@@ -77,6 +79,7 @@ export async function saveBookings(
             status: b.status ?? "confirmed",
             notes: b.notes ?? null,
             userId: b.userId ?? null,
+            bookingTypeId: b.bookingTypeId ?? null,
           },
         });
     }
