@@ -191,19 +191,22 @@ async function main() {
                 : "confirmed";
         }
 
+        const bookingType = BOOKING_TYPES[getRandomInt(0, BOOKING_TYPES.length - 1)];
         const booking = { id: bookingId, start: bStart, end: bEnd };
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, start, end, status, notes, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
             user.id,
+            bookingType.id,
             bStart,
             bEnd,
             status,
+            bookingType.price,
             `Seeded ${status} booking`,
             Date.now(),
           ],

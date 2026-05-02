@@ -12,13 +12,11 @@ export type PayBySquareData = {
   beneficiaryName?: string;
   beneficiaryAddressLine1?: string;
   beneficiaryAddressLine2?: string;
-  /** YYYYMMDD */
   paymentDueDate?: string;
 };
 
 type Props = {
   payment: PayBySquareData;
-  /** Size in pixels, default 300 */
   size?: number;
 };
 
@@ -37,13 +35,19 @@ function buildUrl(payment: PayBySquareData, size: number): string {
   params.set("iban", payment.iban.replace(/\s+/g, ""));
 
   if (payment.paymentDueDate) params.set("dueDate", payment.paymentDueDate);
-  if (payment.variableSymbol) params.set("variableSymbol", payment.variableSymbol);
-  if (payment.constantSymbol) params.set("constantSymbol", payment.constantSymbol);
-  if (payment.specificSymbol) params.set("specificSymbol", payment.specificSymbol);
+  if (payment.variableSymbol)
+    params.set("variableSymbol", payment.variableSymbol);
+  if (payment.constantSymbol)
+    params.set("constantSymbol", payment.constantSymbol);
+  if (payment.specificSymbol)
+    params.set("specificSymbol", payment.specificSymbol);
   if (payment.paymentNote) params.set("paymentNote", payment.paymentNote);
-  if (payment.beneficiaryName) params.set("beneficiaryName", payment.beneficiaryName);
-  if (payment.beneficiaryAddressLine1) params.set("beneficiaryAddressLine1", payment.beneficiaryAddressLine1);
-  if (payment.beneficiaryAddressLine2) params.set("beneficiaryAddressLine2", payment.beneficiaryAddressLine2);
+  if (payment.beneficiaryName)
+    params.set("beneficiaryName", payment.beneficiaryName);
+  if (payment.beneficiaryAddressLine1)
+    params.set("beneficiaryAddressLine1", payment.beneficiaryAddressLine1);
+  if (payment.beneficiaryAddressLine2)
+    params.set("beneficiaryAddressLine2", payment.beneficiaryAddressLine2);
 
   return `${BASE}?${params.toString()}`;
 }

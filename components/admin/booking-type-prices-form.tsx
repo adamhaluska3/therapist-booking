@@ -12,7 +12,6 @@ type Props = {
 };
 
 export function BookingTypePricesForm({ bookingTypes }: Props) {
-  // Store prices as euro strings per id
   const [prices, setPrices] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       bookingTypes.map((bt) => [
@@ -48,7 +47,9 @@ export function BookingTypePricesForm({ bookingTypes }: Props) {
   return (
     <div className="rounded-xl border border-surface-200 bg-white p-6 flex flex-col gap-5">
       <div>
-        <p className="text-sm font-semibold text-neutral-800">Ceny za typy sedení</p>
+        <p className="text-sm font-semibold text-neutral-800">
+          Ceny za typy sedení
+        </p>
         <p className="text-xs text-neutral-500 mt-0.5">
           Cena sa použije pri generovaní QR platby pre klienta.
         </p>
