@@ -54,10 +54,10 @@ const getRandomWeekday = () => {
 };
 
 const BOOKING_TYPES = [
-  { id: "bt-psychoterapia", name: "Psychoterapia" },
-  { id: "bt-supervizia", name: "Supervízia" },
-  { id: "bt-seminare", name: "Semináre" },
-  { id: "bt-koucing", name: "Koučing" },
+  { id: "bt-psychoterapia", name: "Psychoterapia", price: 6000 },  // €60
+  { id: "bt-supervizia",   name: "Supervízia",    price: 7000 },  // €70
+  { id: "bt-seminare",     name: "Semináre",      price: 4000 },  // €40
+  { id: "bt-koucing",      name: "Koučing",       price: 5500 },  // €55
 ];
 
 async function main() {
@@ -66,10 +66,27 @@ async function main() {
   // 0. Seed Booking Types
   for (const bt of BOOKING_TYPES) {
     statements.push({
-      sql: `INSERT INTO booking_type (id, name) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name`,
-      args: [bt.id, bt.name],
+      sql: `INSERT INTO booking_type (id, name, price) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, price=excluded.price`,
+      args: [bt.id, bt.name, bt.price],
     });
   }
+
+  // 0b. Seed Payment Settings
+  statements.push({
+    sql: `INSERT INTO payment_settings (id, iban, bic, beneficiary_name, payment_note)
+          VALUES ('singleton', ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            iban=excluded.iban,
+            bic=excluded.bic,
+            beneficiary_name=excluded.beneficiary_name,
+            payment_note=excluded.payment_note`,
+    args: [
+      "SK8209000000000011424060",
+      "TATRSKBX",
+      "Jana Nováková",
+      "Terapia",
+    ],
+  });
 
   // 1. Generate Deterministic Users
   const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
