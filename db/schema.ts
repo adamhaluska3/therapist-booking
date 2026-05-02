@@ -14,6 +14,7 @@ export const bookingType = sqliteTable("booking_type", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull().unique(),
+  price: integer("price"), // price in EUR cents, e.g. 5000 = €50.00
 });
 
 export const availabilitySlot = sqliteTable("availability_slot", {
@@ -72,9 +73,21 @@ export const userNoteRelations = relations(userNote, ({ one }) => ({
   }),
 }));
 
+export const paymentSettings = sqliteTable("payment_settings", {
+  id: text("id").primaryKey().default("singleton"),
+  iban: text("iban"),
+  bic: text("bic"),
+  beneficiaryName: text("beneficiary_name"),
+  paymentNote: text("payment_note"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdateFn(
+    () => new Date(),
+  ),
+});
+
 export type Booking = typeof booking.$inferSelect;
 export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
 export type UserNote = typeof userNote.$inferSelect;
+export type PaymentSettings = typeof paymentSettings.$inferSelect;
 export type BookingType = typeof bookingType.$inferSelect;
 
 export type BookingUser = {
