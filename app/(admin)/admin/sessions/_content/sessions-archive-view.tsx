@@ -25,7 +25,7 @@ export function SessionsArchiveView() {
         <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
           Archív záznamov
         </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800 [font-family:var(--font-serif)]">
+        <h1 className="font-serif text-4xl font-bold text-neutral-800">
           Prehľad dokončených terapií
         </h1>
       </div>
@@ -46,7 +46,7 @@ export function SessionsArchiveView() {
         <div className="flex flex-col gap-10">
           {groups.map(({ label, bookings: items }) => (
             <section key={label}>
-              <h2 className="text-xl font-serif font-semibold text-neutral-600 mb-4 capitalize [font-family:var(--font-serif)]">
+              <h2 className="text-xl font-serif font-semibold text-neutral-600 mb-4 capitalize">
                 {label}
               </h2>
               <div className="flex flex-col gap-3">

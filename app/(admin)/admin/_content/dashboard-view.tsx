@@ -74,7 +74,7 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
         <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
           Administratíva
         </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-4 [font-family:var(--font-serif)]">
+        <h1 className="text-4xl font-bold text-neutral-800 mb-4">
           Potvrdené sedenia
         </h1>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">

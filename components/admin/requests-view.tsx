@@ -91,7 +91,7 @@ export function RequestsView({ bookings, total, page }: Props) {
           Administratíva
         </p>
         <h1
-          className="font-serif text-4xl font-bold text-neutral-800 mb-2 [font-family:var(--font-serif)]"
+          className="font-serif text-4xl font-bold text-neutral-800 mb-2"
         >
           Nové žiadosti o terapiu
         </h1>
