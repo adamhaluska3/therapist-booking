@@ -26,7 +26,6 @@ export const booking = sqliteTable("booking", {
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
-  clientName: text("client_name"),
   notes: text("notes"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -64,3 +63,12 @@ export const userNoteRelations = relations(userNote, ({ one }) => ({
 export type Booking = typeof booking.$inferSelect;
 export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
 export type UserNote = typeof userNote.$inferSelect;
+
+export type BookingUser = {
+  id: string;
+  name: string;
+  nickname: string | null;
+  email: string;
+};
+
+export type BookingWithUser = Booking & { user: BookingUser | null };

@@ -3,6 +3,7 @@ import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { user } from "@/db/auth-schema";
+import type { UserOption } from "@/server/queries/users";
 
 export type SlotUpsert = {
   id: string;
@@ -44,7 +45,6 @@ export type BookingUpsert = {
   start: Date;
   end: Date;
   status?: "pending" | "confirmed" | "cancelled" | "finished";
-  clientName?: string | null;
   notes?: string | null;
   userId?: string | null;
 };
@@ -66,7 +66,6 @@ export async function saveBookings(
           start: b.start,
           end: b.end,
           status: b.status ?? "confirmed",
-          clientName: b.clientName ?? null,
           notes: b.notes ?? null,
           userId: b.userId ?? null,
         })
@@ -76,8 +75,8 @@ export async function saveBookings(
             start: b.start,
             end: b.end,
             status: b.status ?? "confirmed",
-            clientName: b.clientName ?? null,
             notes: b.notes ?? null,
+            userId: b.userId ?? null,
           },
         });
     }
@@ -130,7 +129,7 @@ export async function updateBookingTime(
 export async function createClientBooking(
   dateKey: string,
   time: string,
-  clientName?: string,
+  userId?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
@@ -150,7 +149,7 @@ export async function createClientBooking(
     start,
     end,
     status: "pending",
-    clientName: clientName?.trim() || null,
+    userId: userId ?? null,
   });
 
   return { ok: true };
@@ -164,4 +163,41 @@ export async function updateUserNickname(
     .update(user)
     .set({ nickname: nickname || null })
     .where(eq(user.id, userId));
+}
+
+export async function createNonOAuthUser(
+  name: string,
+  email: string,
+  phone?: string,
+): Promise<{ ok: boolean; user?: UserOption; error?: string }> {
+  const trimmedEmail = email.trim();
+  const trimmedName = name.trim();
+
+  if (!trimmedName || !trimmedEmail) {
+    return { ok: false, error: "Meno a email sú povinné." };
+  }
+
+  const existing = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.email, trimmedEmail));
+
+  if (existing.length > 0) {
+    return { ok: false, error: "Používateľ s týmto emailom už existuje." };
+  }
+
+  const id = crypto.randomUUID();
+  await db.insert(user).values({
+    id,
+    name: trimmedName,
+    email: trimmedEmail,
+    emailVerified: false,
+    phone: phone?.trim() || null,
+    role: "user",
+  });
+
+  return {
+    ok: true,
+    user: { id, name: trimmedName, nickname: null, email: trimmedEmail },
+  };
 }

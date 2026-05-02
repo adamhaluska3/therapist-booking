@@ -35,7 +35,8 @@ import {
   type SlotUpsert,
   type BookingUpsert,
 } from "@/server/actions/index"
-import type { AvailabilitySlot, Booking } from "@/db/schema"
+import type { AvailabilitySlot, Booking, BookingWithUser } from "@/db/schema"
+import type { UserOption } from "@/server/queries/users"
 
 
 const locales = { sk }
@@ -93,20 +94,23 @@ function resolveSlotSave(
 
 interface AvailabilityCalendarProps {
   initialSlots: AvailabilitySlot[]
-  initialBookings: Booking[]
+  initialBookings: BookingWithUser[]
   initialDate?: Date
+  initialUsers: UserOption[]
 }
 
 export function AvailabilityCalendar({
   initialSlots,
   initialBookings,
   initialDate,
+  initialUsers,
 }: AvailabilityCalendarProps) {
   const router = useRouter()
 
   const [mounted, setMounted] = useState(false)
   const [slots, setSlots] = useState<AvailabilitySlot[]>(initialSlots)
-  const [bookings, setBookings] = useState<Booking[]>(initialBookings)
+  const [bookings, setBookings] = useState<BookingWithUser[]>(initialBookings)
+  const [users, setUsers] = useState<UserOption[]>(initialUsers)
 
   const persistedSlotIds = useRef(new Set(initialSlots.map((s) => s.id)))
   const persistedBookingIds = useRef(new Set(initialBookings.map((b) => b.id)))
@@ -123,7 +127,7 @@ export function AvailabilityCalendar({
   }, [])
 
   const [slotDialogId, setSlotDialogId] = useState<string | null>(null)
-  const [bookingDialog, setBookingDialog] = useState<{ booking?: Booking; defaultStart: Date; defaultEnd: Date } | null>(null)
+  const [bookingDialog, setBookingDialog] = useState<{ booking?: BookingWithUser; defaultStart: Date; defaultEnd: Date } | null>(null)
   const [newEventOpen, setNewEventOpen] = useState(false)
 
   const openSlot = slotDialogId ? slots.find((s) => s.id === slotDialogId) : undefined
@@ -180,8 +184,8 @@ export function AvailabilityCalendar({
   }
 
   function applyAndPersistBookingChange(
-    updatedBooking: Booking,
-    previousBookings: Booking[],
+    updatedBooking: BookingWithUser,
+    previousBookings: BookingWithUser[],
     previousSlots: AvailabilitySlot[],
   ): boolean {
     if (bookingOverlapsOthers(previousBookings, updatedBooking)) {
@@ -268,9 +272,16 @@ export function AvailabilityCalendar({
   }, [])
 
   const handleBookingSave = useCallback((saved: Booking) => {
-    const ok = applyAndPersistBookingChange(saved, bookings, slots)
+    const userInfo = users.find((u) => u.id === saved.userId) ?? null
+    const savedWithUser: BookingWithUser = {
+      ...saved,
+      user: userInfo
+        ? { id: userInfo.id, name: userInfo.name, nickname: userInfo.nickname, email: userInfo.email }
+        : null,
+    }
+    const ok = applyAndPersistBookingChange(savedWithUser, bookings, slots)
     if (ok) setBookingDialog(null)
-  }, [bookings, slots])
+  }, [bookings, slots, users])
 
   const handleBookingDelete = useCallback((bookingId: string) => {
     setBookings((prev) => prev.filter((b) => b.id !== bookingId))
@@ -278,6 +289,13 @@ export function AvailabilityCalendar({
       deletePersistedBooking(bookingId)
     }
     setBookingDialog(null)
+  }, [])
+
+  const handleUserCreated = useCallback((newUser: UserOption) => {
+    setUsers((prev) => {
+      if (prev.some((u) => u.id === newUser.id)) return prev
+      return [...prev, newUser].sort((a, b) => a.name.localeCompare(b.name))
+    })
   }, [])
 
   const handleNewEventSlot = useCallback((start: Date, end: Date) => {
@@ -410,9 +428,11 @@ export function AvailabilityCalendar({
           booking={bookingDialog.booking}
           defaultStart={bookingDialog.defaultStart}
           defaultEnd={bookingDialog.defaultEnd}
+          users={users}
           onSave={handleBookingSave}
           onDelete={bookingDialog.booking ? () => handleBookingDelete(bookingDialog.booking!.id) : undefined}
           onClose={() => setBookingDialog(null)}
+          onUserCreated={handleUserCreated}
         />
       )}
     </div>

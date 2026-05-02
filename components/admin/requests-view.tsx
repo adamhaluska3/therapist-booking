@@ -10,7 +10,7 @@ import {
   flexRender,
   type SortingState,
 } from "@tanstack/react-table"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants"
@@ -29,7 +29,7 @@ import { PaginationControls } from "@/components/admin/pagination-controls"
 import { getRequestsColumns } from "@/components/admin/requests-columns"
 
 interface Props {
-  bookings: Booking[]
+  bookings: BookingWithUser[]
   total: number
   page: number
 }
@@ -37,7 +37,7 @@ interface Props {
 export function RequestsView({ bookings, total, page }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
 
   const totalPages = Math.max(1, Math.ceil(total / BOOKINGS_PAGE_SIZE))
@@ -55,7 +55,7 @@ export function RequestsView({ bookings, total, page }: Props) {
     })
   }, [router])
 
-  const handleCancelOpen = useCallback((booking: Booking) => {
+  const handleCancelOpen = useCallback((booking: BookingWithUser) => {
     setCancelTarget(booking)
   }, [])
 
@@ -119,7 +119,7 @@ export function RequestsView({ bookings, total, page }: Props) {
           </p>
         )}
         {bookings.map((b) => {
-          const clientName = b.clientName ?? "Neznámy klient"
+          const clientName = b.user?.nickname ?? b.user?.name ?? "Neznámy klient"
           return (
             <div
               key={b.id}
@@ -243,7 +243,7 @@ export function RequestsView({ bookings, total, page }: Props) {
             <DialogDescription>
               Žiadosť klienta{" "}
               <span className="font-medium text-neutral-800">
-                {cancelTarget?.clientName ?? "Neznámy klient"}
+                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? "Neznámy klient"}
               </span>{" "}
               bude zamietnutá a označená ako zrušená.
             </DialogDescription>

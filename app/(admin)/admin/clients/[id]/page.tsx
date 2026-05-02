@@ -124,7 +124,6 @@ export default async function Page({ params }: Props) {
               start: b.start,
               end: b.end,
               status: b.status,
-              clientName: b.clientName,
             }))}
           />
 

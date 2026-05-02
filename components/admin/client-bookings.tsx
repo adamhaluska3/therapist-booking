@@ -24,7 +24,6 @@ type BookingItem = {
   start: string | number | Date;
   end: string | number | Date;
   status?: string;
-  clientName?: string | null;
   notes?: string | null;
 };
 

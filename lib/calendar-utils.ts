@@ -1,22 +1,23 @@
-import type { AvailabilitySlot, Booking } from "@/db/schema";
+import type { AvailabilitySlot, Booking, BookingWithUser } from "@/db/schema";
 import type { TherapistEvent } from "@/components/admin/calendar-event-card";
 
-function bookingToEvent(b: Booking): TherapistEvent {
+function bookingToEvent(b: BookingWithUser): TherapistEvent {
+  const displayName = b.user?.nickname ?? b.user?.name ?? undefined;
   return {
     id: `booking_${b.id}`,
-    title: b.clientName ?? "Terapia",
+    title: displayName ?? "Terapia",
     start: b.start,
     end: b.end,
     type: "therapy",
     source: "booking",
     bookingId: b.id,
-    clientName: b.clientName ?? undefined,
+    clientName: displayName,
   };
 }
 
 export function buildDisplayEvents(
   slots: AvailabilitySlot[],
-  bookings: Booking[],
+  bookings: BookingWithUser[],
 ): TherapistEvent[] {
   const events: TherapistEvent[] = [];
   const handledBookingIds = new Set<string>();
@@ -102,12 +103,12 @@ export function applySlotMove(
   );
 }
 
-export function applyBookingMove(
-  bookings: Booking[],
+export function applyBookingMove<T extends Booking>(
+  bookings: T[],
   bookingId: string,
   newStart: Date,
   newEnd: Date,
-): Booking[] {
+): T[] {
   return bookings.map((b) =>
     b.id === bookingId ? { ...b, start: newStart, end: newEnd } : b,
   );

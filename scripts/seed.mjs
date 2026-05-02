@@ -163,8 +163,8 @@ async function main() {
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+          sql: `INSERT INTO booking (id, user_id, start, end, status, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
@@ -172,7 +172,6 @@ async function main() {
             bStart,
             bEnd,
             status,
-            user.name,
             `Seeded ${status} booking`,
             Date.now(),
           ],

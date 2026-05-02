@@ -3,29 +3,51 @@ import { cache } from "react";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
+import { user } from "@/db/auth-schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
 import { getClientsTableRows } from "./clients";
 import { getUserNotes } from "./notes";
-import { getUserById, getUserBookings } from "./users";
+import { getUserById, getUserBookings, getAllUsers } from "./users";
+import type { BookingWithUser } from "@/db/schema";
 
-export { getClientsTableRows, getUserNotes, getUserById, getUserBookings };
+export { getClientsTableRows, getUserNotes, getUserById, getUserBookings, getAllUsers };
 
-export async function getDashboardBookings() {
+function toBookingWithUser(row: {
+  booking: typeof booking.$inferSelect;
+  user: typeof user.$inferSelect | null;
+}): BookingWithUser {
+  return {
+    ...row.booking,
+    user: row.user
+      ? {
+          id: row.user.id,
+          name: row.user.name,
+          nickname: row.user.nickname,
+          email: row.user.email,
+        }
+      : null,
+  };
+}
+
+export async function getDashboardBookings(): Promise<BookingWithUser[]> {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  return db
+  const rows = await db
     .select()
     .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
     .where(
       and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")),
     )
     .orderBy(booking.start);
+
+  return rows.map(toBookingWithUser);
 }
 
 export async function getCalendarData(from: Date, to: Date) {
-  const [slots, bookings] = await Promise.all([
+  const [slots, bookingRows] = await Promise.all([
     db
       .select()
       .from(availabilitySlot)
@@ -35,10 +57,11 @@ export async function getCalendarData(from: Date, to: Date) {
     db
       .select()
       .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
       .where(and(lte(booking.start, to), gte(booking.end, from))),
   ]);
 
-  return { slots, bookings };
+  return { slots, bookings: bookingRows.map(toBookingWithUser) };
 }
 
 export async function getBookingSlots(
@@ -85,13 +108,17 @@ export const getPendingCount = cache(async (): Promise<number> => {
   return Number(total);
 });
 
-export async function getPendingBookings(page = 1) {
+export async function getPendingBookings(page = 1): Promise<{
+  bookings: BookingWithUser[];
+  total: number;
+}> {
   const offset = (page - 1) * BOOKINGS_PAGE_SIZE;
 
   const [items, [{ total }]] = await Promise.all([
     db
       .select()
       .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
       .where(eq(booking.status, "pending"))
       .orderBy(booking.start)
       .limit(BOOKINGS_PAGE_SIZE)
@@ -102,5 +129,5 @@ export async function getPendingBookings(page = 1) {
       .where(eq(booking.status, "pending")),
   ]);
 
-  return { bookings: items, total: Number(total) };
+  return { bookings: items.map(toBookingWithUser), total: Number(total) };
 }

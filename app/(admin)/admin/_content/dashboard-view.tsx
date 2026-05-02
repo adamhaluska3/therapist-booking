@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Search, CalendarDays } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDateInput, getTimeGroup, type TimeGroup } from "@/lib/date-utils"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { SessionCard } from "@/components/admin/session-card"
 
 type FilterKey = "all" | "today" | "week"
@@ -21,7 +21,7 @@ const GROUP_LABELS: Record<TimeGroup, string> = {
   week: "Tento týždeň",
 }
 
-export function DashboardView({ bookings }: { bookings: Booking[] }) {
+export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all")
   const [search, setSearch] = useState("")
   const [selectedDate, setSelectedDate] = useState("")
@@ -29,7 +29,7 @@ export function DashboardView({ bookings }: { bookings: Booking[] }) {
   const lowerSearch = search.toLowerCase()
 
   const filtered = bookings.filter((b) => {
-    const matchesSearch = (b.clientName ?? "").toLowerCase().includes(lowerSearch)
+    const matchesSearch = (b.user?.nickname ?? b.user?.name ?? "").toLowerCase().includes(lowerSearch)
     if (selectedDate) return matchesSearch && formatDateInput(b.start) === selectedDate
     const matchesTime =
       activeFilter === "all" ||
@@ -38,7 +38,7 @@ export function DashboardView({ bookings }: { bookings: Booking[] }) {
     return matchesTime && matchesSearch
   })
 
-  const buckets: Record<TimeGroup, Booking[]> = { today: [], tomorrow: [], week: [] }
+  const buckets: Record<TimeGroup, BookingWithUser[]> = { today: [], tomorrow: [], week: [] }
   for (const b of filtered) buckets[getTimeGroup(b.start)].push(b)
   const groups = (["today", "tomorrow", "week"] as TimeGroup[])
     .filter((g) => buckets[g].length > 0)

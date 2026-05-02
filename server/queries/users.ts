@@ -20,3 +20,18 @@ export async function getUserBookings(userId: string) {
     .orderBy(desc(bookingTable.start));
   return rows;
 }
+
+export async function getAllUsers() {
+  return db
+    .select({
+      id: user.id,
+      name: user.name,
+      nickname: user.nickname,
+      email: user.email,
+    })
+    .from(user)
+    .where(eq(user.role, "user"))
+    .orderBy(user.name);
+}
+
+export type UserOption = Awaited<ReturnType<typeof getAllUsers>>[number];

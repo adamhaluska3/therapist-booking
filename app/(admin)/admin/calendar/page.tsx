@@ -1,6 +1,6 @@
 import { startOfWeek, addDays, parseISO, isValid } from "date-fns";
 import { AvailabilityCalendar } from "@/components/admin/availability-calendar";
-import { getCalendarData } from "@/server/queries/index";
+import { getCalendarData, getAllUsers } from "@/server/queries/index";
 
 export const metadata = {
   title: "Správa dostupnosti – Kalendár",
@@ -19,13 +19,17 @@ export default async function CalendarPage({ searchParams }: Props) {
   const rangeFrom = addDays(weekStart, -28);
   const rangeTo = addDays(weekStart, 28);
 
-  const { slots, bookings } = await getCalendarData(rangeFrom, rangeTo);
+  const [{ slots, bookings }, users] = await Promise.all([
+    getCalendarData(rangeFrom, rangeTo),
+    getAllUsers(),
+  ]);
 
   return (
     <AvailabilityCalendar
       initialSlots={slots}
       initialBookings={bookings}
       initialDate={weekStart}
+      initialUsers={users}
     />
   );
 }
