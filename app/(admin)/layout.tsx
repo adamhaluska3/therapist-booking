@@ -14,9 +14,10 @@ export default async function AdminLayout({
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session?.user || session.user.role !== "admin") {
-    redirect("/")
-  }
+  // UNCOMMENT TO ENABLE ADMIN PROTECTION
+  // if (!session?.user || session.user.role !== "admin") {
+  //   redirect("/")
+  // }
 
   const pendingCount = await getPendingCount()
 
