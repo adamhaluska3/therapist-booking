@@ -1,15 +1,16 @@
-"use client"
+"use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
-  page: number
-  totalPages: number
-  rangeStart: number
-  rangeEnd: number
-  total: number
-  isPending: boolean
-  onNavigate: (page: number) => void
+  page: number;
+  totalPages: number;
+  rangeStart: number;
+  rangeEnd: number;
+  total: number;
+  isPending: boolean;
+  onNavigate: (page: number) => void;
+  label?: string;
 }
 
 export function PaginationControls({
@@ -20,11 +21,12 @@ export function PaginationControls({
   total,
   isPending,
   onNavigate,
+  label,
 }: Props) {
   return (
     <div className="flex items-center justify-between">
       <p className="text-xs text-neutral-400">
-        Zobrazené {rangeStart}–{rangeEnd} z {total} výsledkov
+        {`Zobrazené ${rangeStart}–${rangeEnd} z ${total} ${label ?? "výsledkov"}`}
       </p>
       <div className="flex items-center gap-1">
         <button
@@ -43,5 +45,5 @@ export function PaginationControls({
         </button>
       </div>
     </div>
-  )
+  );
 }

@@ -22,10 +22,17 @@ pnpm db:push
 pnpm db:studio
 ```
 
+4. (Optional) Seed the database with sample availability and bookings.
+
+```bash
+pnpm db:seed
+```
+
 Notes:
 
 - `pnpm db:push` reads `db/schema.ts` and `db/auth-schema.ts` via `drizzle.config.ts`.
 - If you change schema files, run `pnpm db:push` again.
+- `pnpm db:seed` adds sample users, May 2026 availability slots, and a few bookings.
 
 ---
 

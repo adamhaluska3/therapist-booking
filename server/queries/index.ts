@@ -1,10 +1,15 @@
-import "server-only";
+"use server";
 import { cache } from "react";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking } from "@/db/schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
+import { getClientsTableRows } from "./clients";
+import { getUserNotes } from "./notes";
+import { getUserById, getUserBookings } from "./users";
+
+export { getClientsTableRows, getUserNotes, getUserById, getUserBookings };
 
 export async function getDashboardBookings() {
   const startOfToday = new Date();
@@ -13,7 +18,9 @@ export async function getDashboardBookings() {
   return db
     .select()
     .from(booking)
-    .where(and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")))
+    .where(
+      and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")),
+    )
     .orderBy(booking.start);
 }
 
@@ -22,7 +29,9 @@ export async function getCalendarData(from: Date, to: Date) {
     db
       .select()
       .from(availabilitySlot)
-      .where(and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from))),
+      .where(
+        and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from)),
+      ),
     db
       .select()
       .from(booking)
@@ -32,7 +41,10 @@ export async function getCalendarData(from: Date, to: Date) {
   return { slots, bookings };
 }
 
-export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate> {
+export async function getBookingSlots(
+  from: Date,
+  to: Date,
+): Promise<SlotsByDate> {
   const { slots, bookings } = await getCalendarData(from, to);
   const HOUR_MS = 3_600_000;
   const STEP_MS = 1_800_000;
@@ -48,7 +60,9 @@ export async function getBookingSlots(from: Date, to: Date): Promise<SlotsByDate
         const end = new Date(cursor.getTime() + HOUR_MS);
 
         const available = !bookings.some(
-          (b) => b.start.getTime() < end.getTime() && b.end.getTime() > cursor.getTime(),
+          (b) =>
+            b.start.getTime() < end.getTime() &&
+            b.end.getTime() > cursor.getTime(),
         );
 
         const dateKey = toDateKey(cursor);
