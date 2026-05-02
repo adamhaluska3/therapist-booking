@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Check, Video, Pencil, X, Clock } from "lucide-react"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { updateBookingStatus } from "@/server/actions"
@@ -42,13 +42,13 @@ const CONFIRM_CONFIG: Record<ConfirmAction, {
 }
 
 
-export function SessionCard({ booking }: { booking: Booking }) {
+export function SessionCard({ booking }: { booking: BookingWithUser }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
 
-  const clientName = booking.clientName ?? "Neznámy klient"
+  const clientName = booking.user?.nickname ?? booking.user?.name ?? "Neznámy klient"
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null
 
   function handleConfirm() {

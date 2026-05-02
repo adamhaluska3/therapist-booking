@@ -92,13 +92,13 @@
 }
 
 .rbc-current-time-indicator {
-  background-color: #427a5c !important;
+  background-color: #000000 !important;
   height: 2px;
 }
 
 .rbc-current-time-indicator::before {
-  background-color: #427a5c !important;
-  border-color: #427a5c !important;
+  background-color: #000000 !important;
+  border-color: #000000 !important;
 }
 
 .rbc-day-slot .rbc-time-slot {

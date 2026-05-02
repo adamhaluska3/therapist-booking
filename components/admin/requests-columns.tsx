@@ -1,22 +1,24 @@
 import { createColumnHelper } from "@tanstack/react-table"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 
 interface ActionHandlers {
   onConfirm: (id: string) => void
-  onCancel: (booking: Booking) => void
+  onCancel: (booking: BookingWithUser) => void
   isPending: boolean
 }
 
-const columnHelper = createColumnHelper<Booking>()
+const columnHelper = createColumnHelper<BookingWithUser>()
 
 export function getRequestsColumns({ onConfirm, onCancel, isPending }: ActionHandlers) {
   return [
-    columnHelper.accessor("clientName", {
+    columnHelper.display({
+      id: "client",
       header: "Klient",
       cell: (info) => {
-        const clientName = info.getValue() ?? "Neznámy klient"
+        const booking = info.row.original
+        const clientName = booking.user?.nickname ?? booking.user?.name ?? "Neznámy klient"
         return (
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">

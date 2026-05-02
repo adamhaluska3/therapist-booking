@@ -1,21 +1,20 @@
 "use client"
 
 import { type ComponentType, useState, useCallback, useMemo, useTransition, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Calendar, dateFnsLocalizer, Views, type CalendarProps } from "react-big-calendar"
 import withDragAndDrop, {
   type EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop"
-import { format, parse, startOfWeek, getDay, isToday } from "date-fns"
+import { format, parse, startOfWeek, getDay, isToday, addDays } from "date-fns"
 import { sk } from "date-fns/locale"
-import { toast } from "sonner"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
 
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
 import "./calendar.css"
 
-import { CalendarEventCard, type TherapistEvent } from "./calendar-event-card"
+import { CalendarEventCard, BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR, type TherapistEvent } from "./calendar-event-card"
 import { CalendarToolbar, type CalendarView } from "./calendar-toolbar"
 import { SlotSettingsDialog } from "./slot-settings-dialog"
 import { BookingDialog } from "./booking-dialog"
@@ -32,10 +31,12 @@ import {
 import {
   saveAvailabilitySlots,
   saveBookings,
+  fetchCalendarData,
   type SlotUpsert,
   type BookingUpsert,
 } from "@/server/actions/index"
-import type { AvailabilitySlot, Booking } from "@/db/schema"
+import type { AvailabilitySlot, Booking, BookingType, BookingWithUser } from "@/db/schema"
+import type { UserOption } from "@/server/queries/users"
 
 
 const locales = { sk }
@@ -53,7 +54,12 @@ const DnDCalendar = withDragAndDrop<TherapistEvent>(Calendar as ComponentType<Ca
 function getEventStyle(event: TherapistEvent): React.CSSProperties {
   const base: React.CSSProperties = { borderRadius: "10px", border: "none", padding: 0, overflow: "hidden" }
   switch (event.type) {
-    case "therapy": return { ...base, backgroundColor: "#427a5c" }
+    case "therapy": {
+      const color = event.bookingTypeId
+        ? (BOOKING_TYPE_COLORS[event.bookingTypeId]?.bg ?? DEFAULT_THERAPY_COLOR)
+        : DEFAULT_THERAPY_COLOR
+      return { ...base, backgroundColor: color }
+    }
     case "empty": return { ...base, backgroundColor: "#faf8f5", border: "2px dashed #92baa2" }
     case "blocked": return { ...base, backgroundColor: "#e8e3d9" }
     default: return base
@@ -93,20 +99,23 @@ function resolveSlotSave(
 
 interface AvailabilityCalendarProps {
   initialSlots: AvailabilitySlot[]
-  initialBookings: Booking[]
+  initialBookings: BookingWithUser[]
   initialDate?: Date
+  initialUsers: UserOption[]
+  bookingTypes: BookingType[]
 }
 
 export function AvailabilityCalendar({
   initialSlots,
   initialBookings,
   initialDate,
+  initialUsers,
+  bookingTypes,
 }: AvailabilityCalendarProps) {
-  const router = useRouter()
-
   const [mounted, setMounted] = useState(false)
   const [slots, setSlots] = useState<AvailabilitySlot[]>(initialSlots)
-  const [bookings, setBookings] = useState<Booking[]>(initialBookings)
+  const [bookings, setBookings] = useState<BookingWithUser[]>(initialBookings)
+  const [users, setUsers] = useState<UserOption[]>(initialUsers)
 
   const persistedSlotIds = useRef(new Set(initialSlots.map((s) => s.id)))
   const persistedBookingIds = useRef(new Set(initialBookings.map((b) => b.id)))
@@ -123,7 +132,7 @@ export function AvailabilityCalendar({
   }, [])
 
   const [slotDialogId, setSlotDialogId] = useState<string | null>(null)
-  const [bookingDialog, setBookingDialog] = useState<{ booking?: Booking; defaultStart: Date; defaultEnd: Date } | null>(null)
+  const [bookingDialog, setBookingDialog] = useState<{ booking?: BookingWithUser; defaultStart: Date; defaultEnd: Date } | null>(null)
   const [newEventOpen, setNewEventOpen] = useState(false)
 
   const openSlot = slotDialogId ? slots.find((s) => s.id === slotDialogId) : undefined
@@ -180,8 +189,8 @@ export function AvailabilityCalendar({
   }
 
   function applyAndPersistBookingChange(
-    updatedBooking: Booking,
-    previousBookings: Booking[],
+    updatedBooking: BookingWithUser,
+    previousBookings: BookingWithUser[],
     previousSlots: AvailabilitySlot[],
   ): boolean {
     if (bookingOverlapsOthers(previousBookings, updatedBooking)) {
@@ -268,9 +277,16 @@ export function AvailabilityCalendar({
   }, [])
 
   const handleBookingSave = useCallback((saved: Booking) => {
-    const ok = applyAndPersistBookingChange(saved, bookings, slots)
+    const userInfo = users.find((u) => u.id === saved.userId) ?? null
+    const savedWithUser: BookingWithUser = {
+      ...saved,
+      user: userInfo
+        ? { id: userInfo.id, name: userInfo.name, nickname: userInfo.nickname, email: userInfo.email }
+        : null,
+    }
+    const ok = applyAndPersistBookingChange(savedWithUser, bookings, slots)
     if (ok) setBookingDialog(null)
-  }, [bookings, slots])
+  }, [bookings, slots, users])
 
   const handleBookingDelete = useCallback((bookingId: string) => {
     setBookings((prev) => prev.filter((b) => b.id !== bookingId))
@@ -278,6 +294,13 @@ export function AvailabilityCalendar({
       deletePersistedBooking(bookingId)
     }
     setBookingDialog(null)
+  }, [])
+
+  const handleUserCreated = useCallback((newUser: UserOption) => {
+    setUsers((prev) => {
+      if (prev.some((u) => u.id === newUser.id)) return prev
+      return [...prev, newUser].sort((a, b) => a.name.localeCompare(b.name))
+    })
   }, [])
 
   const handleNewEventSlot = useCallback((start: Date, end: Date) => {
@@ -292,17 +315,31 @@ export function AvailabilityCalendar({
   }, [])
 
   const handleNavigate = useCallback(
-    (action: "PREV" | "NEXT" | "TODAY") => {
+    async (action: "PREV" | "NEXT" | "TODAY") => {
       const base = action === "TODAY" ? new Date() : new Date(date)
       if (action !== "TODAY") {
         const delta = view === "day" ? 1 : 7
         base.setDate(base.getDate() + (action === "NEXT" ? delta : -delta))
       }
+
       const anchor = view === "week" ? startOfWeek(base, { weekStartsOn: 1 }) : base
+      // week: Mon 00:00 → Sun+1 00:00 (7 days); day: day 00:00 → day+1 00:00
+      const rangeFrom = view === "week" ? anchor : anchor
+      const rangeTo = view === "week" ? addDays(anchor, 7) : addDays(anchor, 1)
+
       setDate(anchor)
-      router.push(`/admin/calendar?from=${format(anchor, "yyyy-MM-dd")}`)
+
+      try {
+        const { slots: newSlots, bookings: newBookings } = await fetchCalendarData(rangeFrom, rangeTo)
+        setSlots(newSlots)
+        setBookings(newBookings)
+        persistedSlotIds.current = new Set(newSlots.map((s: AvailabilitySlot) => s.id))
+        persistedBookingIds.current = new Set(newBookings.map((b: BookingWithUser) => b.id))
+      } catch {
+        toast.error("Nepodarilo sa načítať dáta")
+      }
     },
-    [date, view, router],
+    [date, view],
   )
 
   const interactiveAccessor = useCallback(
@@ -328,58 +365,55 @@ export function AvailabilityCalendar({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="h-10 mb-4 rounded-lg bg-surface-100" />
-          <div style={{ height: 640 }} className="rounded-xl bg-surface-50 border border-surface-200" />
-        </div>
+      <div className="max-w-5xl mx-auto">
+        <div className="h-10 mb-4 rounded-lg bg-surface-100" />
+        <div style={{ height: "calc(100vh - 160px)" }} className="rounded-xl bg-surface-50 border border-surface-200" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-surface-100 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto">
-        <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} onNewEvent={() => setNewEventOpen(true)} />
+    <div className="max-w-5xl mx-auto">
+      <CalendarToolbar date={date} onNavigate={handleNavigate} view={view} onViewChange={(v) => setView(v as CalendarView)} onNewEvent={() => setNewEventOpen(true)} />
 
-        <div style={{ height: 640 }}>
-          <DnDCalendar
-            localizer={localizer}
-            events={displayEvents}
-            date={date}
-            onNavigate={setDate}
-            view={view === "day" ? Views.DAY : Views.WEEK}
-            onView={() => {}}
-            selectable={!isMobile}
-            resizable
-            onEventDrop={handleEventInteraction}
-            onEventResize={handleEventInteraction}
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
-            components={components}
-            eventPropGetter={eventPropGetter}
-            draggableAccessor={interactiveAccessor}
-            resizableAccessor={interactiveAccessor}
-            step={30}
-            timeslots={2}
-            min={new Date(0, 0, 0, 7, 0)}
-            max={new Date(0, 0, 0, 20, 0)}
-            formats={{
-              timeGutterFormat: (d: Date, culture?: string, loc?: typeof localizer) =>
-                loc ? loc.format(d, "HH:mm", culture ?? "") : format(d, "HH:mm"),
-            }}
-            culture="sk"
-          />
-        </div>
+      <div style={{ height: "calc(100vh - 160px)" }}>
+        <DnDCalendar
+          localizer={localizer}
+          events={displayEvents}
+          date={date}
+          onNavigate={setDate}
+          view={view === "day" ? Views.DAY : Views.WEEK}
+          onView={() => {}}
+          selectable={!isMobile}
+          resizable
+          onEventDrop={handleEventInteraction}
+          onEventResize={handleEventInteraction}
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          components={components}
+          eventPropGetter={eventPropGetter}
+          draggableAccessor={interactiveAccessor}
+          resizableAccessor={interactiveAccessor}
+          step={30}
+          timeslots={2}
+          min={new Date(0, 0, 0, 7, 0)}
+          max={new Date(0, 0, 0, 20, 0)}
+          formats={{
+            timeGutterFormat: (d: Date, culture?: string, loc?: typeof localizer) =>
+              loc ? loc.format(d, "HH:mm", culture ?? "") : format(d, "HH:mm"),
+          }}
+          culture="sk"
+        />
       </div>
+
 
       {isMobile && (
         <button
           onClick={() => setNewEventOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform sm:hidden"
           aria-label="Nová udalosť"
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-7 w-7" />
         </button>
       )}
 
@@ -410,9 +444,12 @@ export function AvailabilityCalendar({
           booking={bookingDialog.booking}
           defaultStart={bookingDialog.defaultStart}
           defaultEnd={bookingDialog.defaultEnd}
+          users={users}
+          bookingTypes={bookingTypes}
           onSave={handleBookingSave}
           onDelete={bookingDialog.booking ? () => handleBookingDelete(bookingDialog.booking!.id) : undefined}
           onClose={() => setBookingDialog(null)}
+          onUserCreated={handleUserCreated}
         />
       )}
     </div>

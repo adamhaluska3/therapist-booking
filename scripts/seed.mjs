@@ -53,8 +53,23 @@ const getRandomWeekday = () => {
   }
 };
 
+const BOOKING_TYPES = [
+  { id: "bt-psychoterapia", name: "Psychoterapia" },
+  { id: "bt-supervizia", name: "Supervízia" },
+  { id: "bt-seminare", name: "Semináre" },
+  { id: "bt-koucing", name: "Koučing" },
+];
+
 async function main() {
   const statements = [];
+
+  // 0. Seed Booking Types
+  for (const bt of BOOKING_TYPES) {
+    statements.push({
+      sql: `INSERT INTO booking_type (id, name) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name`,
+      args: [bt.id, bt.name],
+    });
+  }
 
   // 1. Generate Deterministic Users
   const users = seedNames.slice(0, USERS_COUNT).map((fullName, i) => {
@@ -163,8 +178,8 @@ async function main() {
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, start, end, status, client_name, notes, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+          sql: `INSERT INTO booking (id, user_id, start, end, status, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
@@ -172,7 +187,6 @@ async function main() {
             bStart,
             bEnd,
             status,
-            user.name,
             `Seeded ${status} booking`,
             Date.now(),
           ],

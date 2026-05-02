@@ -1,25 +1,42 @@
-"use client"
+"use client";
 
-import { AlignJustify, Plus, User } from "lucide-react"
+import { AlignJustify, Check, Clock, Plus, User } from "lucide-react";
+import type { statusEnum } from "@/db/schema";
 
-export type EventType = "therapy" | "empty" | "blocked"
+export type BookingStatus = (typeof statusEnum)[number];
+
+export type EventType = "therapy" | "empty" | "blocked";
+
+export const BOOKING_TYPE_COLORS: Record<
+  string,
+  { bg: string; label: string }
+> = {
+  "bt-psychoterapia": { bg: "#427a5c", label: "Psychoterapia" },
+  "bt-supervizia": { bg: "#5a6abf", label: "Supervízia" },
+  "bt-seminare": { bg: "#d96c4f", label: "Semináre" },
+  "bt-koucing": { bg: "#bf8a2e", label: "Koučing" },
+};
+
+export const DEFAULT_THERAPY_COLOR = "#427a5c";
 
 export interface TherapistEvent {
-  id: string
-  title: string
-  start: Date
-  end: Date
-  type: EventType
-  source: "slot" | "booking"
-  slotId?: string
-  bookingId?: string
-  isDraggable?: boolean
-  clientName?: string
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  type: EventType;
+  source: "slot" | "booking";
+  slotId?: string;
+  bookingId?: string;
+  isDraggable?: boolean;
+  clientName?: string;
+  bookingTypeId?: string | null;
+  status?: BookingStatus | null;
 }
 
 interface CalendarEventCardProps {
-  event: TherapistEvent
-  compact?: boolean
+  event: TherapistEvent;
+  compact?: boolean;
 }
 
 export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
@@ -29,23 +46,25 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
         <div className="h-full w-full flex items-center justify-center text-brand-500">
           <Plus className="h-3 w-3" />
         </div>
-      )
+      );
     }
     if (event.type === "therapy") {
       return (
-        <div className="h-full w-full flex items-center justify-center">
+        <div className="h-full w-full flex flex-col items-center justify-center gap-0.5">
           <User className="h-3 w-3 text-white" />
+          {event.status === "pending"   && <Clock className="h-3 w-3 text-white/60" />}
+          {event.status === "confirmed" && <Check className="h-3 w-3 text-white/60" />}
         </div>
-      )
+      );
     }
     if (event.type === "blocked") {
       return (
         <div className="h-full w-full flex items-center justify-center">
           <AlignJustify className="h-3 w-3 text-gray-400" />
         </div>
-      )
+      );
     }
-    return null
+    return null;
   }
 
   if (event.type === "empty") {
@@ -56,23 +75,35 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
           Dostupný čas
         </span>
       </div>
-    )
+    );
   }
 
   if (event.type === "therapy") {
+    const durationMin = (event.end.getTime() - event.start.getTime()) / 60000;
+    const isPending = event.status === "pending";
+    const typeInfo = event.bookingTypeId
+      ? BOOKING_TYPE_COLORS[event.bookingTypeId]
+      : null;
+
     return (
-      <div className="h-full flex flex-col p-2 overflow-hidden">
-        <div className="text-[9px] font-bold uppercase tracking-widest text-brand-200 mb-0.5 truncate">
-          Terapia
-        </div>
+      <div className="relative h-full flex flex-col justify-center p-2 overflow-hidden">
+        {isPending
+          ? <Clock className="absolute top-1 right-1 h-3 w-3 text-white/60 shrink-0" />
+          : <Check className="absolute top-1 right-1 h-3 w-3 text-white/60 shrink-0" />
+        }
+        {durationMin > 30 && (
+          <div className="text-[11px] font-bold tracking-wide text-white/60 truncate">
+            {typeInfo?.label ?? "Terapia"}
+          </div>
+        )}
         <div className="flex items-center gap-1 overflow-hidden">
           <User className="h-3 w-3 text-white/70 shrink-0" />
-          <span className="text-sm font-semibold text-white leading-snug truncate">
+          <span className="text-xs font-semibold text-white leading-snug truncate">
             {event.clientName ?? event.title}
           </span>
         </div>
       </div>
-    )
+    );
   }
 
   if (event.type === "blocked") {
@@ -80,8 +111,8 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
       <div className="h-full w-full flex items-center justify-center">
         <AlignJustify className="h-4 w-4 text-gray-400" />
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }

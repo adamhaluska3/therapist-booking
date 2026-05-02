@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { formatDateInput, formatTime, buildDate } from "@/lib/date-utils"
 import { editBookingSchema, type EditBookingFormValues } from "@/components/admin/edit-booking-schema"
 import { updateBookingTime } from "@/server/actions"
@@ -27,7 +27,7 @@ export function EditBookingDialog({
   open,
   onOpenChange,
 }: {
-  booking: Booking
+  booking: BookingWithUser
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
@@ -69,7 +69,7 @@ export function EditBookingDialog({
         <DialogHeader>
           <DialogTitle>Upraviť sedenie</DialogTitle>
           <DialogDescription>
-            Klient: <span className="font-medium text-neutral-700">{booking.clientName ?? "Neznámy klient"}</span>
+            Klient: <span className="font-medium text-neutral-700">{booking.user?.nickname ?? booking.user?.name ?? "Neznámy klient"}</span>
           </DialogDescription>
         </DialogHeader>
 
