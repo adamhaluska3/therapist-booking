@@ -38,9 +38,9 @@ function ArchiveCard({ booking }: { booking: Booking }) {
   const isLinked = Boolean(booking.userId)
 
   const inner = (
-    <div className={`flex flex-col gap-3 rounded-xl bg-white border border-surface-200 px-5 py-4 shadow-sm sm:flex-row sm:items-start sm:gap-6 sm:px-6 transition-colors${isLinked ? " group-hover:border-brand-300 group-hover:bg-surface-50" : ""}`}>
-      <div className="flex items-start gap-4 sm:contents">
-        <div className="w-12 shrink-0 text-center sm:w-16 sm:border-r sm:border-surface-200 sm:pr-6 sm:pt-0.5">
+    <div className={`flex flex-col gap-3 rounded-xl bg-white border border-surface-200 px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:gap-6 sm:px-6 transition-colors${isLinked ? " group-hover:border-brand-300 group-hover:bg-surface-50" : ""}`}>
+      <div className="flex items-center gap-4 sm:contents">
+        <div className="w-12 shrink-0 text-center sm:w-16 sm:border-r sm:border-surface-200 sm:pr-6">
           <p className="text-2xl font-bold text-neutral-800 leading-none sm:text-3xl">
             {booking.start.getDate()}
           </p>

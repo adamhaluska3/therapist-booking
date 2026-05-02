@@ -62,20 +62,20 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
 
   return (
     <>
-      <div className="flex flex-col gap-4 rounded-xl bg-white border border-surface-200 px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:gap-6 sm:px-6">
-        <div className="flex items-center gap-4 sm:contents">
-          <div className="w-12 shrink-0 text-center sm:w-16 sm:border-r sm:border-surface-200 sm:pr-6">
-            <p className="text-2xl font-bold text-neutral-800 leading-none sm:text-3xl">{booking.start.getDate()}</p>
+      <div className="flex flex-col gap-3 rounded-xl bg-white border border-surface-200 px-5 py-4 shadow-sm sm:px-6 lg:flex-row lg:items-center lg:gap-4 lg:gap-y-0">
+        <div className="flex items-center gap-4 lg:contents">
+          <div className="w-12 shrink-0 text-center border-r border-surface-200 pr-4">
+            <p className="text-2xl font-bold text-neutral-800 leading-none">{booking.start.getDate()}</p>
             <p className="text-[10px] font-medium tracking-widest text-neutral-400 mt-1">{formatMonthShort(booking.start)}</p>
           </div>
 
-          <div className="flex items-center gap-3 flex-1 sm:w-44 sm:flex-none sm:shrink-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
               {getInitials(clientName)}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-neutral-800 text-sm leading-tight">{clientName}</p>
-              <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5 sm:hidden">
+              <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
+              <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
                 <Clock size={11} className="shrink-0" />
                 <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
               </div>
@@ -83,20 +83,13 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
           </div>
         </div>
 
-        <div className="hidden sm:flex flex-col gap-1 flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-            <Clock size={13} className="shrink-0" />
-            <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center justify-end gap-2 lg:ml-auto lg:shrink-0">
           <button
             onClick={() => setConfirmDialog("finished")}
             className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-500 hover:bg-surface-50 transition-colors"
           >
             <Check size={13} />
-            <span className="hidden sm:inline">Absolvované</span>
+            <span>Absolvované</span>
           </button>
           <button className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors">
             <Video size={13} />
@@ -107,14 +100,14 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
             className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors"
           >
             <Pencil size={13} />
-            <span className="hidden sm:inline">Upraviť</span>
+            <span>Upraviť</span>
           </button>
           <button
             onClick={() => setConfirmDialog("cancelled")}
             className="flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
           >
             <X size={13} />
-            <span className="hidden sm:inline">Zrušiť</span>
+            <span>Zrušiť</span>
           </button>
         </div>
       </div>
