@@ -1,11 +1,16 @@
+"use client"
+
 import Link from "next/link"
-import { Clock } from "lucide-react"
+import { Clock, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { sk } from "date-fns/locale"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import type { Booking } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
+import { fetchFinishedBookings } from "@/server/actions"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 type MonthGroup = {
   label: string
@@ -64,32 +69,16 @@ function ArchiveCard({ booking }: { booking: Booking }) {
           </p>
           <div className="flex items-center gap-1.5 text-sm text-neutral-600">
             <Clock size={13} className="shrink-0 text-neutral-400" />
-            <span>
-              {formatTime(booking.start)} – {formatTime(booking.end)}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-neutral-500 sm:hidden">
-            <Clock size={11} className="shrink-0" />
-            <span>
-              {formatTime(booking.start)} – {formatTime(booking.end)}
-            </span>
+            <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
           </div>
         </div>
 
         <div className="flex items-center sm:ml-auto">
           <Badge className="bg-brand-100 text-brand-700 border-brand-200 px-3 py-1 h-auto text-xs font-medium">
-            Dokončené
+            Absolvované
           </Badge>
         </div>
       </div>
-
-      {booking.notes && (
-        <div className="sm:pl-22 border-t border-surface-100 pt-2 sm:pt-0 sm:border-0">
-          <p className="text-sm text-neutral-500 italic leading-relaxed">
-            &ldquo;{booking.notes}&rdquo;
-          </p>
-        </div>
-      )}
     </div>
   )
 
@@ -104,8 +93,17 @@ function ArchiveCard({ booking }: { booking: Booking }) {
   return inner
 }
 
-export function SessionsArchiveView({ bookings }: { bookings: Booking[] }) {
-  const groups = groupByMonth(bookings)
+export function SessionsArchiveView() {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["finished-bookings"],
+      queryFn: ({ pageParam }) => fetchFinishedBookings(pageParam),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => lastPage.nextOffset,
+    })
+
+  const allBookings = data?.pages.flatMap((p) => p.bookings) ?? []
+  const groups = groupByMonth(allBookings)
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -121,7 +119,11 @@ export function SessionsArchiveView({ bookings }: { bookings: Booking[] }) {
         </h1>
       </div>
 
-      {groups.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 size={24} className="animate-spin text-neutral-400" />
+        </div>
+      ) : groups.length === 0 ? (
         <p className="text-sm text-neutral-400 py-12 text-center">
           Žiadne dokončené sedenia.
         </p>
@@ -129,8 +131,10 @@ export function SessionsArchiveView({ bookings }: { bookings: Booking[] }) {
         <div className="flex flex-col gap-10">
           {groups.map(({ label, bookings: items }) => (
             <section key={label}>
-              <h2 className="text-xl font-serif font-semibold text-neutral-600 mb-4 capitalize"
-                style={{ fontFamily: "var(--font-serif)" }}>
+              <h2
+                className="text-xl font-serif font-semibold text-neutral-600 mb-4 capitalize"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
                 {label}
               </h2>
               <div className="flex flex-col gap-3">
@@ -140,6 +144,25 @@ export function SessionsArchiveView({ bookings }: { bookings: Booking[] }) {
               </div>
             </section>
           ))}
+        </div>
+      )}
+
+      {hasNextPage && (
+        <div className="mt-8 flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Načítavam...
+              </>
+            ) : (
+              "Načítať viac"
+            )}
+          </Button>
         </div>
       )}
     </div>

@@ -1,7 +1,54 @@
 "use server";
-import { and, eq, gt, gte, inArray, lt, lte, ne } from "drizzle-orm";
+import { and, desc, eq, gt, gte, gte, inArray, like, lt, lte, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { availabilitySlot, booking } from "@/db/schema";
+import { availabilitySlot, booking, type Booking } from "@/db/schema";
+import { SESSIONS_PAGE_SIZE, DASHBOARD_PAGE_SIZE } from "@/lib/constants";
+
+export async function fetchDashboardBookings(
+  offset: number,
+  search = "",
+): Promise<{ bookings: Booking[]; nextOffset: number | undefined }> {
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+
+  const items = await db
+    .select()
+    .from(booking)
+    .where(
+      and(
+        gte(booking.start, startOfToday),
+        eq(booking.status, "confirmed"),
+        search ? like(booking.clientName, `%${search}%`) : undefined,
+      ),
+    )
+    .orderBy(booking.start)
+    .limit(DASHBOARD_PAGE_SIZE + 1)
+    .offset(offset)
+
+  const hasMore = items.length > DASHBOARD_PAGE_SIZE
+  return {
+    bookings: items.slice(0, DASHBOARD_PAGE_SIZE),
+    nextOffset: hasMore ? offset + DASHBOARD_PAGE_SIZE : undefined,
+  }
+}
+
+export async function fetchFinishedBookings(
+  offset: number,
+): Promise<{ bookings: Booking[]; nextOffset: number | undefined }> {
+  const items = await db
+    .select()
+    .from(booking)
+    .where(eq(booking.status, "finished"))
+    .orderBy(desc(booking.start))
+    .limit(SESSIONS_PAGE_SIZE + 1)
+    .offset(offset)
+
+  const hasMore = items.length > SESSIONS_PAGE_SIZE
+  return {
+    bookings: items.slice(0, SESSIONS_PAGE_SIZE),
+    nextOffset: hasMore ? offset + SESSIONS_PAGE_SIZE : undefined,
+  }
+}
 import { user } from "@/db/auth-schema";
 import type { UserOption } from "@/server/queries/users";
 import type { BookingWithUser, AvailabilitySlot } from "@/db/schema";

@@ -1,11 +1,11 @@
-import { format, isToday, isTomorrow } from "date-fns"
+import { format, isToday, isTomorrow, isThisWeek } from "date-fns"
 import { sk } from "date-fns/locale"
 
 export function formatBookingDate(date: Date): string {
   return format(date, "d. MMMM yyyy", { locale: sk })
 }
 
-export type TimeGroup = "today" | "tomorrow" | "week"
+export type TimeGroup = "today" | "tomorrow" | "week" | "later"
 
 export function formatTime(date: Date): string {
   return format(date, "HH:mm")
@@ -28,5 +28,6 @@ export function buildDate(dateStr: string, timeStr: string): Date {
 export function getTimeGroup(date: Date): TimeGroup {
   if (isToday(date)) return "today"
   if (isTomorrow(date)) return "tomorrow"
-  return "week"
+  if (isThisWeek(date, { weekStartsOn: 1 })) return "week"
+  return "later"
 }
