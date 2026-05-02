@@ -16,8 +16,8 @@ export default async function CalendarPage({ searchParams }: Props) {
   const baseDate = fromParam && isValid(parseISO(fromParam)) ? parseISO(fromParam) : new Date();
   const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
 
-  const rangeFrom = addDays(weekStart, -28);
-  const rangeTo = addDays(weekStart, 28);
+  const rangeFrom = weekStart;
+  const rangeTo = addDays(weekStart, 6);
 
   const [{ slots, bookings }, users, bookingTypes] = await Promise.all([
     getCalendarData(rangeFrom, rangeTo),
@@ -27,6 +27,7 @@ export default async function CalendarPage({ searchParams }: Props) {
 
   return (
     <AvailabilityCalendar
+      key={weekStart.toISOString()}
       initialSlots={slots}
       initialBookings={bookings}
       initialDate={weekStart}
