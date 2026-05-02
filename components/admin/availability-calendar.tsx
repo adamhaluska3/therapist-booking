@@ -7,8 +7,8 @@ import withDragAndDrop, {
 } from "react-big-calendar/lib/addons/dragAndDrop"
 import { format, parse, startOfWeek, getDay, isToday, addDays } from "date-fns"
 import { sk } from "date-fns/locale"
-import { toast } from "sonner"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
 
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
@@ -406,13 +406,14 @@ export function AvailabilityCalendar({
         />
       </div>
 
+
       {isMobile && (
         <button
           onClick={() => setNewEventOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform sm:hidden"
           aria-label="Nová udalosť"
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-7 w-7" />
         </button>
       )}
 

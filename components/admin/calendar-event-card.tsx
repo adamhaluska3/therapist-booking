@@ -50,9 +50,10 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
     }
     if (event.type === "therapy") {
       return (
-        <div className="relative h-full w-full flex items-center justify-center">
+        <div className="h-full w-full flex flex-col items-center justify-center gap-0.5">
           <User className="h-3 w-3 text-white" />
-          {event.status === "pending" && <Clock className="absolute top-0.5 right-0.5 h-2 w-2 text-white/60" />}
+          {event.status === "pending"   && <Clock className="h-3 w-3 text-white/60" />}
+          {event.status === "confirmed" && <Check className="h-3 w-3 text-white/60" />}
         </div>
       );
     }
