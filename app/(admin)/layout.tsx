@@ -1,6 +1,9 @@
+import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { Lora } from "next/font/google"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { getPendingCount } from "@/server/queries"
+import { auth } from "@/lib/auth"
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" })
 
@@ -9,6 +12,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session?.user || session.user.role !== "admin") {
+    redirect("/")
+  }
+
   const pendingCount = await getPendingCount()
 
   return (
