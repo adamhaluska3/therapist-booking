@@ -5,7 +5,7 @@ import { availabilitySlot, booking, type Booking, type BookingWithUser, type Ava
 import { user } from "@/db/auth-schema";
 import type { UserOption } from "@/server/queries/users";
 import { getUserById } from "@/server/queries/users";
-import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient } from "@/lib/email";
+import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient, sendBookingCancellationToClient, sendBookingRescheduledToClient } from "@/lib/email";
 import { SESSIONS_PAGE_SIZE, DASHBOARD_PAGE_SIZE } from "@/lib/constants";
 
 function toBookingWithUser(row: {
@@ -198,6 +198,26 @@ export async function updateBookingStatus(
   id: string,
   status: "cancelled" | "finished",
 ): Promise<void> {
+  if (status === "cancelled") {
+    const rows = await db
+      .select()
+      .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
+      .where(eq(booking.id, id))
+      .limit(1)
+
+    const row = rows[0]
+    if (row?.user?.email) {
+      const clientName = row.user.nickname ?? row.user.name
+      void sendBookingCancellationToClient({
+        clientName,
+        clientEmail: row.user.email,
+        start: row.booking.start,
+        end: row.booking.end,
+      })
+    }
+  }
+
   await db.update(booking).set({ status }).where(eq(booking.id, id));
 }
 
@@ -252,7 +272,30 @@ export async function updateBookingTime(
     return { ok: false, error: "V tomto čase už existuje potvrdené sedenie." };
   }
 
+  const rows = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(eq(booking.id, id))
+    .limit(1)
+
+  const row = rows[0]
+  const oldStart = row?.booking.start
+
   await db.update(booking).set({ start, end }).where(eq(booking.id, id));
+
+  if (row?.user?.email && oldStart) {
+    const clientName = row.user.nickname ?? row.user.name
+    void sendBookingRescheduledToClient({
+      clientName,
+      clientEmail: row.user.email,
+      bookingId: id,
+      oldStart,
+      newStart: start,
+      newEnd: end,
+    })
+  }
+
   return { ok: true };
 }
 
