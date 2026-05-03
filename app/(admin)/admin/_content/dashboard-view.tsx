@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Search, CalendarDays, Loader2 } from "lucide-react"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useDebounce } from "use-debounce"
 import { cn } from "@/lib/utils"
-import { formatDateInput, getTimeGroup, type TimeGroup } from "@/lib/date-utils"
+import { getTimeGroup, type TimeGroup } from "@/lib/date-utils"
 import { fetchDashboardBookings } from "@/server/actions"
 import { SessionCard } from "@/components/admin/session-card"
 import { Button } from "@/components/ui/button"
+import type { BookingType } from "@/db/schema"
+import type { UserOption } from "@/server/queries/users"
 
 type FilterKey = "all" | "today" | "week"
 
@@ -25,34 +27,52 @@ const GROUP_LABELS: Record<TimeGroup, string> = {
   later: "Ostatné",
 }
 
-export function DashboardView() {
+function getFilterRange(filter: FilterKey, selectedDate: string): { from?: Date; to?: Date } {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+
+  if (selectedDate) {
+    const [y, m, d] = selectedDate.split("-").map(Number)
+    const from = new Date(y, m - 1, d, 0, 0, 0, 0)
+    const to = new Date(y, m - 1, d + 1, 0, 0, 0, 0)
+    return { from, to }
+  }
+  if (filter === "today") {
+    const to = new Date(now)
+    to.setDate(to.getDate() + 1)
+    return { from: now, to }
+  }
+  if (filter === "week") {
+    const to = new Date(now)
+    to.setDate(to.getDate() + 7)
+    return { from: now, to }
+  }
+  return {}
+}
+
+export function DashboardView({ bookingTypes, users }: { bookingTypes: BookingType[]; users: UserOption[] }) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all")
   const [search, setSearch] = useState("")
   const [debouncedSearch] = useDebounce(search, 300)
   const [selectedDate, setSelectedDate] = useState("")
 
+  const { from, to } = useMemo(
+    () => getFilterRange(activeFilter, selectedDate),
+    [activeFilter, selectedDate],
+  )
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery({
-      queryKey: ["dashboard-bookings", debouncedSearch],
-      queryFn: ({ pageParam }) => fetchDashboardBookings(pageParam, debouncedSearch),
+      queryKey: ["dashboard-bookings", debouncedSearch, activeFilter, selectedDate],
+      queryFn: ({ pageParam }) => fetchDashboardBookings(pageParam, debouncedSearch, from, to),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => lastPage.nextOffset,
     })
 
   const allBookings = data?.pages.flatMap((p) => p.bookings) ?? []
 
-  const filtered = allBookings.filter((b) => {
-    if (selectedDate) return formatDateInput(b.start) === selectedDate
-    const group = getTimeGroup(b.start)
-    return (
-      activeFilter === "all" ||
-      (activeFilter === "today" && group === "today") ||
-      (activeFilter === "week" && group !== "later")
-    )
-  })
-
-  const buckets: Record<TimeGroup, typeof filtered> = { today: [], tomorrow: [], week: [], later: [] }
-  for (const b of filtered) buckets[getTimeGroup(b.start)].push(b)
+  const buckets: Record<TimeGroup, typeof allBookings> = { today: [], tomorrow: [], week: [], later: [] }
+  for (const b of allBookings) buckets[getTimeGroup(b.start)].push(b)
   const groups = (["today", "tomorrow", "week", "later"] as TimeGroup[])
     .filter((g) => buckets[g].length > 0)
     .map((g) => ({ group: g, bookings: buckets[g] }))
@@ -144,7 +164,7 @@ export function DashboardView() {
               )}
               <div className="flex flex-col gap-3">
                 {items.map((booking) => (
-                  <SessionCard key={booking.id} booking={booking} />
+                  <SessionCard key={booking.id} booking={booking} bookingTypes={bookingTypes} users={users} />
                 ))}
               </div>
             </div>
@@ -152,7 +172,7 @@ export function DashboardView() {
         </div>
       )}
 
-      {hasNextPage && filtered.length > 0 && (
+      {hasNextPage && (
         <div className="mt-8 flex justify-center">
           <Button
             variant="outline"

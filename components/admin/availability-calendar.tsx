@@ -30,10 +30,11 @@ import {
 } from "@/lib/calendar-utils"
 import {
   saveAvailabilitySlots,
-  saveBookings,
   fetchCalendarData,
   type SlotUpsert,
-  type BookingUpsert,
+  createAdminBooking,
+  updateBookingFromDialog,
+  deleteBookingWithNotification,
 } from "@/server/actions/index"
 import type { AvailabilitySlot, Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
@@ -157,11 +158,27 @@ export function AvailabilityCalendar({
     })
   }
 
-  function persistBooking(b: BookingUpsert) {
+  function persistBooking(b: BookingWithUser, isNew: boolean, previousStart?: Date) {
     persistedBookingIds.current.add(b.id)
     startTransition(async () => {
       try {
-        await saveBookings([b], [])
+        if (isNew) {
+          await createAdminBooking({
+            id: b.id,
+            start: b.start,
+            end: b.end,
+            status: b.status,
+            userId: b.userId ?? null,
+            bookingTypeId: b.bookingTypeId ?? null,
+            price: b.price ?? null,
+          })
+        } else {
+          await updateBookingFromDialog(
+            b.id,
+            { start: b.start, end: b.end, userId: b.userId ?? null, bookingTypeId: b.bookingTypeId ?? null },
+            previousStart ?? b.start,
+          )
+        }
       } catch {
         toast.error("Nepodarilo sa uložiť rezerváciu")
       }
@@ -172,7 +189,7 @@ export function AvailabilityCalendar({
     persistedBookingIds.current.delete(id)
     startTransition(async () => {
       try {
-        await saveBookings([], [id])
+        await deleteBookingWithNotification(id)
       } catch {
         toast.error("Nepodarilo sa vymazať rezerváciu")
       }
@@ -198,13 +215,14 @@ export function AvailabilityCalendar({
       return false
     }
 
-    const isNew = !previousBookings.find((b) => b.id === updatedBooking.id)
+    const previous = previousBookings.find((b) => b.id === updatedBooking.id)
+    const isNew = !previous
     setBookings(
       isNew
         ? [...previousBookings, updatedBooking]
         : previousBookings.map((b) => (b.id === updatedBooking.id ? updatedBooking : b)),
     )
-    persistBooking(updatedBooking)
+    persistBooking(updatedBooking, isNew, previous?.start)
 
     const { result, upserted, deleted } = trimSlotsAroundBooking(previousSlots, updatedBooking)
     if (upserted.length > 0 || deleted.length > 0) {

@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
@@ -49,7 +48,6 @@ export function BookingDialog({
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(booking?.userId ?? null)
   const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<string | null>(booking?.bookingTypeId ?? null)
-  const [notes, setNotes] = useState(booking?.notes ?? "")
   const [startStr, setStartStr] = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
   const [endStr, setEndStr] = useState(() => format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"))
 
@@ -127,7 +125,6 @@ export function BookingDialog({
       end,
       status: booking?.status ?? "confirmed",
       price: booking?.price ?? null,
-      notes: notes.trim() || null,
       userId: selectedUserId,
       bookingTypeId: selectedBookingTypeId,
       createdAt: booking?.createdAt ?? new Date(),
@@ -310,18 +307,6 @@ export function BookingDialog({
                   onChange={(e) => setEndStr(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="grid gap-1.5">
-              <Label>
-                Poznámky <span className="text-gray-400 font-normal">(voliteľné)</span>
-              </Label>
-              <Textarea
-                rows={2}
-                placeholder="Interné poznámky..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
             </div>
 
             {isEdit && onDelete && (
