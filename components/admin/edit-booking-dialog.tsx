@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { BookingWithUser } from "@/db/schema"
@@ -32,6 +33,7 @@ export function EditBookingDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const {
     register,
@@ -60,6 +62,7 @@ export function EditBookingDialog({
     }
 
     onOpenChange(false)
+    void queryClient.invalidateQueries({ queryKey: ["dashboard-bookings"] })
     router.refresh()
   }
 

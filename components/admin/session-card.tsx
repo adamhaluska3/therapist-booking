@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { Check, Video, Pencil, X, Clock } from "lucide-react"
 import type { BookingWithUser } from "@/db/schema"
@@ -47,6 +48,7 @@ const CONFIRM_CONFIG: Record<ConfirmAction, {
 
 export function SessionCard({ booking }: { booking: BookingWithUser }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
   const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -59,6 +61,7 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
     startTransition(async () => {
       await updateBookingStatus(booking.id, confirmDialog)
       setConfirmDialog(null)
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-bookings"] })
       router.refresh()
     })
   }
