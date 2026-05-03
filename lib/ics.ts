@@ -1,3 +1,37 @@
+export type IcsFeedEvent = {
+  uid: string
+  start: Date
+  end: Date
+  summary: string
+  description?: string
+}
+
+export function generateIcsFeed(events: IcsFeedEvent[]): string {
+  const now = toIcsDate(new Date())
+  const vevents = events.flatMap((e) => [
+    "BEGIN:VEVENT",
+    `UID:${e.uid}`,
+    `DTSTAMP:${now}`,
+    `DTSTART:${toIcsDate(e.start)}`,
+    `DTEND:${toIcsDate(e.end)}`,
+    `SUMMARY:${e.summary}`,
+    e.description ? `DESCRIPTION:${e.description}` : null,
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+  ].filter(Boolean) as string[])
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Therapist Booking//SK",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "X-WR-CALNAME:Terapeutické sedenia",
+    ...vevents,
+    "END:VCALENDAR",
+  ].join("\r\n")
+}
+
 function pad(n: number) {
   return String(n).padStart(2, "0")
 }

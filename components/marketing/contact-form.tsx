@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,30 +20,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { contactSchema, SERVICE_TYPES, SERVICE_LABELS, type ContactFormValues } from "@/lib/contact-schema";
+import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
 import { submitContactForm } from "@/server/actions/contact";
+import type { BookingType } from "@/db/schema";
 
-export function ContactForm() {
+export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
-      serviceType: undefined,
-      serviceTypeOther: "",
+      serviceType: "",
       message: "",
     },
   });
 
-  const serviceType = form.watch("serviceType");
-
   async function onSubmit(values: ContactFormValues) {
     const result = await submitContactForm(values);
     if (result.success) {
-      toast.success("Správa odoslaná! Ozveme sa vám čoskoro.");
       form.reset();
-    } else {
-      toast.error(result.error ?? "Niečo sa pokazilo.");
     }
   }
 
@@ -108,39 +102,18 @@ export function ContactForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {SERVICE_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {SERVICE_LABELS[type]}
+                  {bookingTypes.map((bt) => (
+                    <SelectItem key={bt.id} value={bt.name}>
+                      {bt.name}
                     </SelectItem>
                   ))}
+                  <SelectItem value="Iné">Iné</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        {serviceType === "other" && (
-          <FormField
-            control={form.control}
-            name="serviceTypeOther"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                  Upresniite typ služby
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Napr. párová terapia, skupinové sedenie…"
-                    className="border-0 bg-surface-100 focus-visible:ring-brand-300"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <FormField
           control={form.control}

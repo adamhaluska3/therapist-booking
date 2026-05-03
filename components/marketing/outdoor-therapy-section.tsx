@@ -34,7 +34,7 @@ export function OutdoorTherapySection({ content }: Props) {
                 </li>
               ))}
             </ul>
-            <Link href="/#kontakt">
+            <Link href="/#contact">
               <Button className="w-full rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800 sm:w-auto">
                 {content.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>

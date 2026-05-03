@@ -1,6 +1,5 @@
 import { Resend } from "resend"
 import { generateIcs } from "@/lib/ics"
-import { SERVICE_LABELS } from "@/lib/contact-schema"
 import { format } from "date-fns"
 import { sk } from "date-fns/locale"
 
@@ -444,20 +443,16 @@ export async function sendContactFormEmail({
   name,
   email,
   serviceType,
-  serviceTypeOther,
   message,
 }: {
   name: string
   email: string
   serviceType: string
-  serviceTypeOther?: string
   message: string
 }) {
   if (!THERAPIST_EMAIL) return
 
-  const serviceLabel = serviceType === "other" && serviceTypeOther
-    ? `Iné — ${serviceTypeOther}`
-    : SERVICE_LABELS[serviceType as keyof typeof SERVICE_LABELS] ?? serviceType
+  const serviceLabel = serviceType
 
   await send({
     from: FROM,
