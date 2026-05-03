@@ -15,6 +15,7 @@ export const BOOKING_TYPE_COLORS: Record<
   "bt-supervizia": { bg: "#5a6abf", label: "Supervízia" },
   "bt-seminare": { bg: "#d96c4f", label: "Semináre" },
   "bt-koucing": { bg: "#bf8a2e", label: "Koučing" },
+  "bt-outdoor": { bg: "#3d9e8a", label: "Outdoor terapia" },
 };
 
 export const DEFAULT_THERAPY_COLOR = "#427a5c";

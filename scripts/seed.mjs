@@ -58,6 +58,7 @@ const BOOKING_TYPES = [
   { id: "bt-supervizia",   name: "Supervízia",    price: 7000 },  // €70
   { id: "bt-seminare",     name: "Semináre",      price: 4000 },  // €40
   { id: "bt-koucing",      name: "Koučing",       price: 5500 },  // €55
+  { id: "bt-outdoor",      name: "Outdoor terapia", price: 6500 }, // €65
 ];
 
 async function main() {
