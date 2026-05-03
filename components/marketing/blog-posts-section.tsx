@@ -2,16 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { blogPosts, type BlogPost } from "../../app/(marketing)/_content/blog";
 import { useBlogFilter } from "./blog-filter-context";
+import { PostPreview } from "@/db/schema";
 
-export function BlogPostsSection() {
+export type BlogPostsSectionProp = {
+  posts: PostPreview[]
+}
+
+export function BlogPostsSection({posts}: BlogPostsSectionProp) {
   const { active } = useBlogFilter();
 
   const filtered =
-    active === "vsetko"
-      ? blogPosts
-      : blogPosts.filter((p: BlogPost) => p.category === active);
+    active === null
+      ? posts
+      : posts.filter((p) => p.category?.id === active);
 
   const [featured, ...rest] = filtered;
 
@@ -29,12 +33,16 @@ export function BlogPostsSection() {
           <div className="mb-12 grid grid-cols-1 items-center gap-8 md:mb-16 md:grid-cols-2 md:gap-12">
             <PostImage post={featured} priority />
             <div>
-              <p className="mb-3 text-xs text-neutral-400">{featured.date}</p>
+              <p className="mb-3 text-xs text-neutral-400">{featured.createdAt.toLocaleDateString("sk-SK", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}</p>
               <h2 className="mb-4 font-serif text-2xl font-semibold leading-tight text-brand-900 md:text-4xl">
                 {featured.title}
               </h2>
               <p className="mb-6 text-sm leading-relaxed text-neutral-500">
-                {featured.excerpt}
+                {featured.description}
               </p>
               <Link
                 href={`/blog/${featured.slug}`}
@@ -75,10 +83,10 @@ function PostImage({
   post,
   priority = false,
 }: {
-  post: BlogPost;
+  post: PostPreview;
   priority?: boolean;
 }) {
-  if (!post.image) {
+  if (!post.titleImage) {
     return (
       <div className="flex aspect-4/3 items-center justify-center rounded-2xl bg-surface-200">
         <span className="text-sm text-neutral-400">Bez obrázka</span>
@@ -88,8 +96,8 @@ function PostImage({
   return (
     <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-surface-200">
       <Image
-        src={post.image.src}
-        alt={post.image.alt}
+        src={post.titleImage}
+        alt={post.title + " picture"}
         fill
         sizes="(max-width: 768px) 100vw, 50vw"
         className="object-cover"
@@ -99,15 +107,20 @@ function PostImage({
   );
 }
 
-function PostBody({ post }: { post: BlogPost }) {
+function PostBody({ post }: { post: PostPreview }) {
   return (
     <div>
-      <p className="mb-3 text-xs text-neutral-400">{post.date}</p>
+      <p className="mb-3 text-xs text-neutral-400">{post.createdAt.toLocaleDateString("sk-SK", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}
+      </p>
       <h3 className="mb-3 font-serif text-xl font-semibold leading-tight text-brand-900 md:text-2xl">
         {post.title}
       </h3>
       <p className="mb-5 text-sm leading-relaxed text-neutral-500">
-        {post.excerpt}
+        {post.description}
       </p>
       <Link
         href={`/blog/${post.slug}`}

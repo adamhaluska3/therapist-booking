@@ -2,12 +2,16 @@
 
 import { cn } from "@/lib/utils";
 import {
-  blogCategories,
   blogHeader,
 } from "../../app/(marketing)/_content/blog";
 import { useBlogFilter } from "./blog-filter-context";
+import { PostCategory } from "@/db/schema";
 
-export function BlogHeaderSection() {
+export type BlogHeaderSectionProp = {
+  categories: PostCategory[]
+}
+
+export function BlogHeaderSection({categories}: BlogHeaderSectionProp) {
   const { active, setActive } = useBlogFilter();
 
   return (
@@ -24,18 +28,18 @@ export function BlogHeaderSection() {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {blogCategories.map((cat) => (
+          {categories.map((cat) => (
             <button
-              key={cat.value}
-              onClick={() => setActive(cat.value)}
+              key={cat.id}
+              onClick={() => setActive(cat.id)}
               className={cn(
                 "rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
-                active === cat.value
+                active === cat.id
                   ? "bg-brand-700 text-white"
                   : "bg-surface-200 text-neutral-600 hover:bg-surface-300",
               )}
             >
-              {cat.label}
+              {cat.name}
             </button>
           ))}
         </div>

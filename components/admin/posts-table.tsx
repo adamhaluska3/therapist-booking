@@ -45,7 +45,7 @@ const columns: ColumnDef<Post>[] = [
     {
         id: 'actions',
         cell: ({ row }) => (
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-5 justify-end">
             <Link href={`/admin/blog/${row.original.id}`} className="text-xs text-brand-600 underline">
                 <Edit2/>
             </Link>

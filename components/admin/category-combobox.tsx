@@ -14,7 +14,7 @@ import { PostCategory } from '@/db/schema'
 
 export type CategoryComboboxProps = {
   category?: PostCategory
-  onChange: (category: PostCategory) => void
+  onChange: (category: PostCategory | null) => void
   categories: PostCategory[]
 }
 
@@ -22,9 +22,9 @@ export const CategoryCombobox = ({ category, onChange, categories }: CategoryCom
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const filtered = categories.filter(c =>
+  const filtered = [null, ...categories.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase())
-  )
+  )] as (PostCategory | null)[]
 
   return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -36,7 +36,7 @@ export const CategoryCombobox = ({ category, onChange, categories }: CategoryCom
             </div>
           </Button>
         }/>
-        <PopoverContent className="p-0">
+        <PopoverContent className="p-0 w-full">
           <Command>
             <CommandInput
               placeholder="Hľadať kategóriu..."
@@ -48,11 +48,12 @@ export const CategoryCombobox = ({ category, onChange, categories }: CategoryCom
               <CommandGroup>
                 {filtered.map(cat => (
                   <CommandItem
-                    key={cat.id}
+                    key={cat?.id || "-"}
                     onSelect={() => { onChange(cat); setOpen(false) }}
+                    className={cn(cat === null && "text-gray-500")}
                   >
-                    <Check className={cn('mr-2 h-4 w-4', category?.id === cat.id ? 'opacity-100' : 'opacity-0')} />
-                    {cat.name}
+                    <Check className={cn('mr-2 h-4 w-4', category?.id === cat?.id || (category === null && cat === null) ? 'opacity-100' : 'opacity-0')} />
+                    {cat?.name || "Bez kategórie"}
                   </CommandItem>
                 ))}
               </CommandGroup>

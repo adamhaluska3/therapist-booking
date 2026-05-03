@@ -108,7 +108,8 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
                             <label htmlFor="description" className='mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600'>
                                 Popisok
                             </label>
-                            <input {...register("description")}
+                            <textarea {...register("description")}
+                                rows={3}
                                 defaultValue={post.description || ""}
                                 className="w-full md:max-w-150 border border-solid rounded-2xl p-2 py-4 bg-surface-100"
                                 placeholder="Krátky úvod do článku"
