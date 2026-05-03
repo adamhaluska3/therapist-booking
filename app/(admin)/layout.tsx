@@ -1,7 +1,10 @@
+import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { Lora } from "next/font/google"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { getPendingCount } from "@/server/queries"
+import { auth } from "@/lib/auth"
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" })
 
@@ -10,6 +13,13 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  // UNCOMMENT TO ENABLE ADMIN PROTECTION
+  // if (!session?.user || session.user.role !== "admin") {
+  //   redirect("/")
+  // }
+
   const pendingCount = await getPendingCount()
 
   return (
