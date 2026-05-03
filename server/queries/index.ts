@@ -1,8 +1,8 @@
 "use server";
 import { cache } from "react";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { availabilitySlot, booking, bookingType } from "@/db/schema";
+import { availabilitySlot, booking, type Booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import { BOOKINGS_PAGE_SIZE } from "@/lib/constants";
@@ -134,4 +134,12 @@ export async function getPendingBookings(page = 1): Promise<{
   ]);
 
   return { bookings: items.map(toBookingWithUser), total: Number(total) };
+}
+
+export async function getFinishedBookings(): Promise<Booking[]> {
+  return db
+    .select()
+    .from(booking)
+    .where(eq(booking.status, "finished"))
+    .orderBy(desc(booking.start));
 }

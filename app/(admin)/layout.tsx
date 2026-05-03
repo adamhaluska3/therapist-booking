@@ -1,5 +1,6 @@
 import { Lora } from "next/font/google"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { QueryProvider } from "@/components/providers/query-provider"
 import { getPendingCount } from "@/server/queries"
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" })
@@ -17,7 +18,9 @@ export default async function AdminLayout({
       style={{ "--font-serif": "var(--font-lora, ui-serif)" } as React.CSSProperties}
     >
       <AdminSidebar pendingCount={pendingCount} />
-      <main className="flex-1 p-4 md:p-6">{children}</main>
+      <main className="flex-1 p-4 md:p-6">
+        <QueryProvider>{children}</QueryProvider>
+      </main>
     </div>
   )
 }

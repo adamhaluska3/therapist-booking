@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useTransition, useCallback, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useTransition, useCallback } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import {
   useReactTable,
@@ -13,7 +14,7 @@ import {
 import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
-import { BOOKINGS_PAGE_SIZE } from "@/lib/constants"
+import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants"
 import { confirmBooking, updateBookingStatus } from "@/server/actions"
 import {
   Dialog,
@@ -36,6 +37,7 @@ interface Props {
 
 export function RequestsView({ bookings, total, page }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -45,7 +47,9 @@ export function RequestsView({ bookings, total, page }: Props) {
   const rangeEnd = (page - 1) * BOOKINGS_PAGE_SIZE + bookings.length
 
   function navigatePage(newPage: number) {
-    router.push(`/admin/requests?page=${newPage}`)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", String(newPage))
+    router.push(`/admin/requests?${params}`)
   }
 
   const handleConfirm = useCallback((id: string) => {
@@ -68,10 +72,7 @@ export function RequestsView({ bookings, total, page }: Props) {
     })
   }
 
-  const columns = useMemo(
-    () => getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending }),
-    [handleConfirm, handleCancelOpen, isPending],
-  )
+  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending })
 
   const table = useReactTable({
     data: bookings,
@@ -92,7 +93,6 @@ export function RequestsView({ bookings, total, page }: Props) {
         </p>
         <h1
           className="font-serif text-4xl font-bold text-neutral-800 mb-2"
-          style={{ fontFamily: "var(--font-serif)" }}
         >
           Nové žiadosti o terapiu
         </h1>
@@ -119,24 +119,39 @@ export function RequestsView({ bookings, total, page }: Props) {
           </p>
         )}
         {bookings.map((b) => {
-          const clientName = b.user?.nickname ?? b.user?.name ?? "Neznámy klient"
+          const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT
           return (
             <div
               key={b.id}
               className="flex flex-col gap-3 rounded-xl border border-surface-200 bg-white px-4 py-4 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                  {getInitials(clientName)}
+              {b.userId ? (
+                <Link href={`/admin/clients/${b.userId}`} className="flex items-center gap-3 group">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                    {getInitials(clientName)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">{clientName}</p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {formatBookingDate(b.start)},{" "}
+                      {formatTime(b.start)} – {formatTime(b.end)}
+                    </p>
+                  </div>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                    {getInitials(clientName)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-neutral-800">{clientName}</p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {formatBookingDate(b.start)},{" "}
+                      {formatTime(b.start)} – {formatTime(b.end)}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-neutral-800">{clientName}</p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
-                    {formatBookingDate(b.start)},{" "}
-                    {formatTime(b.start)} – {formatTime(b.end)}
-                  </p>
-                </div>
-              </div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={() => handleConfirm(b.id)}
@@ -243,7 +258,7 @@ export function RequestsView({ bookings, total, page }: Props) {
             <DialogDescription>
               Žiadosť klienta{" "}
               <span className="font-medium text-neutral-800">
-                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? "Neznámy klient"}
+                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? UNKNOWN_CLIENT}
               </span>{" "}
               bude zamietnutá a označená ako zrušená.
             </DialogDescription>

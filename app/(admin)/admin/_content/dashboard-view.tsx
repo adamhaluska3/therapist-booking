@@ -1,11 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Search, CalendarDays } from "lucide-react"
+import { Search, CalendarDays, Loader2 } from "lucide-react"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { useDebounce } from "use-debounce"
 import { cn } from "@/lib/utils"
 import { formatDateInput, getTimeGroup, type TimeGroup } from "@/lib/date-utils"
-import type { BookingWithUser } from "@/db/schema"
+import { fetchDashboardBookings } from "@/server/actions"
 import { SessionCard } from "@/components/admin/session-card"
+import { Button } from "@/components/ui/button"
 
 type FilterKey = "all" | "today" | "week"
 
@@ -19,28 +22,38 @@ const GROUP_LABELS: Record<TimeGroup, string> = {
   today: "Dnes",
   tomorrow: "Zajtra",
   week: "Tento týždeň",
+  later: "Ostatné",
 }
 
-export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
+export function DashboardView() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all")
   const [search, setSearch] = useState("")
+  const [debouncedSearch] = useDebounce(search, 300)
   const [selectedDate, setSelectedDate] = useState("")
 
-  const lowerSearch = search.toLowerCase()
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useInfiniteQuery({
+      queryKey: ["dashboard-bookings", debouncedSearch],
+      queryFn: ({ pageParam }) => fetchDashboardBookings(pageParam, debouncedSearch),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => lastPage.nextOffset,
+    })
 
-  const filtered = bookings.filter((b) => {
-    const matchesSearch = (b.user?.nickname ?? b.user?.name ?? "").toLowerCase().includes(lowerSearch)
-    if (selectedDate) return matchesSearch && formatDateInput(b.start) === selectedDate
-    const matchesTime =
+  const allBookings = data?.pages.flatMap((p) => p.bookings) ?? []
+
+  const filtered = allBookings.filter((b) => {
+    if (selectedDate) return formatDateInput(b.start) === selectedDate
+    const group = getTimeGroup(b.start)
+    return (
       activeFilter === "all" ||
-      activeFilter === "week" ||
-      getTimeGroup(b.start) === activeFilter
-    return matchesTime && matchesSearch
+      (activeFilter === "today" && group === "today") ||
+      (activeFilter === "week" && group !== "later")
+    )
   })
 
-  const buckets: Record<TimeGroup, BookingWithUser[]> = { today: [], tomorrow: [], week: [] }
+  const buckets: Record<TimeGroup, typeof filtered> = { today: [], tomorrow: [], week: [], later: [] }
   for (const b of filtered) buckets[getTimeGroup(b.start)].push(b)
-  const groups = (["today", "tomorrow", "week"] as TimeGroup[])
+  const groups = (["today", "tomorrow", "week", "later"] as TimeGroup[])
     .filter((g) => buckets[g].length > 0)
     .map((g) => ({ group: g, bookings: buckets[g] }))
 
@@ -60,7 +73,7 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
         <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
           Administratíva
         </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+        <h1 className="text-4xl font-bold text-neutral-800 mb-4">
           Potvrdené sedenia
         </h1>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -107,27 +120,56 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
-        {groups.length === 0 && (
-          <p className="text-sm text-neutral-400 py-12 text-center">
-            Žiadne sedenia pre zvolený filter.
-          </p>
-        )}
-        {groups.map(({ group, bookings: items }, groupIdx) => (
-          <div key={group}>
-            {(groupIdx > 0 || group !== "today") && (
-              <p className="text-base font-semibold text-neutral-700 mb-3">
-                {GROUP_LABELS[group]}
-              </p>
-            )}
-            <div className="flex flex-col gap-3">
-              {items.map((booking) => (
-                <SessionCard key={booking.id} booking={booking} />
-              ))}
+      {isError ? (
+        <p className="text-sm text-red-500 py-12 text-center">
+          Nepodarilo sa načítať sedenia. Skúste obnoviť stránku.
+        </p>
+      ) : isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 size={24} className="animate-spin text-neutral-400" />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-8">
+          {groups.length === 0 && (
+            <p className="text-sm text-neutral-400 py-12 text-center">
+              Žiadne sedenia pre zvolený filter.
+            </p>
+          )}
+          {groups.map(({ group, bookings: items }, groupIdx) => (
+            <div key={group}>
+              {(groupIdx > 0 || groups.length > 1 || group !== "today") && (
+                <p className="text-base font-semibold text-neutral-700 mb-3">
+                  {GROUP_LABELS[group]}
+                </p>
+              )}
+              <div className="flex flex-col gap-3">
+                {items.map((booking) => (
+                  <SessionCard key={booking.id} booking={booking} />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {hasNextPage && filtered.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Načítavam...
+              </>
+            ) : (
+              "Načítať viac"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
