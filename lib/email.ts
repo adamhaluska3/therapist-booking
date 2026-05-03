@@ -4,10 +4,16 @@ import { SERVICE_LABELS } from "@/lib/contact-schema"
 import { format } from "date-fns"
 import { sk } from "date-fns/locale"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const EMAILS_ENABLED = process.env.ENABLE_EMAILS === "true"
+const resend = EMAILS_ENABLED ? new Resend(process.env.RESEND_API_KEY) : null
 
 const FROM = process.env.EMAIL_FROM ?? "noreply@example.com"
 const THERAPIST_EMAIL = process.env.THERAPIST_EMAIL ?? ""
+
+async function send(params: Parameters<Resend["emails"]["send"]>[0]) {
+  if (!resend) return
+  await resend.emails.send(params)
+}
 
 function formatDateTime(date: Date) {
   return format(date, "d. MMMM yyyy 'o' HH:mm", { locale: sk })
@@ -45,7 +51,7 @@ export async function sendBookingNotificationToTherapist({
   const dateStr = formatDateTime(start)
   const endTimeStr = format(end, "HH:mm")
 
-  await resend.emails.send({
+  await send({
     from: FROM,
     to: THERAPIST_EMAIL,
     subject: `Nová žiadosť o sedenie — ${clientName}`,
@@ -148,7 +154,7 @@ export async function sendBookingConfirmationToClient({
   const dateStr = formatDateTime(start)
   const endTimeStr = format(end, "HH:mm")
 
-  await resend.emails.send({
+  await send({
     from: FROM,
     to: clientEmail,
     subject: "Vaše sedenie bolo potvrdené ✓",
@@ -244,7 +250,7 @@ export async function sendBookingCancellationToClient({
   const dateStr = formatDateTime(start)
   const endTimeStr = format(end, "HH:mm")
 
-  await resend.emails.send({
+  await send({
     from: FROM,
     to: clientEmail,
     subject: "Vaše sedenie bolo zrušené",
@@ -348,7 +354,7 @@ export async function sendBookingRescheduledToClient({
   const newDateStr = formatDateTime(newStart)
   const newEndTimeStr = format(newEnd, "HH:mm")
 
-  await resend.emails.send({
+  await send({
     from: FROM,
     to: clientEmail,
     subject: "Čas vášho sedenia bol zmenený",
@@ -453,7 +459,7 @@ export async function sendContactFormEmail({
     ? `Iné — ${serviceTypeOther}`
     : SERVICE_LABELS[serviceType as keyof typeof SERVICE_LABELS] ?? serviceType
 
-  await resend.emails.send({
+  await send({
     from: FROM,
     to: THERAPIST_EMAIL,
     replyTo: email,
