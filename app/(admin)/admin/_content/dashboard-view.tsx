@@ -6,7 +6,6 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { useDebounce } from "use-debounce"
 import { cn } from "@/lib/utils"
 import { formatDateInput, getTimeGroup, type TimeGroup } from "@/lib/date-utils"
-import type { BookingWithUser } from "@/db/schema"
 import { fetchDashboardBookings } from "@/server/actions"
 import { SessionCard } from "@/components/admin/session-card"
 import { Button } from "@/components/ui/button"
@@ -26,7 +25,7 @@ const GROUP_LABELS: Record<TimeGroup, string> = {
   later: "Ostatné",
 }
 
-export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
+export function DashboardView() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all")
   const [search, setSearch] = useState("")
   const [debouncedSearch] = useDebounce(search, 300)
@@ -52,7 +51,7 @@ export function DashboardView({ bookings }: { bookings: BookingWithUser[] }) {
     )
   })
 
-  const buckets: Record<TimeGroup, BookingWithUser[]> = { today: [], tomorrow: [], week: [] }
+  const buckets: Record<TimeGroup, typeof filtered> = { today: [], tomorrow: [], week: [], later: [] }
   for (const b of filtered) buckets[getTimeGroup(b.start)].push(b)
   const groups = (["today", "tomorrow", "week", "later"] as TimeGroup[])
     .filter((g) => buckets[g].length > 0)

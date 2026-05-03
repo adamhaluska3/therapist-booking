@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Check, Video, Pencil, X, Clock } from "lucide-react"
 import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
@@ -71,18 +72,36 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
             <p className="text-[10px] font-medium tracking-widest text-neutral-400 mt-1">{formatMonthShort(booking.start)}</p>
           </div>
 
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
-              {getInitials(clientName)}
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
-              <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
-                <Clock size={11} className="shrink-0" />
-                <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+          {booking.userId ? (
+            <Link
+              href={`/admin/clients/${booking.userId}`}
+              className="flex items-center gap-3 flex-1 min-w-0 group"
+            >
+              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                {getInitials(clientName)}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-neutral-800 text-sm leading-tight truncate group-hover:text-brand-700 transition-colors">{clientName}</p>
+                <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
+                  <Clock size={11} className="shrink-0" />
+                  <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                {getInitials(clientName)}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
+                <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
+                  <Clock size={11} className="shrink-0" />
+                  <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2 lg:ml-auto lg:shrink-0">

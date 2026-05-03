@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useCallback } from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import {
@@ -124,18 +125,33 @@ export function RequestsView({ bookings, total, page }: Props) {
               key={b.id}
               className="flex flex-col gap-3 rounded-xl border border-surface-200 bg-white px-4 py-4 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                  {getInitials(clientName)}
+              {b.userId ? (
+                <Link href={`/admin/clients/${b.userId}`} className="flex items-center gap-3 group">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                    {getInitials(clientName)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">{clientName}</p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {formatBookingDate(b.start)},{" "}
+                      {formatTime(b.start)} – {formatTime(b.end)}
+                    </p>
+                  </div>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                    {getInitials(clientName)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-neutral-800">{clientName}</p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {formatBookingDate(b.start)},{" "}
+                      {formatTime(b.start)} – {formatTime(b.end)}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-neutral-800">{clientName}</p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
-                    {formatBookingDate(b.start)},{" "}
-                    {formatTime(b.start)} – {formatTime(b.end)}
-                  </p>
-                </div>
-              </div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={() => handleConfirm(b.id)}

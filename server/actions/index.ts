@@ -1,24 +1,44 @@
 "use server";
-import { and, desc, eq, gt, gte, gte, inArray, like, lt, lte, ne } from "drizzle-orm";
+import { and, desc, eq, gt, gte, inArray, like, lt, lte, ne, or } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { availabilitySlot, booking, type Booking } from "@/db/schema";
+import { availabilitySlot, booking, type Booking, type BookingWithUser, type AvailabilitySlot } from "@/db/schema";
+import { user } from "@/db/auth-schema";
+import type { UserOption } from "@/server/queries/users";
 import { SESSIONS_PAGE_SIZE, DASHBOARD_PAGE_SIZE } from "@/lib/constants";
+
+function toBookingWithUser(row: {
+  booking: typeof booking.$inferSelect;
+  user: typeof user.$inferSelect | null;
+}): BookingWithUser {
+  return {
+    ...row.booking,
+    user: row.user
+      ? { id: row.user.id, name: row.user.name, nickname: row.user.nickname, email: row.user.email }
+      : null,
+  }
+}
 
 export async function fetchDashboardBookings(
   offset: number,
   search = "",
-): Promise<{ bookings: Booking[]; nextOffset: number | undefined }> {
+): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
 
   const items = await db
     .select()
     .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
     .where(
       and(
         gte(booking.start, startOfToday),
         eq(booking.status, "confirmed"),
-        search ? like(booking.clientName, `%${search}%`) : undefined,
+        search
+          ? or(
+              like(user.name, `%${search}%`),
+              like(user.nickname, `%${search}%`),
+            )
+          : undefined,
       ),
     )
     .orderBy(booking.start)
@@ -27,17 +47,18 @@ export async function fetchDashboardBookings(
 
   const hasMore = items.length > DASHBOARD_PAGE_SIZE
   return {
-    bookings: items.slice(0, DASHBOARD_PAGE_SIZE),
+    bookings: items.slice(0, DASHBOARD_PAGE_SIZE).map(toBookingWithUser),
     nextOffset: hasMore ? offset + DASHBOARD_PAGE_SIZE : undefined,
   }
 }
 
 export async function fetchFinishedBookings(
   offset: number,
-): Promise<{ bookings: Booking[]; nextOffset: number | undefined }> {
+): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
   const items = await db
     .select()
     .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
     .where(eq(booking.status, "finished"))
     .orderBy(desc(booking.start))
     .limit(SESSIONS_PAGE_SIZE + 1)
@@ -45,13 +66,10 @@ export async function fetchFinishedBookings(
 
   const hasMore = items.length > SESSIONS_PAGE_SIZE
   return {
-    bookings: items.slice(0, SESSIONS_PAGE_SIZE),
+    bookings: items.slice(0, SESSIONS_PAGE_SIZE).map(toBookingWithUser),
     nextOffset: hasMore ? offset + SESSIONS_PAGE_SIZE : undefined,
   }
 }
-import { user } from "@/db/auth-schema";
-import type { UserOption } from "@/server/queries/users";
-import type { BookingWithUser, AvailabilitySlot } from "@/db/schema";
 
 export async function fetchCalendarData(
   from: Date,

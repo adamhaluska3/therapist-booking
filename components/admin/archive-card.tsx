@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Clock } from "lucide-react"
-import type { Booking } from "@/db/schema"
+import type { BookingWithUser } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
@@ -8,8 +8,8 @@ import { AdminCard } from "@/components/admin/admin-card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
-export function ArchiveCard({ booking }: { booking: Booking }) {
-  const clientName = booking.clientName ?? UNKNOWN_CLIENT
+export function ArchiveCard({ booking }: { booking: BookingWithUser }) {
+  const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
   const isLinked = Boolean(booking.userId)
 
   const inner = (

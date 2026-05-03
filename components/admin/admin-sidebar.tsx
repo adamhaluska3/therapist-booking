@@ -53,7 +53,9 @@ function SidebarContent({
       <nav className="flex flex-col gap-1 px-3">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href
+          const isActive = item.href === "/admin"
+            ? pathname === "/admin"
+            : pathname.startsWith(item.href)
           const badge = item.badgeKey === "pending" ? pendingCount : 0
           return (
             <Link
