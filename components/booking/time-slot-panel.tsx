@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { bookingContent } from "../../app/(booking)/booking/_content/booking";
 import type { TimeSlot } from "@/lib/booking-types";
+import { authClient } from "@/lib/auth-client";
 
 const { slots: sc } = bookingContent;
 
@@ -15,6 +16,7 @@ export function TimeSlotPanel({
   onConfirm,
   pending,
   error,
+  disableConfirm = false,
 }: {
   slots: TimeSlot[];
   selectedTime: string | null;
@@ -22,6 +24,7 @@ export function TimeSlotPanel({
   onConfirm: () => void;
   pending?: boolean;
   error?: string | null;
+  disableConfirm?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -69,12 +72,25 @@ export function TimeSlotPanel({
       )}
 
       <Button
-        disabled={!selectedTime || pending}
+        disabled={!selectedTime || pending || disableConfirm}
         onClick={onConfirm}
         className="h-12 rounded-full bg-brand-800 text-sm font-semibold text-white hover:bg-brand-900 disabled:opacity-40"
       >
         {pending ? "Rezervujem…" : sc.confirmCta}
       </Button>
+
+      {disableConfirm && (
+        <p className="text-center text-sm text-neutral-500">
+          Pre rezerváciu sa musíte{" "}
+          <button
+            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/booking" })}
+            className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800"
+          >
+            prihlásiť
+          </button>
+          .
+        </p>
+      )}
 
       <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
         {sc.footer}

@@ -14,7 +14,7 @@ export function SiteHeader() {
           href="/"
           className="font-serif text-lg font-semibold italic text-brand-900"
         >
-          Terapeut - Ján Šolc
+          V Rozhovore - Ján Šolc
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

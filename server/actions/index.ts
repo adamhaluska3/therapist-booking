@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { availabilitySlot, booking, type Booking, type BookingWithUser, type AvailabilitySlot } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 import type { UserOption } from "@/server/queries/users";
+import { getUserById } from "@/server/queries/users";
+import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient } from "@/lib/email";
 import { SESSIONS_PAGE_SIZE, DASHBOARD_PAGE_SIZE } from "@/lib/constants";
 
 function toBookingWithUser(row: {
@@ -204,6 +206,29 @@ export async function confirmBooking(id: string): Promise<void> {
     .update(booking)
     .set({ status: "confirmed" })
     .where(eq(booking.id, id));
+
+  const rows = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(eq(booking.id, id))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return;
+
+  const clientEmail = row.user?.email;
+  if (!clientEmail) return;
+
+  const clientName = row.user?.nickname ?? row.user?.name ?? "Klient";
+
+  await sendBookingConfirmationToClient({
+    bookingId: id,
+    start: row.booking.start,
+    end: row.booking.end,
+    clientName,
+    clientEmail,
+  }).catch(() => undefined);
 }
 
 export async function updateBookingTime(
@@ -250,12 +275,23 @@ export async function createClientBooking(
     return { ok: false, error: "Tento termín je už obsadený." };
   }
 
-  await db.insert(booking).values({
+  const [inserted] = await db.insert(booking).values({
     start,
     end,
     status: "pending",
     userId: userId ?? null,
-  });
+  }).returning({ id: booking.id });
+
+  const clientUser = userId ? await getUserById(userId) : null
+  const clientName = clientUser?.nickname ?? clientUser?.name ?? "Klient"
+  const clientEmail = clientUser?.email
+
+  await sendBookingNotificationToTherapist({
+    start,
+    end,
+    clientName,
+    clientEmail,
+  }).catch(() => undefined)
 
   return { ok: true };
 }
