@@ -8,8 +8,7 @@ import {
 } from '@tanstack/react-table'
 import { Edit2, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../ui/pagination'
-import { useState } from 'react'
+import { PaginationControls } from './pagination-controls'
 
 type Post = {
     id: string
@@ -56,11 +55,9 @@ const columns: ColumnDef<Post>[] = [
 ]
 
 export function PostsTable({ data }: { data: Post[] }) {
-    const [pagination] = useState({ pageIndex: 0, pageSize: 1 })
     const table = useReactTable({
         data,
         columns,
-        state: {pagination},
         getCoreRowModel: getCoreRowModel(),
     })
 
@@ -90,38 +87,29 @@ export function PostsTable({ data }: { data: Post[] }) {
                     ))}
                 </tbody>
             </table>
-            <Pagination className='mt-5'>
-                <PaginationContent className='flex w-full'>
-                    <div className='flex-1'>
-                        Celkovo {data.length} {data.length === 1 ? "príspevok" : (data.length < 5 ? "príspevky" : "príspevkov")}
-                    </div>
-                    <div className='flex'>
-                        <PaginationItem>
-                        <PaginationPrevious onClick={() => table.previousPage()} text='Späť'/>
-                        </PaginationItem>
-
-                        {Array.from({ length: table.getPageCount() }, (_, i) => i)
-                        .filter(i => Math.abs(i - table.getState().pagination.pageIndex) <= 1)
-                        .map(i => (
-                            <PaginationItem key={i}>
-                            <PaginationLink
-                                isActive={table.getState().pagination.pageIndex === i}
-                                onClick={() => table.setPageIndex(i)}
-                            >
-                                {i + 1}
-                            </PaginationLink>
-                            </PaginationItem>
-                        ))
-                        }
-
-                        {table.getPageCount() > 3 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
-
-                        <PaginationItem>
-                        <PaginationNext onClick={() => table.nextPage()} text='Ďalej'/>
-                        </PaginationItem>
-                    </div>
-                </PaginationContent>
-            </Pagination>
+            <div className="mt-4">
+                <PaginationControls
+                    page={table.getState().pagination.pageIndex + 1}
+                    totalPages={table.getPageCount()}
+                    rangeStart={
+                    data.length === 0
+                        ? 0
+                        : table.getState().pagination.pageIndex *
+                            table.getState().pagination.pageSize +
+                        1
+                    }
+                    rangeEnd={Math.min(
+                    (table.getState().pagination.pageIndex + 1) *
+                        table.getState().pagination.pageSize,
+                    data.length,
+                    )}
+                    total={data.length}
+                    isPending={false}
+                    onNavigate={(page) => {
+                    table.setPageIndex(page - 1);
+                    }}
+                />
+            </div>
         </>
     )
 }

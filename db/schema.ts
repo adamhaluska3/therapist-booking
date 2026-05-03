@@ -139,6 +139,6 @@ export type PostPreview = {
   titleImage: string | null,
   description: string,
   createdAt: Date,
-  category: PostCategory
+  category: PostCategory | null
 }
 

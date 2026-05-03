@@ -31,6 +31,12 @@ const isContentBlank = (html: string) => {
   return !html || html.replace(/<[^>]*>/g, '').trim() === ''
 }
 
+const setNewLines = (html: string): string => {
+  return html
+    ?.replace(/<p><\/p>/gi, "<br>")
+    ?.replace(/\s-\s/g, "\u00A0\u2011\u00A0")
+}
+
 const postSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -40,7 +46,7 @@ type PostFormValues = z.infer<typeof postSchema>
 
 export const PostEditor = ({post, categories}: PostEditorProps) => {
     const [content, setContent] = useState(post.content);
-    const [category, setCategory] = useState(categories.find(c => c.id === post.categoryId));
+    const [category, setCategory] = useState(categories.find(c => c.id === post.categoryId) || null);
     const [titleImageFile, setTitleImageFile] = useState<File | null>(null)
     const [titleImageRemoved, setTitleImageRemoved] = useState(false)
 
@@ -66,10 +72,11 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
     }
 
     const onSubmit = async (values: PostFormValues, isPublic: boolean) => {
+        console.log(content)
         if (!post.id) {
             await createPost({
                 ...values,
-                content,
+                content: setNewLines(content),
                 categoryId: category?.id ?? null,
                 isPublic,
                 titleImage: titleImageFile
@@ -77,7 +84,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
         } else {
             await updatePost(post.id, {
                 ...values,
-                content,
+                content: setNewLines(content),
                 categoryId: category?.id ?? null,
                 isPublic,
                 existingTitleImage: post.titleImage,

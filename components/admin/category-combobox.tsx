@@ -13,7 +13,7 @@ import {
 import { PostCategory } from '@/db/schema'
 
 export type CategoryComboboxProps = {
-  category?: PostCategory
+  category: PostCategory | null
   onChange: (category: PostCategory | null) => void
   categories: PostCategory[]
 }
