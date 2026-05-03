@@ -10,6 +10,7 @@ import {
   History,
   Users,
   FileText,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -25,6 +26,7 @@ const navItems = [
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
+  { label: "Nastavenia", href: "/admin/settings", icon: Settings },
 ]
 
 function SidebarContent({

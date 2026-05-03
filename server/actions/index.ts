@@ -79,7 +79,9 @@ export async function fetchCalendarData(
     db
       .select()
       .from(availabilitySlot)
-      .where(and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from))),
+      .where(
+        and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from)),
+      ),
     db
       .select()
       .from(booking)
@@ -92,7 +94,12 @@ export async function fetchCalendarData(
     bookings: bookingRows.map((row) => ({
       ...row.booking,
       user: row.user
-        ? { id: row.user.id, name: row.user.name, nickname: row.user.nickname, email: row.user.email }
+        ? {
+            id: row.user.id,
+            name: row.user.name,
+            nickname: row.user.nickname,
+            email: row.user.email,
+          }
         : null,
     })),
   };
@@ -138,6 +145,7 @@ export type BookingUpsert = {
   start: Date;
   end: Date;
   status?: "pending" | "confirmed" | "cancelled" | "finished";
+  price?: number | null;
   notes?: string | null;
   userId?: string | null;
   bookingTypeId?: string | null;
@@ -160,6 +168,7 @@ export async function saveBookings(
           start: b.start,
           end: b.end,
           status: b.status ?? "confirmed",
+          price: b.price ?? null,
           notes: b.notes ?? null,
           userId: b.userId ?? null,
           bookingTypeId: b.bookingTypeId ?? null,

@@ -126,6 +126,7 @@ export function BookingDialog({
       start,
       end,
       status: booking?.status ?? "confirmed",
+      price: booking?.price ?? null,
       notes: notes.trim() || null,
       userId: selectedUserId,
       bookingTypeId: selectedBookingTypeId,
