@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutGrid,
   Calendar,
@@ -14,51 +14,62 @@ import {
   LogOut,
   Menu,
   X,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useUser } from "@/lib/user-context"
-import { authClient } from "@/lib/auth-client"
+  Globe,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useUser } from "@/lib/user-context";
+import { authClient } from "@/lib/auth-client";
 
 const navItems = [
   { label: "Prehľad", href: "/admin", icon: LayoutGrid },
   { label: "Kalendár", href: "/admin/calendar", icon: Calendar },
-  { label: "Žiadosti", href: "/admin/requests", icon: Bell, badgeKey: "pending" as const },
+  {
+    label: "Žiadosti",
+    href: "/admin/requests",
+    icon: Bell,
+    badgeKey: "pending" as const,
+  },
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
   { label: "Nastavenia", href: "/admin/settings", icon: Settings },
-]
+];
 
 function SidebarContent({
   onNavigate,
   pendingCount,
 }: {
-  onNavigate?: () => void
-  pendingCount: number
+  onNavigate?: () => void;
+  pendingCount: number;
 }) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { user } = useUser()
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useUser();
 
   const handleLogout = async () => {
-    await authClient.signOut()
-    router.push("/")
-  }
+    await authClient.signOut();
+    router.push("/");
+  };
 
   return (
     <>
       <div className="px-6 pt-8 pb-6">
-        <p className="text-lg font-semibold text-neutral-800 leading-tight">Admin Portal</p>
-        <p className="text-xs tracking-widest uppercase text-neutral-400 mt-0.5">Clinical Management</p>
+        <p className="text-lg font-semibold text-neutral-800 leading-tight">
+          Admin Portal
+        </p>
+        <p className="text-xs tracking-widest uppercase text-neutral-400 mt-0.5">
+          Clinical Management
+        </p>
       </div>
 
       <nav className="flex flex-col gap-1 px-3">
         {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = item.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(item.href)
-          const badge = item.badgeKey === "pending" ? pendingCount : 0
+          const Icon = item.icon;
+          const isActive =
+            item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(item.href);
+          const badge = item.badgeKey === "pending" ? pendingCount : 0;
           return (
             <Link
               key={item.href}
@@ -68,11 +79,16 @@ function SidebarContent({
                 "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-surface-100",
                 isActive
                   ? "bg-brand-100 font-semibold text-brand-700"
-                  : "font-normal text-neutral-500 hover:text-neutral-700"
+                  : "font-normal text-neutral-500 hover:text-neutral-700",
               )}
             >
               <span className="relative shrink-0">
-                <Icon size={18} className={cn(isActive ? "text-brand-600" : "text-neutral-400")} />
+                <Icon
+                  size={18}
+                  className={cn(
+                    isActive ? "text-brand-600" : "text-neutral-400",
+                  )}
+                />
                 {badge > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold leading-none text-white">
                     {badge > 99 ? "99+" : badge}
@@ -81,15 +97,27 @@ function SidebarContent({
               </span>
               {item.label}
             </Link>
-          )
+          );
         })}
       </nav>
+      <div className="mx-3 mt-4 border-t border-surface-200 pt-4">
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-normal text-neutral-500 transition-colors hover:bg-surface-100 hover:text-neutral-700"
+        >
+          <Globe size={18} className="text-neutral-400" />
+          Verejné stránky
+        </Link>
+      </div>
 
       <div className="mt-auto border-t border-surface-200 p-4">
         {user && (
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-neutral-800 truncate">{user.name}</p>
+              <p className="text-sm font-medium text-neutral-800 truncate">
+                {user.name}
+              </p>
               <p className="text-xs text-neutral-400 truncate">{user.email}</p>
             </div>
             <button
@@ -103,11 +131,11 @@ function SidebarContent({
         )}
       </div>
     </>
-  )
+  );
 }
 
 export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -139,7 +167,7 @@ export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-surface-200 bg-surface-50 border-l-4 border-l-brand-600 transition-transform duration-300 md:hidden",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex items-center justify-end p-3 border-b border-surface-200">
@@ -150,8 +178,11 @@ export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
             <X size={18} />
           </button>
         </div>
-        <SidebarContent pendingCount={pendingCount} onNavigate={() => setIsOpen(false)} />
+        <SidebarContent
+          pendingCount={pendingCount}
+          onNavigate={() => setIsOpen(false)}
+        />
       </aside>
     </>
-  )
+  );
 }
