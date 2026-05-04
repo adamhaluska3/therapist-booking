@@ -7,3 +7,7 @@ export const addCategorySchema = z.object({
 });
 
 export type AddCategoryFormData = z.infer<typeof addCategorySchema>;
+
+export const editCategorySchema = addCategorySchema;
+
+export type EditCategoryFormData = z.infer<typeof editCategorySchema>;
