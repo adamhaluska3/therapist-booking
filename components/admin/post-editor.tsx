@@ -145,7 +145,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
                 </div>
 
                 <ReactQuill className="mt-5" value={content} onChange={setContent} modules={modules} theme="snow" />
-                <div className="mt-5 flex justify-end gap-5">
+                <div className="mt-5 flex flex-col sm:flex-row justify-end gap-3">
                     <Button
                         onClick={handleSubmit(vals => onSubmit(vals, false))}
                         className="mt-5 p-2text-gray-400 text-xs font-semibold uppercase tracking-widest"

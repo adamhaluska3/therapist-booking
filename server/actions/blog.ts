@@ -1,13 +1,15 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { posts } from '@/db/schema'
+import { postCategories, posts } from '@/db/schema'
 import { writeFile, unlink } from 'fs/promises'
 import path from 'path'
 import { randomBytes } from 'crypto'
 import { eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { PcCase } from 'lucide-react'
+import z from 'zod'
 
 const toSlug = (title: string) => {
   return title
@@ -43,7 +45,7 @@ export async function createPost(data: {
         titleImage = `/uploads/${filename}`
     }
 
-    const [inserted] = await db.insert(posts).values({
+    await db.insert(posts).values({
         title: data.title,
         description: data.description,
         content: data.content,
@@ -51,9 +53,9 @@ export async function createPost(data: {
         isPublic: data.isPublic,
         titleImage,
         slug: generateSlug(data.title, data.isPublic),
-    }).returning({ id: posts.id })
+    });
 
-    redirect(`/admin/blog/${inserted.id}`)
+    redirect("/admin/blog")
 }
 
 export async function updatePost(id: string, data: {
@@ -95,10 +97,16 @@ export async function updatePost(id: string, data: {
     titleImage,
   }).where(eq(posts.id, id))
 
-  revalidatePath(`/admin/blog/${id}`)
+  redirect("/admin/blog")
 }
 
 export const deletePost = async (id: string) => {
     await db.delete(posts).where(eq(posts.id, id))
     revalidatePath('/admin/blog')
+}
+
+export const setPublicity = async (id: string, isPublic: boolean) => {
+    await db.update(posts).set({isPublic}).where(eq(posts.id, id));
+    revalidatePath('/admin/blog')
+    revalidatePath(`/admin/blog/${isPublic}`)
 }

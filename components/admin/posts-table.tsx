@@ -1,14 +1,19 @@
 'use client'
-import { deletePost } from '@/server/actions/blog'
+import { deletePost, setPublicity } from '@/server/actions/blog'
 import {
     useReactTable,
     getCoreRowModel,
     flexRender,
     ColumnDef,
+    getPaginationRowModel,
 } from '@tanstack/react-table'
 import { Edit2, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { PaginationControls } from './pagination-controls'
+import { useState } from 'react'
+import { Button } from '../ui/button'
+import { RemovePostDialog } from './remove-post-dialog'
+import { PublicityToggle } from './publicity-toggle'
 
 type Post = {
     id: string
@@ -16,14 +21,20 @@ type Post = {
     isPublic: boolean
     category: { name: string } | null
     createdAt: Date,
-    titleImage?: string
+    titleImage?: string | null
 }
 
 const columns: ColumnDef<Post>[] = [
     {
         accessorKey: 'titleImage',
-        header: 'Titulný obrázok',
-        cell: ({ row }) => row.original.titleImage ? <img src={row.original.titleImage} className='w-20 aspect-4/3 object-cover rounded-xl'/> : <div className='h-15'></div>
+        header: () => <span className="hidden md:table-cell">Titulný obrázok</span>,
+        cell: ({ row }) => (
+            <div className="hidden md:table-cell">
+                {row.original.titleImage
+                    ? <img src={row.original.titleImage} className='w-20 aspect-4/3 object-cover rounded-xl'/>
+                    : <div className='h-15'/>}
+            </div>
+        )
     },
     {
         accessorKey: 'title',
@@ -31,15 +42,19 @@ const columns: ColumnDef<Post>[] = [
     },
     {
         accessorKey: 'category',
-        header: 'Kategória',
-        cell: ({ row }) => row.original.category?.name ?? '—',
+        header: () => <span className="hidden sm:table-cell">Kategória</span>,
+        cell: ({ row }) =>  (
+            <div className="hidden sm:table-cell">
+                {row.original.category?.name ?? '—'}
+            </div>
+        ),
     },
     {
         accessorKey: 'isPublic',
         header: 'Stav',
-        cell: ({ row }) => row.original.isPublic
-        ? <span className="text-brand-500 text-xs font-semibold">Publikovaný</span>
-        : <span className="text-gray-400 text-xs font-semibold">Koncept</span>,
+        cell: ({ row }) => (
+            <PublicityToggle id={row.original.id} isPublic={row.original.isPublic}/>
+        )
     },
     {
         id: 'actions',
@@ -48,17 +63,24 @@ const columns: ColumnDef<Post>[] = [
             <Link href={`/admin/blog/${row.original.id}`} className="text-xs text-brand-600 underline">
                 <Edit2/>
             </Link>
-            <Trash2 className='text-red-900' onClick={() => deletePost(row.original.id)}/>
+            <RemovePostDialog id={row.original.id} title={row.original.title} />
         </div>
         ),
     },
 ]
 
 export function PostsTable({ data }: { data: Post[] }) {
+    const [ pagination, setPagination ] = useState({
+        pageIndex: 0,
+        pageSize: 5,
+      });
     const table = useReactTable({
         data,
         columns,
+        state: { pagination },
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (

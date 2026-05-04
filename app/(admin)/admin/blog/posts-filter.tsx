@@ -28,8 +28,8 @@ export const PostsFilter = ({query, isPublic, category}: PostsFilterProp) => {
     }
 
     return (
-        <div className="flex wrap">
-            <div className="flex-1">
+        <div className="flex flex-wrap gap-y-5">
+            <div className="flex-1 min-w-50">
                 <SearchText onChange={v => handleSearch("query", v)} oldSearch={query}/>
             </div>
             <div>

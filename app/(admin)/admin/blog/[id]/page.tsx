@@ -1,7 +1,7 @@
 import { PostEditor, PostEditorProps } from '@/components/admin/post-editor';
+import { PublicityToggle } from '@/components/admin/publicity-toggle';
 import { postCategories, posts } from '@/db/schema';
 import { db } from '@/lib/db'
-import { cn } from '@/lib/utils';
 import { eq } from 'drizzle-orm';
 import { ArrowLeft, MoveLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -25,7 +25,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const categories = await db.query.postCategories.findMany()
 
   const props: PostEditorProps = {
-      post: post,
+      post: { ...post, titleImage: post.titleImage ?? undefined, categoryId: post.categoryId ?? undefined },
       categories: categories
   }
 
@@ -39,9 +39,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             <h1 className="mb-2 font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl flex-1">
                 Upraviť článok
             </h1>
-            <span className={cn("rounded-2xl p-2 text-xs font-semibold uppercase tracking-widest text-white", post.isPublic ?"bg-brand-400" : "bg-gray-400")}>
-                {post.isPublic ? "Publikovaný" : "Koncept"}
-            </span>
+            <PublicityToggle id={post.id} isPublic={post.isPublic} />
         </div>
         <PostEditor {...props} />
     </div>

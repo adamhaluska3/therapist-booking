@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +11,7 @@ import {
   Popover, PopoverContent, PopoverTrigger,
 } from '@/components/ui/popover'
 import { PostCategory } from '@/db/schema'
+import { AddCategoryDialog } from './add-category'
 
 export type CategoryComboboxProps = {
   category: PostCategory | null
@@ -56,6 +57,17 @@ export const CategoryCombobox = ({ category, onChange, categories }: CategoryCom
                     {cat?.name || "Bez kategórie"}
                   </CommandItem>
                 ))}
+                
+              </CommandGroup>
+              <CommandGroup>
+                <CommandItem>
+                  <AddCategoryDialog onCreate={cat => { onChange(cat); setOpen(false) }}>
+                    <div className='flex'>
+                      <Plus className='mr-2 h-4 w-4'/>
+                      <span>Nová kategória</span>
+                    </div>
+                  </AddCategoryDialog>
+                </CommandItem>
               </CommandGroup>
             </CommandList>
           </Command>
