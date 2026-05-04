@@ -21,7 +21,7 @@ export const homeContent = {
         title: "Semináre",
         description:
           "Skupinové vzdelávacie podujatia zamerané na mindfulness, komunikáciu a psychohygienu pre firmy aj verejnosť.",
-        cta: "Kontaktovať",
+        cta: "Mám záujem",
       },
       {
         title: "Koučing",

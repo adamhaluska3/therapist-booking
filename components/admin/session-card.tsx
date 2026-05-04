@@ -2,15 +2,17 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 import { Check, Video, Pencil, X, Clock } from "lucide-react"
-import type { BookingWithUser } from "@/db/schema"
+import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
+import type { UserOption } from "@/server/queries/users"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
-import { updateBookingStatus } from "@/server/actions"
+import { updateBookingStatus, updateBookingFromDialog } from "@/server/actions"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { AdminCard } from "@/components/admin/admin-card"
-import { EditBookingDialog } from "@/components/admin/edit-booking-dialog"
+import { BookingDialog } from "@/components/admin/booking-dialog"
 import {
   Dialog,
   DialogContent,
@@ -45,8 +47,17 @@ const CONFIRM_CONFIG: Record<ConfirmAction, {
 }
 
 
-export function SessionCard({ booking }: { booking: BookingWithUser }) {
+export function SessionCard({
+  booking,
+  bookingTypes,
+  users,
+}: {
+  booking: BookingWithUser
+  bookingTypes: BookingType[]
+  users: UserOption[]
+}) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
   const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -54,12 +65,29 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
   const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null
 
+  function invalidateAndRefresh() {
+    void queryClient.invalidateQueries({ queryKey: ["dashboard-bookings"] })
+    router.refresh()
+  }
+
   function handleConfirm() {
     if (!confirmDialog) return
     startTransition(async () => {
       await updateBookingStatus(booking.id, confirmDialog)
       setConfirmDialog(null)
-      router.refresh()
+      invalidateAndRefresh()
+    })
+  }
+
+  function handleSave(updated: Booking) {
+    startTransition(async () => {
+      await updateBookingFromDialog(
+        updated.id,
+        { start: updated.start, end: updated.end, userId: updated.userId ?? null, bookingTypeId: updated.bookingTypeId ?? null },
+        booking.start,
+      )
+      setEditOpen(false)
+      invalidateAndRefresh()
     })
   }
 
@@ -133,7 +161,16 @@ export function SessionCard({ booking }: { booking: BookingWithUser }) {
         </div>
       </AdminCard>
 
-      <EditBookingDialog booking={booking} open={editOpen} onOpenChange={setEditOpen} />
+      <BookingDialog
+        open={editOpen}
+        booking={booking}
+        users={users}
+        bookingTypes={bookingTypes}
+        onSave={handleSave}
+        onDelete={() => { setEditOpen(false); setConfirmDialog("cancelled") }}
+        onClose={() => setEditOpen(false)}
+        onUserCreated={() => {}}
+      />
 
       <Dialog open={confirmDialog !== null} onOpenChange={(open) => { if (!open) setConfirmDialog(null) }}>
         <DialogContent showCloseButton={false}>

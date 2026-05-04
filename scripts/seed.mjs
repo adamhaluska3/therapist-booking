@@ -58,6 +58,7 @@ const BOOKING_TYPES = [
   { id: "bt-supervizia",   name: "Supervízia",    price: 7000 },  // €70
   { id: "bt-seminare",     name: "Semináre",      price: 4000 },  // €40
   { id: "bt-koucing",      name: "Koučing",       price: 5500 },  // €55
+  { id: "bt-outdoor",      name: "Outdoor terapia", price: 6500 }, // €65
 ];
 
 async function main() {
@@ -196,8 +197,8 @@ async function main() {
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, notes, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
@@ -207,7 +208,6 @@ async function main() {
             bEnd,
             status,
             bookingType.price,
-            `Seeded ${status} booking`,
             Date.now(),
           ],
         });

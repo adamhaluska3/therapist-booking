@@ -1,14 +1,17 @@
 import { MapPin, Mail, Phone } from "lucide-react";
 import { ContactForm } from "@/components/marketing/contact-form";
+import { getBookingTypes } from "@/server/queries";
 import type { homeContent } from "../../app/(marketing)/_content/home";
 
 type Props = {
   content: typeof homeContent.contact;
 };
 
-export function ContactSection({ content }: Props) {
+export async function ContactSection({ content }: Props) {
+  const bookingTypes = await getBookingTypes();
+
   return (
-    <section className="bg-linear-to-b from-surface-100 to-surface-50">
+    <section id="contact" className="bg-linear-to-b from-surface-100 to-surface-50">
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8 md:rounded-3xl md:p-12">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
@@ -35,7 +38,7 @@ export function ContactSection({ content }: Props) {
               </ul>
             </div>
 
-            <ContactForm />
+            <ContactForm bookingTypes={bookingTypes} />
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Brain, Users, GraduationCap, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { homeContent } from "../../app/(marketing)/_content/home";
@@ -79,16 +80,20 @@ export function ServicesSection({ content }: Props) {
 
                 <div className="mt-auto flex items-center justify-between">
                   {v.primary ? (
-                    <Button className="h-auto rounded-full bg-brand-700 px-4 py-2 text-xs text-white hover:bg-brand-800">
-                      {item.cta} →
-                    </Button>
+                    <Link href="/booking">
+                      <Button className="h-auto rounded-full bg-brand-700 px-4 py-2 text-xs text-white hover:bg-brand-800">
+                        {item.cta} →
+                      </Button>
+                    </Link>
                   ) : (
-                    <Button
-                      variant="outline"
-                      className="h-auto rounded-full border-neutral-300 px-4 py-2 text-xs"
-                    >
-                      {item.cta}
-                    </Button>
+                    <Link href="/#contact">
+                      <Button
+                        variant="outline"
+                        className="h-auto rounded-full border-neutral-300 px-4 py-2 text-xs"
+                      >
+                        {item.cta}
+                      </Button>
+                    </Link>
                   )}
                   <ArrowRight className="h-4 w-4 text-neutral-300" />
                 </div>

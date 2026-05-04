@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageCarousel } from "@/components/marketing/image-carousel";
@@ -33,9 +34,11 @@ export function OutdoorTherapySection({ content }: Props) {
                 </li>
               ))}
             </ul>
-            <Button className="w-full rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800 sm:w-auto">
-              {content.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
-            </Button>
+            <Link href="/#contact">
+              <Button className="w-full rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800 sm:w-auto">
+                {content.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
 
           {content.images.length > 0 ? (
