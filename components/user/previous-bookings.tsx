@@ -1,6 +1,6 @@
 import { booking } from "@/db/schema";
 import { db } from "@/lib/db";
-import { eq, and, ne, lt, or } from "drizzle-orm";
+import { eq, and, ne, lt, or, desc } from "drizzle-orm";
 import { SmallInfoText } from "../ui/brand-text-ui/small-info-text";
 import Link from "next/link";
 import { PreviousUserBookingItem } from "./previous-booking-item";
@@ -13,6 +13,7 @@ export const PreviousUserBookings = async ({userId, limit}: {userId: string, lim
                 eq(booking.status, "finished"),
             ),
             with: { bookingType: true },
+            orderBy: desc(booking.start),
             ...(limit ? { limit } : {}),
         });
 
