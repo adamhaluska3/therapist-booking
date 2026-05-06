@@ -40,6 +40,8 @@ export const booking = sqliteTable("booking", {
   locationType: text("location_type", { enum: locationTypeEnum }).notNull().default("onsite"),
   price: integer("price"), // snapshot of booking_type.price at time of booking
   note: text("note"),
+  variableSymbol: integer("variable_symbol"),
+  meetLink: text("meet_link"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { BookingUpsert } from "./schema";
 import { booking, bookingType } from "@/db/schema";
 import { eq, inArray, and, gt, lt, ne } from "drizzle-orm";
-import { user } from "@/db/auth-schema";
+import { account, user } from "@/db/auth-schema";
 import {
   sendBookingCancellationToClient,
   sendBookingConfirmationToClient,
@@ -14,6 +14,8 @@ import { getUserById } from "../user/queries";
 import { requireAdmin, requireAuth, requireUser } from "../auth";
 import { fetchPriceForBookingType } from "../booking-type/queries";
 import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
+import { createMeetLink } from "../utils/meet";
+import { generateVS } from "../utils/payment";
 
 export async function saveBookings(
   upserted: BookingUpsert[],
@@ -109,10 +111,22 @@ export async function updateBookingStatus(
 }
 
 export async function confirmBooking(id: string): Promise<void> {
-  await requireAdmin();
+  const authUser = await requireAdmin();
+  const googleAccount = await db.query.account.findFirst({
+    where: eq(account.userId, authUser.id),
+  });
+
+  const foundBooking = await db.query.booking.findFirst({ where: eq(booking.id, id) })
+  if (!foundBooking) {
+    return
+  }
+
+  const clientUser = foundBooking.userId ? await getUserById(foundBooking.userId) : null;
+  const meet = await createMeetLink(foundBooking.start.toISOString(), foundBooking.end.toISOString(), googleAccount?.refreshToken ?? "", clientUser?.email ?? undefined);
+
   await db
     .update(booking)
-    .set({ status: "confirmed" })
+    .set({ status: "confirmed", meetLink: meet?.meetLink })
     .where(eq(booking.id, id));
 
   const rows = await db
@@ -298,6 +312,7 @@ export async function createClientBooking(
         .then((rows) => rows[0]?.id ?? null),
       note: note?.trim() || null,
       locationType,
+      variableSymbol: generateVS(),
       price: priceSnapshot,
     })
     .returning({ id: booking.id });
@@ -330,9 +345,15 @@ export async function createAdminBooking(data: {
   note: string | null;
   locationType: "onsite" | "online";
 }): Promise<void> {
-  await requireAdmin();
+  const authUser = await requireAdmin();
   const priceSnapshot = data.price ?? (data.bookingTypeId ? await fetchPriceForBookingType(data.bookingTypeId) : null)
 
+  const googleAccount = await db.query.account.findFirst({
+      where: eq(account.userId, authUser.id),
+    });
+  
+  const clientUser = data.userId ? await getUserById(data.userId) : null;
+  const meet = await createMeetLink(data.start.toISOString(), data.end.toISOString(), googleAccount?.refreshToken ?? "", clientUser?.email ?? undefined);
   await db.insert(booking).values({
     id: data.id,
     start: data.start,
@@ -341,6 +362,8 @@ export async function createAdminBooking(data: {
     userId: data.userId,
     bookingTypeId: data.bookingTypeId,
     price: priceSnapshot,
+    meetLink: (data.status === "confirmed" ? meet?.meetLink : null),
+    variableSymbol: generateVS(),
     note: data.note,
     locationType: data.locationType,
   });

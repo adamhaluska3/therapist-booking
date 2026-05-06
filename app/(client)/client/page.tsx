@@ -23,7 +23,7 @@ const Page = async () => {
                 />
             </section>
             <div className="flex flex-col gap-10">
-                <UpcomingUserBookings userId={userSession.user.id} limit={2}/>
+                <UpcomingUserBookings userId={userSession.user.id}/>
                 <PreviousUserBookings userId={userSession.user.id} limit={5}/>
             </div>
         </div>
