@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
-import { Check, Video, Pencil, X, Clock } from "lucide-react"
+import { Check, Video, Pencil, X, Clock, Hash, MessageSquare, MapPin, Monitor, MoreHorizontal } from "lucide-react"
 import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
@@ -12,7 +12,15 @@ import { getInitials } from "@/lib/formatting"
 import { updateBookingStatus, updateBookingFromDialog } from "@/server/actions"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { AdminCard } from "@/components/admin/admin-card"
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
 import { BookingDialog } from "@/components/admin/booking-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -63,6 +71,7 @@ export function SessionCard({
   const [editOpen, setEditOpen] = useState(false)
 
   const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
+  const bookingType = bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null
 
   function invalidateAndRefresh() {
@@ -93,71 +102,157 @@ export function SessionCard({
 
   return (
     <>
-      <AdminCard className="lg:flex-row lg:items-center lg:gap-6">
-        <div className="flex items-center gap-4 lg:contents">
+      <AdminCard className="gap-3">
+        <div className="flex items-center gap-4">
           <div className="w-12 shrink-0 text-center border-r border-surface-200 pr-4">
             <p className="text-2xl font-bold text-neutral-800 leading-none">{booking.start.getDate()}</p>
             <p className="text-[10px] font-medium tracking-widest text-neutral-400 mt-1">{formatMonthShort(booking.start)}</p>
           </div>
 
-          {booking.userId ? (
-            <Link
-              href={`/admin/clients/${booking.userId}`}
-              className="flex items-center gap-3 flex-1 min-w-0 group"
-            >
-              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
-                {getInitials(clientName)}
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-neutral-800 text-sm leading-tight truncate group-hover:text-brand-700 transition-colors">{clientName}</p>
-                <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
-                  <Clock size={11} className="shrink-0" />
-                  <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+          <div className="flex items-center gap-6 flex-1 min-w-0">
+            {booking.userId ? (
+              <Link
+                href={`/admin/clients/${booking.userId}`}
+                className="flex items-center gap-3 min-w-0 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                  {getInitials(clientName)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate group-hover:text-brand-700 transition-colors">{clientName}</p>
+                  <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
+                    <Clock size={11} className="shrink-0" />
+                    <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                    <Hash size={11} className="shrink-0" />
+                    <span>2400001</span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+                  {getInitials(clientName)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
+                  <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
+                    <Clock size={11} className="shrink-0" />
+                    <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                    <Hash size={11} className="shrink-0" />
+                    <span>2400001</span>
+                  </div>
                 </div>
               </div>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
-                {getInitials(clientName)}
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
-                <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
-                  <Clock size={11} className="shrink-0" />
-                  <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+            )}
+
+            <div className="hidden sm:flex flex-col gap-1.5 shrink-0">
+              {bookingType && (
+                <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+                  <span
+                    className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                  />
+                  <span>{bookingType.name}</span>
                 </div>
+              )}
+              <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+                <MapPin size={13} className="shrink-0" />
+                <span>Osobne</span>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
+            <button className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors">
+              <Video size={13} />
+              <span>Pripojiť sa</span>
+            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors">
+                <MoreHorizontal size={13} />
+                <span>Akcie</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setConfirmDialog("finished")}>
+                  <Check size={13} />
+                  Absolvované
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <MessageSquare size={13} />
+                  Poznámka
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                  <Pencil size={13} />
+                  Upraviť
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-500 focus:text-red-500"
+                  onClick={() => setConfirmDialog("cancelled")}
+                >
+                  <X size={13} />
+                  Zrušiť
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 lg:ml-auto lg:shrink-0">
-          <button
-            onClick={() => setConfirmDialog("finished")}
-            className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-500 hover:bg-surface-50 transition-colors"
-          >
-            <Check size={13} />
-            <span>Absolvované</span>
-          </button>
+        <div className="flex sm:hidden items-center gap-4">
+          {bookingType && (
+            <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+              />
+              <span>{bookingType.name}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+            <MapPin size={13} className="shrink-0" />
+            <span>Osobne</span>
+          </div>
+        </div>
+
+        <div className="flex lg:hidden items-center justify-end gap-2">
           <button className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors">
             <Video size={13} />
             <span>Pripojiť sa</span>
           </button>
-          <button
-            onClick={() => setEditOpen(true)}
-            className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors"
-          >
-            <Pencil size={13} />
-            <span>Upraviť</span>
-          </button>
-          <button
-            onClick={() => setConfirmDialog("cancelled")}
-            className="flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
-          >
-            <X size={13} />
-            <span>Zrušiť</span>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors">
+              <MoreHorizontal size={13} />
+              <span>Akcie</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setConfirmDialog("finished")}>
+                <Check size={13} />
+                Absolvované
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <MessageSquare size={13} />
+                Poznámka
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <Pencil size={13} />
+                Upraviť
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-500 focus:text-red-500"
+                onClick={() => setConfirmDialog("cancelled")}
+              >
+                <X size={13} />
+                Zrušiť
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </AdminCard>
 

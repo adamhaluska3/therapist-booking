@@ -3,7 +3,7 @@
 import { useState, useTransition, useCallback } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown, MapPin, Hash, MessageSquare } from "lucide-react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,11 +11,12 @@ import {
   flexRender,
   type SortingState,
 } from "@tanstack/react-table"
-import type { BookingWithUser } from "@/db/schema"
+import type { BookingWithUser, BookingType } from "@/db/schema"
 import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants"
 import { confirmBooking, updateBookingStatus } from "@/server/actions"
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,10 @@ interface Props {
   bookings: BookingWithUser[]
   total: number
   page: number
+  bookingTypes: BookingType[]
 }
 
-export function RequestsView({ bookings, total, page }: Props) {
+export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -72,7 +74,7 @@ export function RequestsView({ bookings, total, page }: Props) {
     })
   }
 
-  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending })
+  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending, bookingTypes })
 
   const table = useReactTable({
     data: bookings,
@@ -112,7 +114,7 @@ export function RequestsView({ bookings, total, page }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 sm:hidden">
+      <div className="flex flex-col gap-3 lg:hidden">
         {bookings.length === 0 && (
           <p className="py-12 text-center text-sm text-neutral-400">
             Žiadne nové žiadosti
@@ -120,50 +122,73 @@ export function RequestsView({ bookings, total, page }: Props) {
         )}
         {bookings.map((b) => {
           const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT
+          const bookingType = bookingTypes.find((t) => t.id === b.bookingTypeId) ?? null
+          const clientBlock = (
+            <div className="flex items-center gap-3 flex-1 min-w-0 group">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                {getInitials(clientName)}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">{clientName}</p>
+                <p className="mt-0.5 text-xs text-neutral-500">
+                  {formatBookingDate(b.start)},{" "}
+                  {formatTime(b.start)} – {formatTime(b.end)}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                  <Hash size={11} className="shrink-0" />
+                  <span>2400001</span>
+                </div>
+              </div>
+            </div>
+          )
           return (
             <div
               key={b.id}
               className="flex flex-col gap-3 rounded-xl border border-surface-200 bg-white px-4 py-4 shadow-sm"
             >
-              {b.userId ? (
-                <Link href={`/admin/clients/${b.userId}`} className="flex items-center gap-3 group">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                    {getInitials(clientName)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">{clientName}</p>
-                    <p className="mt-0.5 text-xs text-neutral-500">
-                      {formatBookingDate(b.start)},{" "}
-                      {formatTime(b.start)} – {formatTime(b.end)}
-                    </p>
-                  </div>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                    {getInitials(clientName)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-neutral-800">{clientName}</p>
-                    <p className="mt-0.5 text-xs text-neutral-500">
-                      {formatBookingDate(b.start)},{" "}
-                      {formatTime(b.start)} – {formatTime(b.end)}
-                    </p>
+              <div className="flex items-start gap-2">
+                {b.userId ? (
+                  <Link href={`/admin/clients/${b.userId}`} className="flex-1 min-w-0">
+                    {clientBlock}
+                  </Link>
+                ) : (
+                  <div className="flex-1 min-w-0">{clientBlock}</div>
+                )}
+                <div className="flex flex-col items-end gap-1 shrink-0 pt-0.5">
+                  {bookingType && (
+                    <div className="flex items-center gap-1 text-xs text-neutral-500">
+                      <span
+                        className="inline-block w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                      />
+                      <span>{bookingType.name}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 text-xs text-neutral-500">
+                    <MapPin size={11} className="shrink-0" />
+                    <span>Osobne</span>
                   </div>
                 </div>
-              )}
-              <div className="flex gap-2">
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  disabled={isPending}
+                  className="flex items-center gap-1.5 rounded-full border border-surface-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+                >
+                  <MessageSquare size={13} />
+                  Poznámka
+                </button>
                 <button
                   onClick={() => handleConfirm(b.id)}
                   disabled={isPending}
-                  className="flex-1 rounded-full bg-brand-600 py-2 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+                  className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
                 >
                   Potvrdiť
                 </button>
                 <button
                   onClick={() => handleCancelOpen(b)}
                   disabled={isPending}
-                  className="flex-1 rounded-full border border-surface-200 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+                  className="rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
                 >
                   Zrušiť
                 </button>
@@ -173,7 +198,7 @@ export function RequestsView({ bookings, total, page }: Props) {
         })}
       </div>
 
-      <div className="mt-4 sm:hidden">
+      <div className="mt-4 lg:hidden">
         <PaginationControls
           page={page}
           totalPages={totalPages}
@@ -185,7 +210,7 @@ export function RequestsView({ bookings, total, page }: Props) {
         />
       </div>
 
-      <div className="hidden sm:block overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
+      <div className="hidden lg:block overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (

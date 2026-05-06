@@ -6,8 +6,9 @@ import { groupByMonth } from "@/lib/date-utils"
 import { fetchFinishedBookings } from "@/server/actions"
 import { ArchiveCard } from "@/components/admin/archive-card"
 import { Button } from "@/components/ui/button"
+import type { BookingType } from "@/db/schema"
 
-export function SessionsArchiveView() {
+export function SessionsArchiveView({ bookingTypes }: { bookingTypes: BookingType[] }) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery({
       queryKey: ["finished-bookings"],
@@ -51,7 +52,7 @@ export function SessionsArchiveView() {
               </h2>
               <div className="flex flex-col gap-3">
                 {items.map((b) => (
-                  <ArchiveCard key={b.id} booking={b} />
+                  <ArchiveCard key={b.id} booking={b} bookingTypes={bookingTypes} />
                 ))}
               </div>
             </section>
