@@ -1,6 +1,4 @@
 import React from "react";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { getUserById, getUserNotes, getUserBookings } from "@/server/queries";
 import { saveUserNote, deleteUserNote } from "@/server/actions/notes";
 import ClientBookings from "@/components/admin/client-bookings";
@@ -16,6 +14,8 @@ import {
 import ClientNotes from "@/components/admin/client-notes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/formatting";
+import { Button } from "@/components/ui/button";
+import { RedirectBackButton } from "@/components/admin/redirect-back-button";
 
 type Props = { params: { id: string } };
 
@@ -53,18 +53,17 @@ export default async function Page({ params }: Props) {
     return true;
   }
 
+  async function redirectBack() {
+    "use server";
+    navigation.back();
+  }
+
   if (!user) return <div className="p-6">Klient nenájdený</div>;
 
   return (
     <>
       <div className="mx-auto max-w-6xl px-6 pt-6">
-        <Link
-          href="/admin/clients"
-          className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-700"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="ml-2">Späť na zoznam</span>
-        </Link>
+        <RedirectBackButton href="/admin" />
       </div>
 
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-12">
