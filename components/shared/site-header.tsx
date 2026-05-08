@@ -38,15 +38,9 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            <HeaderLink label="Domov" href="/" />
-            <HeaderLink label="Blog" href="/blog" />
-            <HeaderLink label="Rezervácie" href="/booking" />
-            {user?.role === "admin" && (
-              <HeaderLink label="Admin" href="/admin" />
-            )}
-            {user?.role === "user" && (
-              <HeaderLink label="Sedenia" href="/client" />
-            )}
+            {navLinks.map((link) => (
+              <HeaderLink key={link.href} href={link.href} label={link.label} />
+            ))}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -55,7 +49,7 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile overlay — must be outside <header> to escape backdrop-filter containing block */}
+      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/40 md:hidden"
@@ -87,14 +81,13 @@ export function SiteHeader() {
         </div>
         <nav className="flex flex-col gap-1 p-3">
           {navLinks.map((link) => (
-            <Link
+            <HeaderLink
               key={link.href}
               href={link.href}
+              label={link.label}
+              variant="mobile"
               onClick={() => setIsOpen(false)}
-              className="rounded-md px-3 py-2.5 text-sm text-neutral-600 transition-colors hover:bg-surface-100 hover:text-brand-700"
-            >
-              {link.label}
-            </Link>
+            />
           ))}
         </nav>
       </aside>
