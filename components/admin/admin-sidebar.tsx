@@ -49,6 +49,7 @@ function SidebarContent({
   const handleLogout = async () => {
     await authClient.signOut();
     router.push("/");
+    router.refresh();
   };
 
   return (
