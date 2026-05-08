@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { ChevronRight, Search } from "lucide-react";
+import { useDebounce } from "use-debounce";
 
 import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
@@ -36,9 +37,12 @@ export default function ClientsTable({
   items: ClientItem[];
 }) {
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
   const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
   const [sorting, setSorting] = useState<any>([]);
-  const [isPending, setIsPending] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const isPending = (search !== debouncedSearch && search !== "") || isFetching;
 
   const columns = useMemo<ColumnDef<ClientItem, any>[]>(
     () => [
@@ -118,24 +122,16 @@ export default function ClientsTable({
     (meta as ColumnClassMeta | undefined)?.className ?? "";
 
   useEffect(() => {
-    if (search === "") {
+    if (debouncedSearch === "") {
       setData(initialItems ?? []);
-      setIsPending(false);
       return;
     }
-    setIsPending(true);
-    const id = setTimeout(async () => {
-      try {
-        const items = await getClientsTableRows(search || undefined);
-        setData(items ?? []);
-      } catch (e) {
-        // ignore
-      } finally {
-        setIsPending(false);
-      }
-    }, 300);
-    return () => clearTimeout(id);
-  }, [search]);
+    setIsFetching(true);
+    getClientsTableRows(debouncedSearch)
+      .then((items) => setData(items ?? []))
+      .catch(() => {})
+      .finally(() => setIsFetching(false));
+  }, [debouncedSearch, initialItems]);
 
   return (
     <div className="w-full">
