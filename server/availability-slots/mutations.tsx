@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/lib/db";
-import { SlotUpsert } from "../availability-slot/schema";
+import { SlotUpsert } from "./schema";
 import { availabilitySlot } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 

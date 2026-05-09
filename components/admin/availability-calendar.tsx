@@ -27,16 +27,11 @@ import {
   mergeAdjacentSlots,
   bookingOverlapsOthers,
 } from "@/lib/calendar-utils"
-import {
-  saveAvailabilitySlots,
-  fetchCalendarData,
-  type SlotUpsert,
-  createAdminBooking,
-  updateBookingFromDialog,
-  deleteBookingWithNotification,
-} from "@/server/actions/index"
-import type { AvailabilitySlot, Booking, BookingType, BookingWithUser } from "@/db/schema"
-import type { UserOption } from "@/server/queries/users"
+import { AvailabilitySlot, BookingType } from "@/db/schema"
+import { SlotUpsert } from "@/server/availability-slots/schema"
+import { BookingWithUser } from "@/server/booking/schema"
+import { UserOption } from "@/server/user/schema"
+import { saveAvailabilitySlots } from "@/server/availability-slots/mutations"
 
 
 const locales = { sk }

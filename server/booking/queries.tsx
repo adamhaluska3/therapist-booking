@@ -12,7 +12,7 @@ import {
 } from "@/lib/constants";
 import { SlotsByDate, toDateKey } from "@/lib/booking-types";
 import { cache } from "react";
-import { getAvailabilitySlots } from "../availability-slot/queries";
+import { getAvailabilitySlots } from "../availability-slots/queries";
 
 export async function getDashboardBookings(): Promise<BookingWithUser[]> {
   const startOfToday = new Date();

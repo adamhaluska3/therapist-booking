@@ -3,7 +3,7 @@ import { AvailabilityCalendar } from "@/components/admin/availability-calendar";
 import { getAllUsers } from "@/server/user/queries";
 import { getBookingTypes } from "@/server/booking-type/queries";
 import { getBookingsWithUsers } from "@/server/booking/queries";
-import { getAvailabilitySlots } from "@/server/availability-slot/queries";
+import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 
 export const metadata = {
   title: "Správa dostupnosti – Kalendár",
