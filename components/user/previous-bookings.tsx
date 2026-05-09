@@ -4,6 +4,8 @@ import { eq, and, ne, lt, or, desc } from "drizzle-orm";
 import { SmallInfoText } from "../ui/brand-text-ui/small-info-text";
 import Link from "next/link";
 import { PreviousUserBookingItem } from "./previous-booking-item";
+import { ClientPaymentInfo } from "./client-payment-info";
+import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 
 export const PreviousUserBookings = async ({userId, limit}: {userId: string, limit?: number}) => {
@@ -35,9 +37,16 @@ export const PreviousUserBookings = async ({userId, limit}: {userId: string, lim
                 )}
                 {previousSessions.length !== 0 && (
                     <div className="flex flex-col gap-5">
-                        {previousSessions.map(s => (
-                            <PreviousUserBookingItem key={s.id} item={s} />
-                        ))}
+                        {previousSessions.map(s => {
+                            const payment = (
+                                <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
+                                    <Button className="p-5 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
+                                        <span>Platba</span>
+                                    </Button>
+                                </ClientPaymentInfo>
+                            );
+                            return <PreviousUserBookingItem key={s.id} item={s} paymentSlot={payment} />;
+                        })}
                     </div>
                 )}
             </section>

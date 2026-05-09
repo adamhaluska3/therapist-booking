@@ -2,8 +2,8 @@ import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
 import { Button } from "../ui/button"
 import { ClientPaymentInfo } from "./client-payment-info"
-import { ClientEditBookingDialog } from "./client-edit-booking-dialog"
 import { Calendar, Clock5 } from "lucide-react"
+import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
 
 const bookingTypeImageSrc = {
   "bt-psychoterapia":   "/images/booking-types/psycho-therapy.png",
@@ -44,11 +44,11 @@ export const ClosestPendingUpcommingBooking = ({item}: ClosestPendingUpcommingBo
             </div>
             <div className="flex gap-2 text-sm text-brand-700">
                 {(item.start.getTime() - Date.now() > 2 * 24 * 60 * 60 * 1000) && (
-                    <ClientEditBookingDialog item={item}>
+                    <ClientCancelBookingDialog item={item}>
                         <Button className="p-5 bg-white border border-gray-500 text-black text-sm rounded-2xl flex gap-2">
-                            <span>Upraviť alebo zrušiť</span>
+                            <span>Zrušiť</span>
                         </Button>
-                    </ClientEditBookingDialog>
+                    </ClientCancelBookingDialog>
                 )}
                     
             </div>

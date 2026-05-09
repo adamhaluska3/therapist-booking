@@ -56,13 +56,13 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
                         <div className="mt-5 flex flex-col gap-5">
                             {rest.map(s => (
                                 <UpcomingUserBookingItem key={s.id} item={s} paymentSlot={
-                                    s.status === "pending" ? (
+                                    (
                                         <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
                                             <Button className="p-5 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
                                                 <span>Platba</span>
                                             </Button>
                                         </ClientPaymentInfo>
-                                    ) : undefined
+                                    )
                                 } />
                             ))}
                         </div>

@@ -3,6 +3,7 @@ import { and, desc, eq, gt, gte, inArray, like, lt, lte, ne, or } from "drizzle-
 import { db } from "@/lib/db";
 import { availabilitySlot, booking, type Booking, type BookingWithUser, type AvailabilitySlot, bookingType } from "@/db/schema";
 import { account, user } from "@/db/auth-schema";
+import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import type { UserOption } from "@/server/queries/users";
 import { getUserById } from "@/server/queries/users";
 import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient, sendBookingCancellationToClient, sendBookingRescheduledToClient } from "@/lib/email";
@@ -548,4 +549,35 @@ export async function createNonOAuthUser(
     ok: true,
     user: { id, name: trimmedName, nickname: null, email: trimmedEmail },
   };
+}
+
+export async function cancelClientBooking(
+  bookingId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { ok: false, error: "Nie ste prihlásený." };
+
+  const row = await db.query.booking.findFirst({ where: eq(booking.id, bookingId) });
+  if (!row) return { ok: false, error: "Rezervácia sa nenašla." };
+  if (row.userId !== session.user.id) return { ok: false, error: "Nemáte oprávnenie." };
+  if (row.start.getTime() < Date.now() + (2 * 24 * 60 * 60 * 1000)) {
+    return {
+      ok: false,
+      error: "Rezerváciu je možné zrušiť iba do 48 hodín"
+    }
+  }
+
+  await db.update(booking).set({ status: "cancelled" }).where(eq(booking.id, bookingId));
+
+  if (session.user.email) {
+    const clientUser = await getUserById(session.user.id);
+    void sendBookingCancellationToClient({
+      clientName: clientUser?.nickname ?? clientUser?.name ?? session.user.name,
+      clientEmail: session.user.email,
+      start: row.start,
+      end: row.end,
+    });
+  }
+
+  return { ok: true };
 }

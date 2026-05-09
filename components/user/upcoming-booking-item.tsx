@@ -3,11 +3,11 @@ import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
 import { MediumInfoText } from "../ui/brand-text-ui/medium-info-text"
 import { bookingStatusIcon } from "../booking/booking-status-icon"
-import { ClientEditBookingDialog } from "./client-edit-booking-dialog"
 import { Button } from "../ui/button"
 import React, { useMemo } from "react"
 import Link from "next/link"
 import { Dot, Play } from "lucide-react"
+import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
 
 export type UpcomingUserBookingItemProps = {
     item: InferSelectModel<typeof booking> & { bookingType: BookingType | null }
@@ -27,11 +27,11 @@ export const UpcomingUserBookingItem = ({item, paymentSlot}: UpcomingUserBooking
             </Link>
         )}
         {(item.start.getTime() - Date.now() > 2 * 24 * 60 * 60 * 1000) && (
-            <ClientEditBookingDialog item={item}>
+            <ClientCancelBookingDialog item={item}>
                 <Button className="p-5 bg-white border border-gray-500 text-black text-sm rounded-2xl flex gap-2">
-                    <span>Upraviť</span>
+                    <span>Zrusiť</span>
                 </Button>
-            </ClientEditBookingDialog>
+            </ClientCancelBookingDialog>
         )}
         </div>
     ), [item])

@@ -3,8 +3,8 @@ import { InferSelectModel } from "drizzle-orm"
 import { Calendar, Clock5, Play } from "lucide-react"
 import Image from "next/image"
 import { Button } from "../ui/button"
-import { ClientEditBookingDialog } from "./client-edit-booking-dialog"
 import Link from "next/link"
+import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
 
 const bookingTypeImageSrc = {
   "bt-psychoterapia":   "/images/booking-types/psycho-therapy.png",
@@ -56,11 +56,11 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                     </Link>
                 )}
                 {(item.start.getTime() - Date.now() > 2 * 24 * 60 * 60 * 1000) && (
-                    <ClientEditBookingDialog item={item}>
+                    <ClientCancelBookingDialog item={item}>
                         <Button className="p-5 bg-white border border-gray-500 text-black text-sm rounded-2xl flex gap-2">
-                            <span>Upraviť</span>
+                            <span>Zrušiť</span>
                         </Button>
-                    </ClientEditBookingDialog>
+                    </ClientCancelBookingDialog>
                 )}
             </div>
         </section>
