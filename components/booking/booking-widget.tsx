@@ -4,8 +4,12 @@ import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
-import { createClientBooking } from "@/server/actions/index";
-import { toDateKey, type SlotsByDate, type TimeSlot } from "@/lib/booking-types";
+import { createClientBooking } from "@/server/booking/mutations";
+import {
+  toDateKey,
+  type SlotsByDate,
+  type TimeSlot,
+} from "@/lib/booking-types";
 import { useUser } from "@/lib/user-context";
 
 function firstAvailableDate(slots: SlotsByDate): Date {
@@ -20,12 +24,22 @@ function firstAvailableDate(slots: SlotsByDate): Date {
   return new Date();
 }
 
-export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftHeader?: React.ReactNode }) {
+export function BookingWidget({
+  slots,
+  leftHeader,
+}: {
+  slots: SlotsByDate;
+  leftHeader?: React.ReactNode;
+}) {
   const today = new Date();
   const { user } = useUser();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(() => firstAvailableDate(slots));
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() =>
+    firstAvailableDate(slots),
+  );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [locationType, setLocationType] = useState<"onsite" | "online">("onsite");
+  const [locationType, setLocationType] = useState<"onsite" | "online">(
+    "onsite",
+  );
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -41,7 +55,9 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
     [slots],
   );
 
-  const dateSlots: TimeSlot[] = selectedDate ? (slots[toDateKey(selectedDate)] ?? []) : [];
+  const dateSlots: TimeSlot[] = selectedDate
+    ? (slots[toDateKey(selectedDate)] ?? [])
+    : [];
 
   const handleSelectDate = useCallback((d: Date) => {
     setSelectedDate(d);
@@ -53,7 +69,13 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
     if (!selectedDate || !selectedTime) return;
     setPending(true);
     setError(null);
-    const result = await createClientBooking(toDateKey(selectedDate), selectedTime, user?.id, note, locationType);
+    const result = await createClientBooking(
+      toDateKey(selectedDate),
+      selectedTime,
+      user?.id,
+      note,
+      locationType,
+    );
     setPending(false);
     if (result.ok) {
       setConfirmed(true);
@@ -66,15 +88,26 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
     return (
       <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100">
-          <svg className="h-6 w-6 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          <svg
+            className="h-6 w-6 text-brand-700"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
           </svg>
         </div>
         <p className="mb-2 font-serif text-2xl font-semibold italic text-brand-700">
           Žiadosť odoslaná
         </p>
         <p className="mb-4 text-sm leading-relaxed text-neutral-500">
-          Vaša žiadosť o sedenie bola úspešne prijatá. Terapeut ju musí ešte schváliť — o schválení budete informovaní e-mailom.
+          Vaša žiadosť o sedenie bola úspešne prijatá. Terapeut ju musí ešte
+          schváliť — o schválení budete informovaní e-mailom.
         </p>
         <Link
           href="/"

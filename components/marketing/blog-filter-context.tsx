@@ -12,7 +12,11 @@ type BlogFilterContextValue = {
 
 const BlogFilterContext = createContext<BlogFilterContextValue | null>(null);
 
-export function BlogFilterProvider({ children }: { children: React.ReactNode }) {
+export function BlogFilterProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [active, setActive] = useState<ActiveCategory>("vsetko");
   return (
     <BlogFilterContext.Provider value={{ active, setActive }}>
@@ -23,6 +27,7 @@ export function BlogFilterProvider({ children }: { children: React.ReactNode }) 
 
 export function useBlogFilter() {
   const ctx = useContext(BlogFilterContext);
-  if (!ctx) throw new Error("useBlogFilter must be used inside BlogFilterProvider");
+  if (!ctx)
+    throw new Error("useBlogFilter must be used inside BlogFilterProvider");
   return ctx;
 }

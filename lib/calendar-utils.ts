@@ -1,5 +1,6 @@
-import type { AvailabilitySlot, Booking, BookingWithUser } from "@/db/schema";
+import type { AvailabilitySlot, Booking } from "@/db/schema";
 import type { TherapistEvent } from "@/components/admin/calendar-event-card";
+import { BookingWithUser } from "@/server/booking/schema";
 
 function bookingToEvent(b: BookingWithUser): TherapistEvent {
   const displayName = b.user?.nickname ?? b.user?.name ?? undefined;
@@ -192,7 +193,9 @@ export function mergeAdjacentSlots(slots: AvailabilitySlot[]): {
 } {
   if (slots.length <= 1) return { merged: slots, deleted: [], dirty: [] };
 
-  const sorted = [...slots].sort((a, b) => a.start.getTime() - b.start.getTime());
+  const sorted = [...slots].sort(
+    (a, b) => a.start.getTime() - b.start.getTime(),
+  );
   const result: AvailabilitySlot[] = [];
   const deleted: string[] = [];
   const dirty: string[] = [];
@@ -202,7 +205,9 @@ export function mergeAdjacentSlots(slots: AvailabilitySlot[]): {
   for (let i = 1; i < sorted.length; i++) {
     const next = sorted[i];
     if (next.start.getTime() <= current.end.getTime()) {
-      const newEnd = new Date(Math.max(current.end.getTime(), next.end.getTime()));
+      const newEnd = new Date(
+        Math.max(current.end.getTime(), next.end.getTime()),
+      );
       if (newEnd.getTime() !== current.end.getTime()) {
         current = { ...current, end: newEnd };
         dirty.push(current.id);

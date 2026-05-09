@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Brain, Users, GraduationCap, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  Brain,
+  Users,
+  GraduationCap,
+  TrendingUp,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { homeContent } from "../../app/(marketing)/_content/home";
 
