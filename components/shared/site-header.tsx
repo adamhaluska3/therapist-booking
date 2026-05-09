@@ -15,6 +15,7 @@ export function SiteHeader() {
   const navLinks = [
     { label: "Domov", href: "/" },
     { label: "Blog", href: "/blog" },
+    { label: "Cenník", href: "/pricing" },
     { label: "Rezervácie", href: "/booking" },
     ...(user?.role === "admin" ? [{ label: "Admin", href: "/admin" }] : []),
     ...(user?.role === "user" ? [{ label: "Sedenia", href: "/client" }] : []),
@@ -23,7 +24,7 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-surface-50/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
+        <div className="mx-auto relative flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
           <button
             className="rounded-md p-1.5 text-neutral-600 hover:bg-surface-100 transition-colors md:hidden"
             onClick={() => setIsOpen(true)}
@@ -37,7 +38,7 @@ export function SiteHeader() {
             V Rozhovore - Ján Šolc
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
             {navLinks.map((link) => (
               <HeaderLink key={link.href} href={link.href} label={link.label} />
             ))}
