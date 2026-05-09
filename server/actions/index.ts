@@ -202,6 +202,7 @@ export async function createAdminBooking(data: {
   userId: string | null
   bookingTypeId: string | null
   price: number | null
+  note: string | null
 }): Promise<void> {
   await db.insert(booking).values({
     id: data.id,
@@ -211,6 +212,7 @@ export async function createAdminBooking(data: {
     userId: data.userId,
     bookingTypeId: data.bookingTypeId,
     price: data.price,
+    note: data.note,
   })
 
   if (data.userId) {
@@ -357,7 +359,7 @@ export async function updateBookingTime(
 
 export async function updateBookingFromDialog(
   id: string,
-  updates: { start: Date; end: Date; userId: string | null; bookingTypeId: string | null },
+  updates: { start: Date; end: Date; userId: string | null; bookingTypeId: string | null; note: string | null },
   previousStart: Date,
 ): Promise<{ ok: boolean; error?: string }> {
   const timeChanged =
@@ -390,7 +392,7 @@ export async function updateBookingFromDialog(
 
   await db
     .update(booking)
-    .set({ start: updates.start, end: updates.end, userId: updates.userId, bookingTypeId: updates.bookingTypeId })
+    .set({ start: updates.start, end: updates.end, userId: updates.userId, bookingTypeId: updates.bookingTypeId, note: updates.note })
     .where(eq(booking.id, id))
 
   if (timeChanged && row?.user?.email) {
@@ -412,6 +414,7 @@ export async function createClientBooking(
   dateKey: string,
   time: string,
   userId?: string,
+  note?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
@@ -432,6 +435,7 @@ export async function createClientBooking(
     end,
     status: "pending",
     userId: userId ?? null,
+    note: note?.trim() || null,
   }).returning({ id: booking.id });
 
   const clientUser = userId ? await getUserById(userId) : null

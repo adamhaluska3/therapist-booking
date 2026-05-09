@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
 import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
 import type { UserOption } from "@/server/queries/users"
 import { createNonOAuthUser } from "@/server/actions"
@@ -47,9 +48,10 @@ export function BookingDialog({
   const base = booking?.start ?? defaultStart ?? new Date()
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(booking?.userId ?? null)
-  const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<string | null>(booking?.bookingTypeId ?? null)
+  const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<string | null>(booking?.bookingTypeId ?? bookingTypes[0]?.id ?? null)
   const [startStr, setStartStr] = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
   const [endStr, setEndStr] = useState(() => format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"))
+  const [note, setNote] = useState(booking?.note ?? "")
 
   // Local list: prop users + newly created users (to show immediately after creation)
   const [pendingUsers, setPendingUsers] = useState<UserOption[]>([])
@@ -127,6 +129,7 @@ export function BookingDialog({
       price: booking?.price ?? null,
       userId: selectedUserId,
       bookingTypeId: selectedBookingTypeId,
+      note: note.trim() || null,
       createdAt: booking?.createdAt ?? new Date(),
     })
   }
@@ -307,6 +310,17 @@ export function BookingDialog({
                   onChange={(e) => setEndStr(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label>Poznámka</Label>
+              <Textarea
+                placeholder="Interná poznámka k terapii..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={3}
+                className="resize-none"
+              />
             </div>
 
             {isEdit && onDelete && (

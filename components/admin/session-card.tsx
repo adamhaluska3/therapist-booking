@@ -92,7 +92,7 @@ export function SessionCard({
     startTransition(async () => {
       await updateBookingFromDialog(
         updated.id,
-        { start: updated.start, end: updated.end, userId: updated.userId ?? null, bookingTypeId: updated.bookingTypeId ?? null },
+        { start: updated.start, end: updated.end, userId: updated.userId ?? null, bookingTypeId: updated.bookingTypeId ?? null, note: updated.note ?? null },
         booking.start,
       )
       setEditOpen(false)

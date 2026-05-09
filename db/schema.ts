@@ -36,6 +36,7 @@ export const booking = sqliteTable("booking", {
   end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
   price: integer("price"), // snapshot of booking_type.price at time of booking
+  note: text("note"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
