@@ -1,5 +1,4 @@
 "use server";
-
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bookingType } from "@/db/schema";

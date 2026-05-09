@@ -1,8 +1,8 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/lib/db";
 import { userNote } from "@/db/schema";
+import { db } from "@/lib/db";
+import { eq, desc } from "drizzle-orm";
 
 export async function getUserNotes(userId: string) {
   if (!userId) return [];

@@ -1,20 +1,12 @@
 "use server";
-
-import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { UserNotePayload } from "./schema";
 import { userNote } from "@/db/schema";
-
-export type UserNotePayload = {
-  id?: string;
-  userId: string;
-  date: Date;
-  note: string;
-};
+import { eq } from "drizzle-orm";
 
 export async function saveUserNote(payload: UserNotePayload) {
   if (payload.id) {
-    await db
-      .update(userNote)
+    await db.update(userNote)
       .set({ note: payload.note, date: payload.date })
       .where(eq(userNote.id, payload.id));
     return payload.id;

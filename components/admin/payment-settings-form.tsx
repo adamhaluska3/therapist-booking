@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { savePaymentSettings } from "@/server/actions/payment-settings";
 import type { PaymentSettings } from "@/db/schema";
 import {
   Form,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { savePaymentSettings } from "@/server/payment-settings/mutations";
 
 const IBAN_RE = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/;
 

@@ -1,14 +1,7 @@
 "use server";
-
 import { db } from "@/lib/db";
+import { PaymentSettingsInput } from "./schema";
 import { paymentSettings } from "@/db/schema";
-
-export type PaymentSettingsInput = {
-  iban: string;
-  bic?: string;
-  beneficiaryName: string;
-  paymentNote?: string;
-};
 
 export async function savePaymentSettings(
   data: PaymentSettingsInput,

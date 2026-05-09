@@ -1,24 +1,9 @@
 "use server";
-
-import { and, asc, count, desc, eq, max, or, sql } from "drizzle-orm";
-
-import { db } from "@/lib/db";
-import { booking } from "@/db/schema";
 import { user } from "@/db/auth-schema";
-
-export type ClientTableRow = {
-  id: string;
-  name: string;
-  avatarUrl: string | null;
-  lastSessionAt: number | null;
-  totalSessions: number;
-};
-
-const handleLastSession = (lastSessionAt: Date | null): number | null => {
-  if (!lastSessionAt) return null;
-  if (lastSessionAt.getTime() > Date.now()) return null;
-  return lastSessionAt.getTime();
-};
+import { ClientTableRow } from "./schema";
+import { db } from "@/lib/db";
+import { count, max, sql, and, eq, desc, or, asc } from "drizzle-orm";
+import { booking } from "@/db/schema";
 
 export async function getClientsTableRows(
   search?: string,
@@ -64,3 +49,34 @@ export async function getClientsTableRows(
     totalSessions: Number(row.totalSessions ?? 0),
   }));
 }
+
+export async function getUserById(id: string) {
+  if (!id) return null;
+  const rows = await db.select().from(user).where(eq(user.id, id));
+  return rows[0] ?? null;
+}
+
+export async function getUserBookings(userId: string) {
+  if (!userId) return [];
+  const rows = await db
+    .select()
+    .from(booking)
+    .where(eq(booking.userId, userId))
+    .orderBy(desc(booking.start));
+  return rows;
+}
+
+export async function getAllUsers() {
+  return db
+    .select({
+      id: user.id,
+      name: user.name,
+      nickname: user.nickname,
+      email: user.email,
+    })
+    .from(user)
+    .where(eq(user.role, "user"))
+    .orderBy(user.name);
+}
+
+export type UserOption = Awaited<ReturnType<typeof getAllUsers>>[number];

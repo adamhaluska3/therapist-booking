@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
-import { submitContactForm } from "@/server/actions/contact";
+import { submitContactForm } from "@/server/contact-form/contact";
 import type { BookingType } from "@/db/schema";
 
 export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
