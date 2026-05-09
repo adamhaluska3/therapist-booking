@@ -115,37 +115,30 @@ async function main() {
 
   // 2. Generate Deterministic Availability Slots
   const availabilitySlots = [];
-  for (let i = 0; i < SLOTS_COUNT; i++) {
+  const usedDates = new Set();
+  let i = 0;
+  while (availabilitySlots.length < SLOTS_COUNT) {
     const date = getRandomWeekday();
+    const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    if (usedDates.has(dateKey)) continue;
+    usedDates.add(dateKey);
+
     const start = Math.floor(
-      new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        9,
-        0,
-        0,
-      ).getTime() / 1000,
+      new Date(date.getFullYear(), date.getMonth(), date.getDate(), 9, 0, 0).getTime() / 1000,
     );
     const end = Math.floor(
-      new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        18,
-        0,
-        0,
-      ).getTime() / 1000,
+      new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0).getTime() / 1000,
     );
 
-    const slotId = `seed-slot-${i}`; // Deterministic ID
+    const slotId = `seed-slot-${i}`;
     availabilitySlots.push({ id: slotId, start, end });
 
     statements.push({
-      sql: `INSERT INTO availability_slot (id, start, end, label) VALUES (?, ?, ?, ?) 
+      sql: `INSERT INTO availability_slot (id, start, end, label) VALUES (?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET start=excluded.start, end=excluded.end`,
       args: [slotId, start, end, `Working Day ${i + 1}`],
     });
+    i++;
   }
 
   // 3. Generate Bookings (3-7 per user)
