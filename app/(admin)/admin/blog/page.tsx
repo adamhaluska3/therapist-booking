@@ -4,6 +4,7 @@ import { PostsFilter } from "./posts-filter";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { AddCategoryDialog } from "@/components/admin/add-category";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Správa blogu",
@@ -38,21 +39,28 @@ const Page = async ({ searchParams }: Props) => {
     }
 
     return (
-        <div className='mx-auto max-w-6xl px-8 py-10'>
-            <div className='w-full flex mb-4 items-center flex-wrap'>
-                <h1 className="mb-4 font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl flex-1 min-w-50">
-                    Správa blogu
-                </h1>
-                <div className="flex gap-5">
-                    <Link href="/admin/blog/new" className="flex items-center rounded-2xl p-4 text-xs font-semibold uppercase tracking-widest text-white bg-brand-600">
-                        <Plus/>
+        <div className='mx-auto max-w-5xl'>
+            <div className='w-full flex mb-8 items-center flex-wrap'>
+                <div className="flex-1">
+                    <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
+                        Administratíva
+                    </p>
+                    <h1
+                    className="font-serif text-4xl font-bold text-neutral-800 mb-2"
+                    >
+                        Správa blogu
+                    </h1>
+                </div>
+                <div className="flex gap-5 flex-col sm:flex-row">
+                    <Link href="/admin/blog/new" className="flex gap-2 items-center rounded-2xl p-2 text-xs font-semibold uppercase tracking-widest text-white bg-brand-600">
+                        <Plus className="size-4"/>
                         <span>Nový článok</span>
                     </Link>
-                    <AddCategoryDialog>
-                        <div className="flex items-center rounded-2xl p-2 text-xs font-semibold uppercase tracking-widest text-white bg-gray-400">
+                    <AddCategoryDialog nativeButton={true}>
+                        <Button className="flex items-center rounded-2xl p-2 h-auto text-xs border border-gray-200 font-semibold uppercase tracking-widest text-brand-600 bg-white">
                             <Plus/>
                             <span>Nová kategória</span>
-                        </div>
+                        </Button>
                     </AddCategoryDialog>
                 </div>
             </div>

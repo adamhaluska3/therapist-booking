@@ -29,7 +29,7 @@ import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";
 
 
-export const AddCategoryDialog = ({onCreate, children}: {onCreate?: (category: PostCategory) => void; children: React.ReactNode}) => {
+export const AddCategoryDialog = ({onCreate, children, nativeButton = false}: {onCreate?: (category: PostCategory) => void; children: React.ReactNode; nativeButton?: boolean}) => {
     const [open, setOpen] = useState(false);
     const router = useRouter();
 
@@ -58,7 +58,7 @@ export const AddCategoryDialog = ({onCreate, children}: {onCreate?: (category: P
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger nativeButton={false} render={children as React.ReactElement} />
+            <DialogTrigger nativeButton={nativeButton} render={children as React.ReactElement} />
             <DialogContent className="sm:max-w-sm">
             <DialogHeader>
                 <DialogTitle>Vytvoriť kategóriu</DialogTitle>

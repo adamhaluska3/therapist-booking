@@ -20,12 +20,14 @@ const Page = async () => {
   }
 
   return (
-    <div className='my-20 mx-10 md:mx-20'>
+    <div className='mx-auto max-w-5xl'>
         <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center">
             <ArrowLeft/>
             <p>Naspäť na správu blogu</p>
         </Link>
-        <h1 className="mb-4 font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl">
+        <h1
+            className="font-serif text-4xl font-bold text-neutral-800 mb-2"
+        >
             Pridať nový článok
         </h1>
         <PostEditor {...props} />

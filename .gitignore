@@ -37,7 +37,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# uploaded files
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # pnpm files
 pnpm-workspace.yaml
-
-./public/uploads/*

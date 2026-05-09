@@ -28,11 +28,11 @@ export const PostsFilter = ({query, isPublic, category}: PostsFilterProp) => {
     }
 
     return (
-        <div className="flex flex-wrap gap-y-5">
+        <div className="flex flex-wrap gap-y-5 gap-x-5 justify-center">
             <div className="flex-1 min-w-50">
                 <SearchText onChange={v => handleSearch("query", v)} oldSearch={query}/>
             </div>
-            <div>
+            <div className="flex items-center">
                 <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1">
                     {publicityTabs.map((tab) => (
                         <button

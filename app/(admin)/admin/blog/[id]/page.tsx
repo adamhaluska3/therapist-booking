@@ -30,13 +30,15 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   }
 
   return (
-    <div className='my-20 mx-10 md:mx-20'>
+    <div className='mx-auto max-w-5xl'>
         <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center">
             <ArrowLeft/>
             <p>Naspäť na správu blogu</p>
         </Link>
         <div className='flex mb-4 items-center'>
-            <h1 className="mb-2 font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl flex-1">
+            <h1
+              className="font-serif text-4xl font-bold text-neutral-800 mb-2"
+            >
                 Upraviť článok
             </h1>
             <PublicityToggle id={post.id} isPublic={post.isPublic} />

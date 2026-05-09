@@ -99,7 +99,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
     return (
         <article>
             <form>
-                <div className="flex flex-col md:flex-row gap-5">
+                <div className="flex flex-col lg:flex-row gap-5">
                     <div className="flex-1">
                         <div className='flex flex-col'>
                             <label htmlFor="title" className='mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600'>
@@ -107,7 +107,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
                             </label>
                             <input {...register("title")}
                                 defaultValue={post.title}
-                                className="w-full md:max-w-150 border border-solid rounded-2xl p-2 py-4 bg-surface-100"
+                                className="w-full md:max-w-150 border border-solid rounded-2xl p-2 bg-surface-100"
                                 placeholder="Výstižný názov"
                             />
                         </div>
@@ -118,7 +118,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
                             <textarea {...register("description")}
                                 rows={3}
                                 defaultValue={post.description || ""}
-                                className="w-full md:max-w-150 border border-solid rounded-2xl p-2 py-4 bg-surface-100"
+                                className="w-full md:max-w-150 border border-solid rounded-2xl p-2 bg-surface-100"
                                 placeholder="Krátky úvod do článku"
                             />
                         </div>
