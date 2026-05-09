@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { updateUserNickname } from "@/server/actions";
+import { updateUserNickname } from "@/server/user/mutations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -1,22 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useTransition, useCallback } from "react"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ClipboardList, ArrowUpDown, ArrowUp, ArrowDown, MapPin, Hash, MessageSquare } from "lucide-react"
+import { useState, useTransition, useCallback } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  ClipboardList,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  MapPin,
+  Hash,
+  MessageSquare,
+} from "lucide-react";
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
   type SortingState,
-} from "@tanstack/react-table"
-import type { BookingWithUser, BookingType } from "@/db/schema"
-import { formatTime, formatBookingDate } from "@/lib/date-utils"
-import { getInitials } from "@/lib/formatting"
-import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants"
-import { confirmBooking, updateBookingStatus } from "@/server/actions"
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
+} from "@tanstack/react-table";
+import { formatTime, formatBookingDate } from "@/lib/date-utils";
+import { getInitials } from "@/lib/formatting";
+import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants";
+import {
+  confirmBooking,
+  updateBookingStatus,
+} from "@/server/booking/mutations";
 import {
   Dialog,
   DialogContent,
@@ -25,56 +34,70 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { PaginationControls } from "@/components/admin/pagination-controls"
-import { getRequestsColumns } from "@/components/admin/requests-columns"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/admin/pagination-controls";
+import { getRequestsColumns } from "@/components/admin/requests-columns";
+import { BookingWithUser } from "@/server/booking/schema";
+import { BookingType } from "@/db/schema";
+import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
 
 interface Props {
-  bookings: BookingWithUser[]
-  total: number
-  page: number
-  bookingTypes: BookingType[]
+  bookings: BookingWithUser[];
+  total: number;
+  page: number;
+  bookingTypes: BookingType[];
 }
 
 export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-  const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(null)
-  const [sorting, setSorting] = useState<SortingState>([])
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(
+    null,
+  );
+  const [sorting, setSorting] = useState<SortingState>([]);
 
-  const totalPages = Math.max(1, Math.ceil(total / BOOKINGS_PAGE_SIZE))
-  const rangeStart = bookings.length === 0 ? 0 : (page - 1) * BOOKINGS_PAGE_SIZE + 1
-  const rangeEnd = (page - 1) * BOOKINGS_PAGE_SIZE + bookings.length
+  const totalPages = Math.max(1, Math.ceil(total / BOOKINGS_PAGE_SIZE));
+  const rangeStart =
+    bookings.length === 0 ? 0 : (page - 1) * BOOKINGS_PAGE_SIZE + 1;
+  const rangeEnd = (page - 1) * BOOKINGS_PAGE_SIZE + bookings.length;
 
   function navigatePage(newPage: number) {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("page", String(newPage))
-    router.push(`/admin/requests?${params}`)
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    router.push(`/admin/requests?${params}`);
   }
 
-  const handleConfirm = useCallback((id: string) => {
-    startTransition(async () => {
-      await confirmBooking(id)
-      router.refresh()
-    })
-  }, [router])
+  const handleConfirm = useCallback(
+    (id: string) => {
+      startTransition(async () => {
+        await confirmBooking(id);
+        router.refresh();
+      });
+    },
+    [router],
+  );
 
   const handleCancelOpen = useCallback((booking: BookingWithUser) => {
-    setCancelTarget(booking)
-  }, [])
+    setCancelTarget(booking);
+  }, []);
 
   function handleCancelConfirm() {
-    if (!cancelTarget) return
+    if (!cancelTarget) return;
     startTransition(async () => {
-      await updateBookingStatus(cancelTarget.id, "cancelled")
-      setCancelTarget(null)
-      router.refresh()
-    })
+      await updateBookingStatus(cancelTarget.id, "cancelled");
+      setCancelTarget(null);
+      router.refresh();
+    });
   }
 
-  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, isPending, bookingTypes })
+  const columns = getRequestsColumns({
+    onConfirm: handleConfirm,
+    onCancel: handleCancelOpen,
+    isPending,
+    bookingTypes,
+  });
 
   const table = useReactTable({
     data: bookings,
@@ -85,7 +108,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     pageCount: totalPages,
-  })
+  });
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -93,9 +116,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
           Administratíva
         </p>
-        <h1
-          className="font-serif text-4xl font-bold text-neutral-800 mb-2"
-        >
+        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-2">
           Nové žiadosti o terapiu
         </h1>
       </div>
@@ -121,18 +142,21 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
           </p>
         )}
         {bookings.map((b) => {
-          const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT
-          const bookingType = bookingTypes.find((t) => t.id === b.bookingTypeId) ?? null
+          const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT;
+          const bookingType =
+            bookingTypes.find((t) => t.id === b.bookingTypeId) ?? null;
           const clientBlock = (
             <div className="flex items-center gap-3 flex-1 min-w-0 group">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
                 {getInitials(clientName)}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">{clientName}</p>
+                <p className="font-semibold text-neutral-800 group-hover:text-brand-700 transition-colors">
+                  {clientName}
+                </p>
                 <p className="mt-0.5 text-xs text-neutral-500">
-                  {formatBookingDate(b.start)},{" "}
-                  {formatTime(b.start)} – {formatTime(b.end)}
+                  {formatBookingDate(b.start)}, {formatTime(b.start)} –{" "}
+                  {formatTime(b.end)}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                   <Hash size={11} className="shrink-0" />
@@ -140,7 +164,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 </div>
               </div>
             </div>
-          )
+          );
           return (
             <div
               key={b.id}
@@ -148,7 +172,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
             >
               <div className="flex items-start gap-2">
                 {b.userId ? (
-                  <Link href={`/admin/clients/${b.userId}`} className="flex-1 min-w-0">
+                  <Link
+                    href={`/admin/clients/${b.userId}`}
+                    className="flex-1 min-w-0"
+                  >
                     {clientBlock}
                   </Link>
                 ) : (
@@ -159,7 +186,11 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                     <div className="flex items-center gap-1 text-xs text-neutral-500">
                       <span
                         className="inline-block w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                        style={{
+                          backgroundColor:
+                            BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
+                            "#427a5c",
+                        }}
                       />
                       <span>{bookingType.name}</span>
                     </div>
@@ -194,7 +225,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 </button>
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -225,13 +256,25 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                         onClick={header.column.getToggleSortingHandler()}
                         className="inline-flex items-center gap-1 hover:text-neutral-600 transition-colors"
                       >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getIsSorted() === "asc" && <ArrowUp size={12} />}
-                        {header.column.getIsSorted() === "desc" && <ArrowDown size={12} />}
-                        {!header.column.getIsSorted() && <ArrowUpDown size={12} className="opacity-40" />}
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getIsSorted() === "asc" && (
+                          <ArrowUp size={12} />
+                        )}
+                        {header.column.getIsSorted() === "desc" && (
+                          <ArrowDown size={12} />
+                        )}
+                        {!header.column.getIsSorted() && (
+                          <ArrowUpDown size={12} className="opacity-40" />
+                        )}
                       </button>
                     ) : (
-                      flexRender(header.column.columnDef.header, header.getContext())
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
                     )}
                   </th>
                 ))}
@@ -241,13 +284,19 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
           <tbody className="divide-y divide-surface-100">
             {table.getRowModel().rows.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-12 text-center text-sm text-neutral-400">
+                <td
+                  colSpan={columns.length}
+                  className="px-6 py-12 text-center text-sm text-neutral-400"
+                >
                   Žiadne nové žiadosti
                 </td>
               </tr>
             )}
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="transition-colors hover:bg-surface-50">
+              <tr
+                key={row.id}
+                className="transition-colors hover:bg-surface-50"
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-6 py-4 last:text-right">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -274,7 +323,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
       <Dialog
         open={cancelTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setCancelTarget(null)
+          if (!open) setCancelTarget(null);
         }}
       >
         <DialogContent showCloseButton={false}>
@@ -283,13 +332,18 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
             <DialogDescription>
               Žiadosť klienta{" "}
               <span className="font-medium text-neutral-800">
-                {cancelTarget?.user?.nickname ?? cancelTarget?.user?.name ?? UNKNOWN_CLIENT}
+                {cancelTarget?.user?.nickname ??
+                  cancelTarget?.user?.name ??
+                  UNKNOWN_CLIENT}
               </span>{" "}
               bude zamietnutá a označená ako zrušená.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />} disabled={isPending}>
+            <DialogClose
+              render={<Button variant="outline" />}
+              disabled={isPending}
+            >
               Späť
             </DialogClose>
             <Button
@@ -303,5 +357,5 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

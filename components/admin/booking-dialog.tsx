@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import type { Booking, BookingType, BookingWithUser } from "@/db/schema";
-import type { UserOption } from "@/server/queries/users";
-import { createNonOAuthUser } from "@/server/actions";
+import type { Booking, BookingType } from "@/db/schema";
 import { BOOKING_TYPE_COLORS as _btColors } from "@/components/admin/calendar-event-card";
+import { BookingWithUser } from "@/server/booking/schema";
+import { UserOption } from "@/server/user/schema";
+import { createNonOAuthUser } from "@/server/user/mutations";
+import { Textarea } from "../ui/textarea";
 
 const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(_btColors).map(([id, v]) => [id, v.bg]),
@@ -406,13 +407,13 @@ export function BookingDialog({
             {isEdit && onDelete && (
               <>
                 <Separator />
-                  <Button
-                    variant="outline"
-                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                    onClick={() => setConfirmingDelete(true)}
-                  >
-                    Vymazať terapiu
-                  </Button>
+                <Button
+                  variant="outline"
+                  className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  Vymazať terapiu
+                </Button>
               </>
             )}
           </div>
@@ -504,15 +505,32 @@ export function BookingDialog({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={confirmingDelete} onOpenChange={(v) => { if (!v) setConfirmingDelete(false) }}>
+      <Dialog
+        open={confirmingDelete}
+        onOpenChange={(v) => {
+          if (!v) setConfirmingDelete(false);
+        }}
+      >
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
             <DialogTitle>Vymazať terapiu?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-neutral-500">Táto akcia sa nedá vrátiť späť.</p>
+          <p className="text-sm text-neutral-500">
+            Táto akcia sa nedá vrátiť späť.
+          </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmingDelete(false)}>Zrušiť</Button>
-            <Button className="bg-red-600 text-white hover:bg-red-700" onClick={onDelete}>Vymazať</Button>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmingDelete(false)}
+            >
+              Zrušiť
+            </Button>
+            <Button
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={onDelete}
+            >
+              Vymazať
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

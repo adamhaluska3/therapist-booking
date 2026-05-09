@@ -6,7 +6,7 @@ import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { updateUserNickname } from "@/server/actions";
+import { updateUserNickname } from "@/server/user/mutations";
 import {
   Dialog,
   DialogContent,

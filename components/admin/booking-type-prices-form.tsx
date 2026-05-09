@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { saveBookingTypePrices } from "@/server/actions/booking-type-prices";
+import { saveBookingTypePrices } from "@/server/booking-type/mutations";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { BookingType } from "@/db/schema";
