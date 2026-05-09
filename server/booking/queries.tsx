@@ -13,8 +13,10 @@ import {
 import { SlotsByDate, toDateKey } from "@/lib/booking-types";
 import { cache } from "react";
 import { getAvailabilitySlots } from "../availability-slots/queries";
+import { requireAdmin } from "../auth";
 
 export async function getDashboardBookings(): Promise<BookingWithUser[]> {
+  await requireAdmin();
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -36,6 +38,7 @@ export async function getDashboardBookingsFiltered(
   from?: Date,
   to?: Date,
 ): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
+  await requireAdmin();
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -70,6 +73,7 @@ export async function getDashboardBookingsFiltered(
 export async function getFinishedBookingsPaginated(
   offset: number,
 ): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
+  await requireAdmin();
   const items = await db
     .select()
     .from(booking)
@@ -91,6 +95,7 @@ export async function getBookingsWithUsers(
   to: Date,
   includeCancelled = false,
 ): Promise<BookingWithUser[]> {
+  await requireAdmin();
   const bookigs = await db
     .select()
     .from(booking)
@@ -154,6 +159,7 @@ export async function getBookingSlots(
 }
 
 export const getPendingCount = cache(async (): Promise<number> => {
+  await requireAdmin();
   const [{ total }] = await db
     .select({ total: sql<number>`count(*)` })
     .from(booking)
@@ -165,6 +171,7 @@ export async function getPendingBookings(page = 1): Promise<{
   bookings: BookingWithUser[];
   total: number;
 }> {
+  await requireAdmin();
   const offset = (page - 1) * BOOKINGS_PAGE_SIZE;
 
   const [items, [{ total }]] = await Promise.all([
@@ -186,6 +193,7 @@ export async function getPendingBookings(page = 1): Promise<{
 }
 
 export async function getFinishedBookings(): Promise<Booking[]> {
+  await requireAdmin();
   return db
     .select()
     .from(booking)

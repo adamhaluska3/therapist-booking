@@ -11,11 +11,13 @@ import {
   sendBookingRescheduledToClient,
 } from "@/lib/email";
 import { getUserById } from "../user/queries";
+import { requireAdmin, requireAuth, requireUser } from "../auth";
 
 export async function saveBookings(
   upserted: BookingUpsert[],
   deletedIds: string[],
 ): Promise<void> {
+  await requireAdmin();
   await db.transaction(async (tx) => {
     if (deletedIds.length > 0) {
       await tx.delete(booking).where(inArray(booking.id, deletedIds));
@@ -48,10 +50,12 @@ export async function saveBookings(
 }
 
 export async function deleteBookingById(id: string): Promise<void> {
+  await requireAdmin();
   await db.delete(booking).where(eq(booking.id, id));
 }
 
 export async function deleteBookingWithNotification(id: string): Promise<void> {
+  await requireAdmin();
   const rows = await db
     .select()
     .from(booking)
@@ -78,6 +82,7 @@ export async function updateBookingStatus(
   id: string,
   status: "cancelled" | "finished",
 ): Promise<void> {
+  await requireAdmin();
   if (status === "cancelled") {
     const rows = await db
       .select()
@@ -102,6 +107,7 @@ export async function updateBookingStatus(
 }
 
 export async function confirmBooking(id: string): Promise<void> {
+  await requireAdmin();
   await db
     .update(booking)
     .set({ status: "confirmed" })
@@ -136,6 +142,7 @@ export async function updateBookingTime(
   start: Date,
   end: Date,
 ): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin();
   const conflicts = await db
     .select({ id: booking.id })
     .from(booking)
@@ -193,6 +200,7 @@ export async function updateBookingFromDialog(
 ): Promise<{ ok: boolean; error?: string }> {
   const timeChanged = updates.start.getTime() !== previousStart.getTime();
 
+  await requireAdmin();
   if (timeChanged) {
     const conflicts = await db
       .select({ id: booking.id })
@@ -255,6 +263,7 @@ export async function createClientBooking(
   note?: string | null,
   locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
+  await requireUser();
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
   const start = new Date(y, m - 1, d, hh, mm, 0, 0);
@@ -306,6 +315,7 @@ export async function createAdminBooking(data: {
   note: string | null;
   locationType: "onsite" | "online";
 }): Promise<void> {
+  await requireAdmin();
   await db.insert(booking).values({
     id: data.id,
     start: data.start,

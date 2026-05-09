@@ -3,11 +3,13 @@ import { user } from "@/db/auth-schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { UserOption } from "./schema";
+import { requireAdmin } from "../auth";
 
 export async function updateUserNickname(
   userId: string,
   nickname: string,
 ): Promise<void> {
+  await requireAdmin();
   await db
     .update(user)
     .set({ nickname: nickname || null })
@@ -19,6 +21,7 @@ export async function createNonOAuthUser(
   email: string,
   phone?: string,
 ): Promise<{ ok: boolean; user?: UserOption; error?: string }> {
+  await requireAdmin();
   const trimmedEmail = email.trim();
   const trimmedName = name.trim();
 

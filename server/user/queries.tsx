@@ -5,10 +5,12 @@ import { db } from "@/lib/db";
 import { count, max, sql, and, eq, desc, or, asc } from "drizzle-orm";
 import { booking } from "@/db/schema";
 import { handleLastSession } from "./utils";
+import { requireAdmin } from "../auth";
 
 export async function getClientsTableRows(
   search?: string,
 ): Promise<ClientTableRow[]> {
+  await requireAdmin();
   const like = search ? `%${search}%` : null;
 
   const baseSelect = db
@@ -52,12 +54,14 @@ export async function getClientsTableRows(
 }
 
 export async function getUserById(id: string) {
+  await requireAdmin();
   if (!id) return null;
   const rows = await db.select().from(user).where(eq(user.id, id));
   return rows[0] ?? null;
 }
 
 export async function getUserBookings(userId: string) {
+  await requireAdmin();
   if (!userId) return [];
   const rows = await db
     .select()
@@ -68,6 +72,7 @@ export async function getUserBookings(userId: string) {
 }
 
 export async function getAllUsers() {
+  await requireAdmin();
   return db
     .select({
       id: user.id,
