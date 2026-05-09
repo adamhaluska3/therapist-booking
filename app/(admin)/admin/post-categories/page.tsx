@@ -21,7 +21,7 @@ const Page = async () => {
                     </h1>
                 </div>
                 <div className="flex gap-5">
-                    <AddCategoryDialog>
+                    <AddCategoryDialog nativeButton={true}>
                         <Button className="flex items-center rounded-2xl p-2 h-auto text-xs border border-gray-200 font-semibold uppercase tracking-widest text-brand-600 bg-white">
                             <Plus/>
                             <span>Nová kategória</span>

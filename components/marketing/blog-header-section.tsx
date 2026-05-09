@@ -31,7 +31,7 @@ export function BlogHeaderSection({categories}: BlogHeaderSectionProp) {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActive(cat.id)}
+              onClick={() => setActive(active === cat.id ? null : cat.id)}
               className={cn(
                 "rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
                 active === cat.id

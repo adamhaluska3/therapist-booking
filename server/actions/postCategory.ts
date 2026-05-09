@@ -31,6 +31,7 @@ export const addCategory = async (anyData: any): Promise<AddCategoryResponse> =>
             name: data.data.name
         }).returning();
     
+    revalidatePath("/admin/post-categories");
     return {result: true, category}
 }
 
@@ -57,6 +58,8 @@ export const editCategory = async (id: string, anyData: any): Promise<EditCatego
             name: data.data.name
         }).where(eq(postCategories.id, id)).returning();
 
+    
+    revalidatePath("/admin/post-categories");
     return {result: true, category}
 }
 
@@ -86,5 +89,6 @@ export const removeCategory = async (id: string, newCategory: PostCategory | nul
         await tx.delete(postCategories).where(eq(postCategories.id, id))
     })
     
+    revalidatePath("/admin/post-categories");
     return {result: true}
 }

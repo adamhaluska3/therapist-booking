@@ -33,11 +33,12 @@ export function BlogPostsSection({posts}: BlogPostsSectionProp) {
           <div className="mb-12 grid grid-cols-1 items-center gap-8 md:mb-16 md:grid-cols-2 md:gap-12">
             <PostImage post={featured} priority />
             <div>
-              <p className="mb-3 text-xs text-neutral-400">{featured.createdAt.toLocaleDateString("sk-SK", {
+              <p className="text-xs text-neutral-400">{featured.createdAt.toLocaleDateString("sk-SK", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
               })}</p>
+              <p className="font-semibold text-sm mb-3 text-taupe-400">{featured.category?.name}</p>
               <h2 className="mb-4 font-serif text-2xl font-semibold leading-tight text-brand-900 md:text-4xl">
                 {featured.title}
               </h2>
@@ -110,12 +111,13 @@ function PostImage({
 function PostBody({ post }: { post: PostPreview }) {
   return (
     <div>
-      <p className="mb-3 text-xs text-neutral-400">{post.createdAt.toLocaleDateString("sk-SK", {
+      <p className="text-xs text-neutral-400">{post.createdAt.toLocaleDateString("sk-SK", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
         })}
       </p>
+      <p className="font-semibold text-sm text-taupe-400 mb-3">{post.category?.name}</p>
       <h3 className="mb-3 font-serif text-xl font-semibold leading-tight text-brand-900 md:text-2xl">
         {post.title}
       </h3>

@@ -30,7 +30,7 @@ export const PostCategoriesTable = ({categories}: {categories: PostCategory[]}) 
                 </div>
         ),
           }
-        ], [])
+        ], [categories])
     
     const table = useReactTable({
         data: categories ?? [],

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { blogPosts, type BlogPost } from "../../_content/blog";
 import { db } from "@/lib/db";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -14,7 +13,8 @@ export async function generateStaticParams() {
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
   const post = await db.query.posts.findFirst({
-    where: (fields, { eq }) => eq(fields.slug, slug)
+    where: (fields, { eq }) => eq(fields.slug, slug),
+    with: { category: true }
   })
 
   if (!post) notFound();
@@ -38,6 +38,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 year: "numeric",
               })}
           </p>
+          <p className="font-semibold text-sm mb-3 text-taupe-400">{post.category?.name}</p>
           <h1 className="font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl">
             {post.title}
           </h1>
