@@ -107,7 +107,7 @@ export function SlotSettingsDialog({
         <DialogHeader>
           <DialogTitle>Vymazať slot?</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-neutral-500">Dostupný čas bude vymazaný z kalendára.</p>
+        <p className="text-sm text-neutral-500">Vybraná udalosť bude vymazaná z kalendára.</p>
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmingDelete(false)}>Zrušiť</Button>
           <Button className="bg-red-600 text-white hover:bg-red-700" onClick={onDelete}>Vymazať</Button>
