@@ -91,7 +91,7 @@ export async function fetchCalendarData(
       .select()
       .from(booking)
       .leftJoin(user, eq(booking.userId, user.id))
-      .where(and(lte(booking.start, to), gte(booking.end, from))),
+      .where(and(lte(booking.start, to), gte(booking.end, from), ne(booking.status, "cancelled"))),
   ]);
 
   return {
