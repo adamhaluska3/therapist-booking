@@ -64,6 +64,7 @@ export function BookingDialog({
     format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"),
   );
   const [note, setNote] = useState(booking?.note ?? "");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   // Local list: prop users + newly created users (to show immediately after creation)
   const [pendingUsers, setPendingUsers] = useState<UserOption[]>([]);
@@ -380,13 +381,13 @@ export function BookingDialog({
             {isEdit && onDelete && (
               <>
                 <Separator />
-                <Button
-                  variant="outline"
-                  className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                  onClick={onDelete}
-                >
-                  Vymazať terapiu
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => setConfirmingDelete(true)}
+                  >
+                    Vymazať terapiu
+                  </Button>
               </>
             )}
           </div>
@@ -474,6 +475,19 @@ export function BookingDialog({
             >
               {createUserLoading ? "Vytváram..." : "Vytvoriť"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={confirmingDelete} onOpenChange={(v) => { if (!v) setConfirmingDelete(false) }}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Vymazať terapiu?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-neutral-500">Táto akcia sa nedá vrátiť späť.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmingDelete(false)}>Zrušiť</Button>
+            <Button className="bg-red-600 text-white hover:bg-red-700" onClick={onDelete}>Vymazať</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -30,6 +30,7 @@ export function SlotSettingsDialog({
 }: SlotSettingsDialogProps) {
   const [startStr, setStartStr] = useState(() => format(slot.start, "HH:mm"))
   const [endStr, setEndStr] = useState(() => format(slot.end, "HH:mm"))
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   function parseTime(base: Date, hhmm: string): Date {
     const [hh, mm] = hhmm.split(":").map(Number)
@@ -52,6 +53,7 @@ export function SlotSettingsDialog({
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
@@ -87,7 +89,7 @@ export function SlotSettingsDialog({
           <Button
             variant="outline"
             className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-            onClick={onDelete}
+            onClick={() => setConfirmingDelete(true)}
           >
             Vymazať slot
           </Button>
@@ -99,5 +101,19 @@ export function SlotSettingsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={confirmingDelete} onOpenChange={(v) => { if (!v) setConfirmingDelete(false) }}>
+      <DialogContent className="sm:max-w-xs">
+        <DialogHeader>
+          <DialogTitle>Vymazať slot?</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-neutral-500">Dostupný čas bude vymazaný z kalendára.</p>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmingDelete(false)}>Zrušiť</Button>
+          <Button className="bg-red-600 text-white hover:bg-red-700" onClick={onDelete}>Vymazať</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
