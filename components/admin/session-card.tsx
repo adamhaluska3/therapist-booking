@@ -1,28 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import {
-  Check,
-  Video,
-  Pencil,
-  X,
-  Clock,
-  Hash,
-  MessageSquare,
-  MapPin,
-  Monitor,
-  MoreHorizontal,
-} from "lucide-react";
-import type { Booking, BookingType } from "@/db/schema";
-import { formatTime, formatMonthShort } from "@/lib/date-utils";
-import { getInitials } from "@/lib/formatting";
-import { UNKNOWN_CLIENT } from "@/lib/constants";
-import { AdminCard } from "@/components/admin/admin-card";
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card";
-import { BookingDialog } from "@/components/admin/booking-dialog";
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
+import { Check, Video, Pencil, X, Clock, Hash, MessageSquare, MoreHorizontal } from "lucide-react"
+import type { Booking, BookingType } from "@/db/schema"
+import { formatTime, formatMonthShort } from "@/lib/date-utils"
+import { getInitials, formatPrice } from "@/lib/formatting"
+import { updateBookingStatus, updateBookingFromDialog } from "@/server/actions"
+import { UNKNOWN_CLIENT } from "@/lib/constants"
+import { AdminCard } from "@/components/admin/admin-card"
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
+import { BookingDialog } from "@/components/admin/booking-dialog"
+import { BookingNoteDialog } from "@/components/admin/booking-note-dialog"
+import { LocationBadge } from "@/components/admin/location-badge"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -40,13 +32,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import {
-  updateBookingFromDialog,
-  updateBookingStatus,
-} from "@/server/booking/mutations";
-import { toast } from "sonner";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -91,6 +79,7 @@ export function SessionCard({
     null,
   );
   const [editOpen, setEditOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false)
 
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
@@ -222,12 +211,12 @@ export function SessionCard({
                     }}
                   />
                   <span>{bookingType.name}</span>
+                  {formatPrice(booking.price) && (
+                    <span className="text-neutral-400">· {formatPrice(booking.price)}</span>
+                  )}
                 </div>
               )}
-              <div className="flex items-center gap-1.5 text-sm text-neutral-500">
-                <MapPin size={13} className="shrink-0" />
-                <span>Osobne</span>
-              </div>
+              <LocationBadge locationType={booking.locationType} />
             </div>
           </div>
 
@@ -247,7 +236,7 @@ export function SessionCard({
                   Absolvované
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setNoteOpen(true)}>
                   <MessageSquare size={13} />
                   Poznámka
                 </DropdownMenuItem>
@@ -279,12 +268,12 @@ export function SessionCard({
                 }}
               />
               <span>{bookingType.name}</span>
+              {formatPrice(booking.price) && (
+                <span className="text-neutral-400">· {formatPrice(booking.price)}</span>
+              )}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
-            <MapPin size={13} className="shrink-0" />
-            <span>Osobne</span>
-          </div>
+          <LocationBadge locationType={booking.locationType} />
         </div>
 
         <div className="flex lg:hidden items-center justify-end gap-2">
@@ -338,7 +327,19 @@ export function SessionCard({
         onUserCreated={() => {}}
       />
 
-      <Dialog
+      <BookingNoteDialog
+        open={noteOpen}
+        booking={booking}
+        onClose={() => setNoteOpen(false)}
+      />
+
+      <BookingNoteDialog
+        open={noteOpen}
+        booking={booking}
+        onClose={() => setNoteOpen(false)}
+      />
+
+        <Dialog
         open={confirmDialog !== null}
         onOpenChange={(open) => {
           if (!open) setConfirmDialog(null);

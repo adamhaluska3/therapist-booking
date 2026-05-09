@@ -25,10 +25,10 @@ function firstAvailableDate(slots: SlotsByDate): Date {
 }
 
 export function BookingWidget({
-  slots,
+  slots, bookingTypeId,
   leftHeader,
 }: {
-  slots: SlotsByDate;
+  slots: SlotsByDate; bookingTypeId: string | null;
   leftHeader?: React.ReactNode;
 }) {
   const today = new Date();
@@ -74,6 +74,7 @@ export function BookingWidget({
       selectedTime,
       user?.id,
       note,
+      bookingTypeId,
       locationType,
     );
     setPending(false);
@@ -82,7 +83,7 @@ export function BookingWidget({
     } else {
       setError(result.error ?? "Nepodarilo sa vytvoriť rezerváciu.");
     }
-  }, [selectedDate, selectedTime, user?.id]);
+  }, [selectedDate, selectedTime, user?.id, note, locationType, bookingTypeId]);
 
   if (confirmed) {
     return (
