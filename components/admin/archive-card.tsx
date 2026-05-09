@@ -1,16 +1,18 @@
 import Link from "next/link"
-import { Clock } from "lucide-react"
-import type { BookingWithUser } from "@/db/schema"
+import { Clock, MapPin } from "lucide-react"
+import type { BookingWithUser, BookingType } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials } from "@/lib/formatting"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { AdminCard } from "@/components/admin/admin-card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
 
-export function ArchiveCard({ booking }: { booking: BookingWithUser }) {
+export function ArchiveCard({ booking, bookingTypes }: { booking: BookingWithUser; bookingTypes: BookingType[] }) {
   const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
   const isLinked = Boolean(booking.userId)
+  const bookingType = bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null
 
   const inner = (
     <AdminCard
@@ -34,26 +36,33 @@ export function ArchiveCard({ booking }: { booking: BookingWithUser }) {
             {getInitials(clientName)}
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium tracking-widest text-neutral-400 uppercase mb-0.5">
-              Klient
-            </p>
             <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">
               {clientName}
             </p>
+            {bookingType && (
+              <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                <span
+                  className="inline-block w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                />
+                <span className="truncate">{bookingType.name}</span>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="hidden sm:flex flex-col gap-1 flex-1 min-w-0">
-          <p className="text-[10px] font-medium tracking-widest text-neutral-400 uppercase mb-0.5">
-            Čas
-          </p>
           <div className="flex items-center gap-1.5 text-sm text-neutral-600">
             <Clock size={11} className="shrink-0 text-neutral-400" />
             <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
           </div>
+          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+            <MapPin size={11} className="shrink-0 text-neutral-400" />
+            <span>Osobne</span>
+          </div>
         </div>
 
-        <div className="flex items-center sm:ml-auto">
+        <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
           <Badge className="bg-brand-100 text-brand-700 border-brand-200 px-3 py-1 h-auto text-xs font-medium">
             Absolvované
           </Badge>
