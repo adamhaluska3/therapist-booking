@@ -78,5 +78,3 @@ export async function getAllUsers() {
     .where(eq(user.role, "user"))
     .orderBy(user.name);
 }
-
-export type UserOption = Awaited<ReturnType<typeof getAllUsers>>[number];
