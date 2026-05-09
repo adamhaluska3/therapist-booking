@@ -285,7 +285,7 @@ async function main() {
   try {
     await client.batch(statements, "write");
     console.log(
-      `Success! Synced ${users.length} users and ${bookings.length} bookings.`,
+      `Success! Synced ${users.length} users, ${bookings.length} bookings and ${seedPosts.length} blog posts.`,
     );
   } catch (e) {
     console.error("Batch failed:", e);
