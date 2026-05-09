@@ -25,6 +25,7 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
   const { user } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => firstAvailableDate(slots));
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [locationType, setLocationType] = useState<"onsite" | "online">("onsite");
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -52,7 +53,7 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
     if (!selectedDate || !selectedTime) return;
     setPending(true);
     setError(null);
-    const result = await createClientBooking(toDateKey(selectedDate), selectedTime, user?.id, note);
+    const result = await createClientBooking(toDateKey(selectedDate), selectedTime, user?.id, note, locationType);
     setPending(false);
     if (result.ok) {
       setConfirmed(true);
@@ -100,6 +101,8 @@ export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftH
         slots={dateSlots}
         selectedTime={selectedTime}
         onSelectTime={setSelectedTime}
+        locationType={locationType}
+        onLocationTypeChange={setLocationType}
         note={note}
         onNoteChange={setNote}
         onConfirm={handleConfirm}

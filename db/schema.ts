@@ -9,6 +9,8 @@ export const statusEnum = [
   "finished",
 ] as const;
 
+export const locationTypeEnum = ["onsite", "online"] as const;
+
 export const bookingType = sqliteTable("booking_type", {
   id: text("id")
     .primaryKey()
@@ -35,6 +37,7 @@ export const booking = sqliteTable("booking", {
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
+  locationType: text("location_type", { enum: locationTypeEnum }).notNull().default("onsite"),
   price: integer("price"), // snapshot of booking_type.price at time of booking
   note: text("note"),
   createdAt: integer("created_at", { mode: "timestamp" })
