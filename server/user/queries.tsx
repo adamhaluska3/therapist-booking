@@ -4,6 +4,7 @@ import { ClientTableRow } from "./schema";
 import { db } from "@/lib/db";
 import { count, max, sql, and, eq, desc, or, asc } from "drizzle-orm";
 import { booking } from "@/db/schema";
+import { handleLastSession } from "./utils";
 
 export async function getClientsTableRows(
   search?: string,
