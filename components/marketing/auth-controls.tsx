@@ -30,6 +30,7 @@ export function AuthControls() {
 
   const handleLogout = async () => {
     await authClient.signOut();
+    router.push("/");
     router.refresh();
   };
 
