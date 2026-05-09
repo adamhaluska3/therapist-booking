@@ -14,6 +14,8 @@ export function TimeSlotPanel({
   slots,
   selectedTime,
   onSelectTime,
+  locationType,
+  onLocationTypeChange,
   note,
   onNoteChange,
   onConfirm,
@@ -24,6 +26,8 @@ export function TimeSlotPanel({
   slots: TimeSlot[];
   selectedTime: string | null;
   onSelectTime: (t: string) => void;
+  locationType: "onsite" | "online";
+  onLocationTypeChange: (v: "onsite" | "online") => void;
   note: string;
   onNoteChange: (v: string) => void;
   onConfirm: () => void;
@@ -65,6 +69,27 @@ export function TimeSlotPanel({
             ))}
           </div>
         )}
+      </div>
+
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-neutral-700">Forma stretnutia</label>
+        <div className="flex gap-2">
+          {(["onsite", "online"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onLocationTypeChange(type)}
+              className={cn(
+                "flex-1 rounded-xl py-3 text-sm font-medium transition-colors",
+                locationType === type
+                  ? "bg-brand-800 text-white"
+                  : "bg-white text-brand-900 shadow-sm hover:bg-surface-50",
+              )}
+            >
+              {type === "onsite" ? "Na mieste" : "Online"}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-1.5">

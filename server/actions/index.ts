@@ -203,6 +203,7 @@ export async function createAdminBooking(data: {
   bookingTypeId: string | null
   price: number | null
   note: string | null
+  locationType: "onsite" | "online"
 }): Promise<void> {
   await db.insert(booking).values({
     id: data.id,
@@ -213,6 +214,7 @@ export async function createAdminBooking(data: {
     bookingTypeId: data.bookingTypeId,
     price: data.price,
     note: data.note,
+    locationType: data.locationType,
   })
 
   if (data.userId) {
@@ -359,7 +361,7 @@ export async function updateBookingTime(
 
 export async function updateBookingFromDialog(
   id: string,
-  updates: { start: Date; end: Date; userId: string | null; bookingTypeId: string | null; note: string | null },
+  updates: { start: Date; end: Date; userId: string | null; bookingTypeId: string | null; note: string | null; locationType: "onsite" | "online" },
   previousStart: Date,
 ): Promise<{ ok: boolean; error?: string }> {
   const timeChanged =
@@ -392,7 +394,7 @@ export async function updateBookingFromDialog(
 
   await db
     .update(booking)
-    .set({ start: updates.start, end: updates.end, userId: updates.userId, bookingTypeId: updates.bookingTypeId, note: updates.note })
+    .set({ start: updates.start, end: updates.end, userId: updates.userId, bookingTypeId: updates.bookingTypeId, note: updates.note, locationType: updates.locationType })
     .where(eq(booking.id, id))
 
   if (timeChanged && row?.user?.email) {
@@ -415,6 +417,7 @@ export async function createClientBooking(
   time: string,
   userId?: string,
   note?: string | null,
+  locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
@@ -436,6 +439,7 @@ export async function createClientBooking(
     status: "pending",
     userId: userId ?? null,
     note: note?.trim() || null,
+    locationType,
   }).returning({ id: booking.id });
 
   const clientUser = userId ? await getUserById(userId) : null

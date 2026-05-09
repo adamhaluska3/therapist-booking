@@ -65,6 +65,9 @@ export function BookingDialog({
   );
   const [note, setNote] = useState(booking?.note ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [locationType, setLocationType] = useState<"onsite" | "online">(
+    booking?.locationType ?? "onsite",
+  );
 
   // Local list: prop users + newly created users (to show immediately after creation)
   const [pendingUsers, setPendingUsers] = useState<UserOption[]>([]);
@@ -142,6 +145,7 @@ export function BookingDialog({
       start,
       end,
       status: booking?.status ?? "confirmed",
+      locationType,
       price: booking?.price ?? null,
       userId: selectedUserId,
       bookingTypeId: selectedBookingTypeId,
@@ -344,6 +348,27 @@ export function BookingDialog({
                     }
                   >
                     {bt.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Location type */}
+            <div className="grid gap-1.5">
+              <Label>Forma stretnutia</Label>
+              <div className="flex gap-2">
+                {(["onsite", "online"] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setLocationType(type)}
+                    className={`flex-1 rounded-md border py-1.5 text-xs font-medium transition-colors ${
+                      locationType === type
+                        ? "bg-brand-600 text-white border-transparent"
+                        : "text-neutral-600 border-surface-200 bg-white hover:bg-surface-50"
+                    }`}
+                  >
+                    {type === "onsite" ? "Na mieste" : "Online"}
                   </button>
                 ))}
               </div>

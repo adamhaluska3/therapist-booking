@@ -171,11 +171,12 @@ export function AvailabilityCalendar({
             bookingTypeId: b.bookingTypeId ?? null,
             price: b.price ?? null,
             note: b.note ?? null,
+            locationType: b.locationType,
           })
         } else {
           await updateBookingFromDialog(
             b.id,
-            { start: b.start, end: b.end, userId: b.userId ?? null, bookingTypeId: b.bookingTypeId ?? null, note: b.note ?? null },
+            { start: b.start, end: b.end, userId: b.userId ?? null, bookingTypeId: b.bookingTypeId ?? null, note: b.note ?? null, locationType: b.locationType },
             previousStart ?? b.start,
           )
         }
