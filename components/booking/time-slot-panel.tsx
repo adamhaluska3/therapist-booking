@@ -2,6 +2,7 @@
 
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { bookingContent } from "../../app/(booking)/booking/_content/booking";
 import type { TimeSlot } from "@/lib/booking-types";
@@ -13,6 +14,8 @@ export function TimeSlotPanel({
   slots,
   selectedTime,
   onSelectTime,
+  note,
+  onNoteChange,
   onConfirm,
   pending,
   error,
@@ -21,6 +24,8 @@ export function TimeSlotPanel({
   slots: TimeSlot[];
   selectedTime: string | null;
   onSelectTime: (t: string) => void;
+  note: string;
+  onNoteChange: (v: string) => void;
   onConfirm: () => void;
   pending?: boolean;
   error?: string | null;
@@ -40,14 +45,14 @@ export function TimeSlotPanel({
         )}
 
         {slots.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {slots.map(({ time, available }: TimeSlot) => (
               <button
                 key={time}
                 disabled={!available}
                 onClick={() => available && onSelectTime(time)}
                 className={cn(
-                  "rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                  "rounded-xl px-2 py-3 text-xs font-medium transition-colors sm:px-4 sm:text-sm",
                   !available
                     ? "cursor-default bg-surface-200 text-neutral-400 italic"
                     : selectedTime === time
@@ -60,6 +65,19 @@ export function TimeSlotPanel({
             ))}
           </div>
         )}
+      </div>
+
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-neutral-700">
+          Správa pre terapeuta <span className="text-neutral-400 font-normal">(voliteľné)</span>
+        </label>
+        <Textarea
+          placeholder="Napíšte krátku správu alebo dôvod návštevy..."
+          value={note}
+          onChange={(e) => onNoteChange(e.target.value)}
+          rows={3}
+          className="resize-none bg-white"
+        />
       </div>
 
       <div className="flex gap-2 rounded-xl bg-brand-50 px-4 py-3">

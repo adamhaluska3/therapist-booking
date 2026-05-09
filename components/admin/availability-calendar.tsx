@@ -26,7 +26,6 @@ import {
   applyBookingMove,
   mergeAdjacentSlots,
   bookingOverlapsOthers,
-  trimSlotsAroundBooking,
 } from "@/lib/calendar-utils"
 import {
   saveAvailabilitySlots,
@@ -171,11 +170,12 @@ export function AvailabilityCalendar({
             userId: b.userId ?? null,
             bookingTypeId: b.bookingTypeId ?? null,
             price: b.price ?? null,
+            note: b.note ?? null,
           })
         } else {
           await updateBookingFromDialog(
             b.id,
-            { start: b.start, end: b.end, userId: b.userId ?? null, bookingTypeId: b.bookingTypeId ?? null },
+            { start: b.start, end: b.end, userId: b.userId ?? null, bookingTypeId: b.bookingTypeId ?? null, note: b.note ?? null },
             previousStart ?? b.start,
           )
         }
@@ -208,7 +208,6 @@ export function AvailabilityCalendar({
   function applyAndPersistBookingChange(
     updatedBooking: BookingWithUser,
     previousBookings: BookingWithUser[],
-    previousSlots: AvailabilitySlot[],
   ): boolean {
     if (bookingOverlapsOthers(previousBookings, updatedBooking)) {
       toast.error("Rezervácia sa prekrýva s inou rezerváciou")
@@ -224,15 +223,6 @@ export function AvailabilityCalendar({
     )
     persistBooking(updatedBooking, isNew, previous?.start)
 
-    const { result, upserted, deleted } = trimSlotsAroundBooking(previousSlots, updatedBooking)
-    if (upserted.length > 0 || deleted.length > 0) {
-      setSlots(result)
-      const toDelete = deleted.filter((id) => persistedSlotIds.current.has(id))
-      upserted.forEach((s) => persistedSlotIds.current.add(s.id))
-      toDelete.forEach((id) => persistedSlotIds.current.delete(id))
-      persistSlots(upserted, toDelete)
-    }
-
     return true
   }
 
@@ -246,7 +236,7 @@ export function AvailabilityCalendar({
       } else if (event.source === "booking" && event.bookingId) {
         const moved = applyBookingMove(bookings, event.bookingId, start as Date, end as Date)
         const target = moved.find((b) => b.id === event.bookingId)!
-        applyAndPersistBookingChange(target, bookings, slots)
+        applyAndPersistBookingChange(target, bookings)
       }
     },
     [slots, bookings],
@@ -302,17 +292,32 @@ export function AvailabilityCalendar({
         ? { id: userInfo.id, name: userInfo.name, nickname: userInfo.nickname, email: userInfo.email }
         : null,
     }
-    const ok = applyAndPersistBookingChange(savedWithUser, bookings, slots)
+    const ok = applyAndPersistBookingChange(savedWithUser, bookings)
     if (ok) setBookingDialog(null)
-  }, [bookings, slots, users])
+  }, [bookings, users])
 
   const handleBookingDelete = useCallback((bookingId: string) => {
+    const deletedBooking = bookings.find((b) => b.id === bookingId)
     setBookings((prev) => prev.filter((b) => b.id !== bookingId))
     if (persistedBookingIds.current.has(bookingId)) {
       deletePersistedBooking(bookingId)
     }
+    if (deletedBooking) {
+      const bStart = deletedBooking.start.getTime()
+      const bEnd = deletedBooking.end.getTime()
+      const hasAdjacent = slots.some(
+        (s) => s.end.getTime() === bStart || s.start.getTime() === bEnd,
+      )
+      if (hasAdjacent) {
+        const restoreId = crypto.randomUUID()
+        applyAndPersistSlotChange(
+          [...slots, { id: restoreId, start: deletedBooking.start, end: deletedBooking.end, label: null }],
+          restoreId,
+        )
+      }
+    }
     setBookingDialog(null)
-  }, [])
+  }, [bookings, slots])
 
   const handleUserCreated = useCallback((newUser: UserOption) => {
     setUsers((prev) => {

@@ -1,6 +1,6 @@
 "use server";
 import { cache } from "react";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlot, booking, type Booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
@@ -62,7 +62,7 @@ export async function getCalendarData(from: Date, to: Date) {
       .select()
       .from(booking)
       .leftJoin(user, eq(booking.userId, user.id))
-      .where(and(lte(booking.start, to), gte(booking.end, from))),
+      .where(and(lte(booking.start, to), gte(booking.end, from), ne(booking.status, "cancelled"))),
   ]);
 
   return { slots, bookings: bookingRows.map(toBookingWithUser) };

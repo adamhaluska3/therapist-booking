@@ -20,11 +20,12 @@ function firstAvailableDate(slots: SlotsByDate): Date {
   return new Date();
 }
 
-export function BookingWidget({ slots }: { slots: SlotsByDate }) {
+export function BookingWidget({ slots, leftHeader }: { slots: SlotsByDate; leftHeader?: React.ReactNode }) {
   const today = new Date();
   const { user } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => firstAvailableDate(slots));
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export function BookingWidget({ slots }: { slots: SlotsByDate }) {
     if (!selectedDate || !selectedTime) return;
     setPending(true);
     setError(null);
-    const result = await createClientBooking(toDateKey(selectedDate), selectedTime, user?.id);
+    const result = await createClientBooking(toDateKey(selectedDate), selectedTime, user?.id, note);
     setPending(false);
     if (result.ok) {
       setConfirmed(true);
@@ -86,16 +87,21 @@ export function BookingWidget({ slots }: { slots: SlotsByDate }) {
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
-      <BookingCalendar
-        today={today}
-        selected={selectedDate}
-        onSelect={handleSelectDate}
-        availableDates={availableDates}
-      />
+      <div>
+        {leftHeader}
+        <BookingCalendar
+          today={today}
+          selected={selectedDate}
+          onSelect={handleSelectDate}
+          availableDates={availableDates}
+        />
+      </div>
       <TimeSlotPanel
         slots={dateSlots}
         selectedTime={selectedTime}
         onSelectTime={setSelectedTime}
+        note={note}
+        onNoteChange={setNote}
         onConfirm={handleConfirm}
         pending={pending}
         error={error}
