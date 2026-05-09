@@ -9,8 +9,7 @@ import {
 } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import type { BookingType } from "@/db/schema"
-
-const DEFAULT_DURATION_MINUTES = 60
+import { DEFAULT_DURATION_MINUTES } from "@/lib/constants"
 
 const columnHelper = createColumnHelper<BookingType>()
 
