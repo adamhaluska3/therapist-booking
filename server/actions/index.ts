@@ -417,6 +417,7 @@ export async function createClientBooking(
   time: string,
   userId?: string,
   note?: string | null,
+  locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
@@ -438,6 +439,7 @@ export async function createClientBooking(
     status: "pending",
     userId: userId ?? null,
     note: note?.trim() || null,
+    locationType,
   }).returning({ id: booking.id });
 
   const clientUser = userId ? await getUserById(userId) : null
