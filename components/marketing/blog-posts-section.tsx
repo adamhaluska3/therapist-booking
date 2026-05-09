@@ -1,28 +1,30 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useBlogFilter } from "./blog-filter-context";
 import { PostPreview } from "@/db/schema";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type BlogPostsSectionProp = {
-  posts: PostPreview[]
-}
+  posts: PostPreview[];
+  page: number;
+  totalPages: number;
+  activeCategory: string | null;
+};
 
-export function BlogPostsSection({posts}: BlogPostsSectionProp) {
-  const { active } = useBlogFilter();
+export function BlogPostsSection({ posts, page, totalPages, activeCategory }: BlogPostsSectionProp) {
+  const [featured, ...rest] = posts;
 
-  const filtered =
-    active === null
-      ? posts
-      : posts.filter((p) => p.category?.id === active);
-
-  const [featured, ...rest] = filtered;
+  const buildHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (activeCategory) params.set("category", activeCategory);
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return `/blog${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <section className="bg-linear-to-b from-surface-100 to-surface-50">
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 md:px-8 md:pb-24 md:pt-12">
-        {filtered.length === 0 && (
+        {posts.length === 0 && (
           <p className="py-16 text-center text-sm text-neutral-400">
             Žiadne články v tejto kategórii.
           </p>
@@ -75,6 +77,31 @@ export function BlogPostsSection({posts}: BlogPostsSectionProp) {
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex items-center justify-center gap-3">
+            {page > 1 ? (
+              <Link
+                href={buildHref(page - 1)}
+                className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium bg-surface-200 text-neutral-600 hover:bg-surface-300 transition-colors"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Späť
+              </Link>
+            ) : <span className="w-32" />}
+            <span className="text-xs text-neutral-400">{page} / {totalPages}</span>
+            {page < totalPages ? (
+              <Link
+                href={buildHref(page + 1)}
+                className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium bg-surface-200 text-neutral-600 hover:bg-surface-300 transition-colors"
+              >
+                Ďalej
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : <span className="w-32" />}
+          </div>
+        )}
       </div>
     </section>
   );

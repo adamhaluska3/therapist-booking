@@ -4,15 +4,28 @@ import { cn } from "@/lib/utils";
 import {
   blogHeader,
 } from "../../app/(marketing)/_content/blog";
-import { useBlogFilter } from "./blog-filter-context";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PostCategory } from "@/db/schema";
 
 export type BlogHeaderSectionProp = {
-  categories: PostCategory[]
-}
+  categories: PostCategory[];
+  activeCategory: string | null;
+};
 
-export function BlogHeaderSection({categories}: BlogHeaderSectionProp) {
-  const { active, setActive } = useBlogFilter();
+export function BlogHeaderSection({ categories, activeCategory }: BlogHeaderSectionProp) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const toggle = (catId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (params.get("category") === catId) {
+      params.delete("category");
+    } else {
+      params.set("category", catId);
+    }
+    params.delete("page");
+    router.push(`/blog?${params.toString()}`);
+  };
 
   return (
     <section className="bg-linear-to-b from-white to-surface-100">
@@ -31,10 +44,10 @@ export function BlogHeaderSection({categories}: BlogHeaderSectionProp) {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActive(active === cat.id ? null : cat.id)}
+              onClick={() => toggle(cat.id)}
               className={cn(
                 "rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
-                active === cat.id
+                activeCategory === cat.id
                   ? "bg-brand-700 text-white"
                   : "bg-surface-200 text-neutral-600 hover:bg-surface-300",
               )}
