@@ -1,36 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useMemo, useEffect, useRef } from "react"
-import { format } from "date-fns"
-import { Check, ChevronDown, Clock, Search, UserPlus } from "lucide-react"
+import { useState, useMemo, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { Check, ChevronDown, Clock, Search, UserPlus } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
-import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
-import type { UserOption } from "@/server/queries/users"
-import { createNonOAuthUser } from "@/server/actions"
-import { BOOKING_TYPE_COLORS as _btColors } from "@/components/admin/calendar-event-card"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import type { Booking, BookingType, BookingWithUser } from "@/db/schema";
+import type { UserOption } from "@/server/queries/users";
+import { createNonOAuthUser } from "@/server/actions";
+import { BOOKING_TYPE_COLORS as _btColors } from "@/components/admin/calendar-event-card";
 
 const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
-  Object.entries(_btColors).map(([id, v]) => [id, v.bg])
-)
+  Object.entries(_btColors).map(([id, v]) => [id, v.bg]),
+);
 
 interface BookingDialogProps {
-  open: boolean
-  booking?: BookingWithUser
-  defaultStart?: Date
-  defaultEnd?: Date
-  users: UserOption[]
-  bookingTypes: BookingType[]
-  onSave: (booking: Booking) => void
-  onDelete?: () => void
-  onClose: () => void
-  onUserCreated: (user: UserOption) => void
+  open: boolean;
+  booking?: BookingWithUser;
+  defaultStart?: Date;
+  defaultEnd?: Date;
+  users: UserOption[];
+  bookingTypes: BookingType[];
+  onSave: (booking: Booking) => void;
+  onDelete?: () => void;
+  onClose: () => void;
+  onUserCreated: (user: UserOption) => void;
 }
 
 export function BookingDialog({
@@ -45,81 +49,92 @@ export function BookingDialog({
   onClose,
   onUserCreated,
 }: BookingDialogProps) {
-  const base = booking?.start ?? defaultStart ?? new Date()
+  const base = booking?.start ?? defaultStart ?? new Date();
 
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(booking?.userId ?? null)
-  const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<string | null>(booking?.bookingTypeId ?? bookingTypes[0]?.id ?? null)
-  const [startStr, setStartStr] = useState(() => format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"))
-  const [endStr, setEndStr] = useState(() => format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"))
-  const [note, setNote] = useState(booking?.note ?? "")
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(
+    booking?.userId ?? null,
+  );
+  const [selectedBookingTypeId, setSelectedBookingTypeId] = useState<
+    string | null
+  >(booking?.bookingTypeId ?? bookingTypes[0]?.id ?? null);
+  const [startStr, setStartStr] = useState(() =>
+    format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"),
+  );
+  const [endStr, setEndStr] = useState(() =>
+    format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"),
+  );
+  const [note, setNote] = useState(booking?.note ?? "");
 
   // Local list: prop users + newly created users (to show immediately after creation)
-  const [pendingUsers, setPendingUsers] = useState<UserOption[]>([])
+  const [pendingUsers, setPendingUsers] = useState<UserOption[]>([]);
   const allUsers = useMemo(() => {
-    const seen = new Set(initialUsers.map((u) => u.id))
-    return [...initialUsers, ...pendingUsers.filter((u) => !seen.has(u.id))]
-  }, [initialUsers, pendingUsers])
+    const seen = new Set(initialUsers.map((u) => u.id));
+    return [...initialUsers, ...pendingUsers.filter((u) => !seen.has(u.id))];
+  }, [initialUsers, pendingUsers]);
 
   // Combobox state
-  const [comboboxOpen, setComboboxOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const comboboxRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // Create user dialog state
-  const [createUserOpen, setCreateUserOpen] = useState(false)
-  const [newUserName, setNewUserName] = useState("")
-  const [newUserEmail, setNewUserEmail] = useState("")
-  const [newUserPhone, setNewUserPhone] = useState("")
-  const [createUserError, setCreateUserError] = useState("")
-  const [createUserLoading, setCreateUserLoading] = useState(false)
+  const [createUserOpen, setCreateUserOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPhone, setNewUserPhone] = useState("");
+  const [createUserError, setCreateUserError] = useState("");
+  const [createUserLoading, setCreateUserLoading] = useState(false);
 
-  const isEdit = !!booking
+  const isEdit = !!booking;
 
-  const selectedUser = allUsers.find((u) => u.id === selectedUserId) ?? null
+  const selectedUser = allUsers.find((u) => u.id === selectedUserId) ?? null;
 
   const filteredUsers = useMemo(() => {
-    const q = searchQuery.toLowerCase()
-    if (!q) return allUsers
+    const q = searchQuery.toLowerCase();
+    if (!q) return allUsers;
     return allUsers.filter(
       (u) =>
         (u.nickname ?? u.name).toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q),
-    )
-  }, [allUsers, searchQuery])
+    );
+  }, [allUsers, searchQuery]);
 
   // Close combobox when clicking outside
   useEffect(() => {
-    if (!comboboxOpen) return
+    if (!comboboxOpen) return;
     function handleClick(e: MouseEvent) {
-      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
-        setComboboxOpen(false)
+      if (
+        comboboxRef.current &&
+        !comboboxRef.current.contains(e.target as Node)
+      ) {
+        setComboboxOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [comboboxOpen])
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [comboboxOpen]);
 
   // Focus search input when combobox opens
   useEffect(() => {
     if (comboboxOpen) {
-      setTimeout(() => searchRef.current?.focus(), 50)
+      setTimeout(() => searchRef.current?.focus(), 50);
     } else {
-      setSearchQuery("")
+      setSearchQuery("");
     }
-  }, [comboboxOpen])
+  }, [comboboxOpen]);
 
   function parseTime(hhmm: string): Date {
-    const [hh, mm] = hhmm.split(":").map(Number)
-    const d = new Date(base)
-    d.setHours(hh ?? 0, mm ?? 0, 0, 0)
-    return d
+    const [hh, mm] = hhmm.split(":").map(Number);
+    const d = new Date(base);
+    d.setHours(hh ?? 0, mm ?? 0, 0, 0);
+    return d;
   }
 
   function handleSave() {
-    const start = parseTime(startStr)
-    const end = parseTime(endStr)
-    if (end <= start) return
+    const start = parseTime(startStr);
+    const end = parseTime(endStr);
+    if (end <= start) return;
 
     onSave({
       id: booking?.id ?? crypto.randomUUID(),
@@ -131,53 +146,74 @@ export function BookingDialog({
       bookingTypeId: selectedBookingTypeId,
       note: note.trim() || null,
       createdAt: booking?.createdAt ?? new Date(),
-    })
+    });
   }
 
   function handleOpenCreateUser() {
-    setComboboxOpen(false)
-    setCreateUserOpen(true)
+    setComboboxOpen(false);
+    setCreateUserOpen(true);
   }
 
   async function handleCreateUser() {
-    setCreateUserError("")
-    setCreateUserLoading(true)
-    const result = await createNonOAuthUser(newUserName, newUserEmail, newUserPhone || undefined)
-    setCreateUserLoading(false)
+    setCreateUserError("");
+    setCreateUserLoading(true);
+    const result = await createNonOAuthUser(
+      newUserName,
+      newUserEmail,
+      newUserPhone || undefined,
+    );
+    setCreateUserLoading(false);
 
     if (!result.ok || !result.user) {
-      setCreateUserError(result.error ?? "Chyba pri vytváraní klienta.")
-      return
+      setCreateUserError(result.error ?? "Chyba pri vytváraní klienta.");
+      return;
     }
 
-    const newUser = result.user
-    setPendingUsers((prev) => [...prev, newUser])
-    setSelectedUserId(newUser.id)
-    onUserCreated(newUser)
-    setCreateUserOpen(false)
-    setNewUserName("")
-    setNewUserEmail("")
-    setNewUserPhone("")
+    const newUser = result.user;
+    setPendingUsers((prev) => [...prev, newUser]);
+    setSelectedUserId(newUser.id);
+    onUserCreated(newUser);
+    setCreateUserOpen(false);
+    setNewUserName("");
+    setNewUserEmail("");
+    setNewUserPhone("");
   }
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) onClose();
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <DialogTitle>{isEdit ? "Nastavenia terapie" : "Nová terapia"}</DialogTitle>
+              <DialogTitle>
+                {isEdit ? "Nastavenia terapie" : "Nová terapia"}
+              </DialogTitle>
               {isEdit && booking?.status && (
-                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  booking.status === "confirmed" ? "bg-brand-100 text-brand-700" :
-                  booking.status === "pending"   ? "bg-yellow-100 text-yellow-700" :
-                  "bg-surface-100 text-neutral-500"
-                }`}>
-                  {booking.status === "confirmed" && <Check className="h-3 w-3" />}
-                  {booking.status === "pending"   && <Clock className="h-3 w-3" />}
-                  {booking.status === "confirmed" ? "Potvrdené" :
-                   booking.status === "pending"   ? "Čaká na potvrdenie" :
-                   "Dokončené"}
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                    booking.status === "confirmed"
+                      ? "bg-brand-100 text-brand-700"
+                      : booking.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-surface-100 text-neutral-500"
+                  }`}
+                >
+                  {booking.status === "confirmed" && (
+                    <Check className="h-3 w-3" />
+                  )}
+                  {booking.status === "pending" && (
+                    <Clock className="h-3 w-3" />
+                  )}
+                  {booking.status === "confirmed"
+                    ? "Potvrdené"
+                    : booking.status === "pending"
+                      ? "Čaká na potvrdenie"
+                      : "Dokončené"}
                 </span>
               )}
             </div>
@@ -193,7 +229,11 @@ export function BookingDialog({
                   onClick={() => setComboboxOpen((v) => !v)}
                   className="flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm text-left transition-colors hover:bg-surface-50 focus:outline-none focus:border-brand-400"
                 >
-                  <span className={selectedUser ? "text-neutral-800" : "text-neutral-400"}>
+                  <span
+                    className={
+                      selectedUser ? "text-neutral-800" : "text-neutral-400"
+                    }
+                  >
                     {selectedUser
                       ? (selectedUser.nickname ?? selectedUser.name)
                       : "Vybrať klienta..."}
@@ -219,15 +259,17 @@ export function BookingDialog({
                     {/* User list */}
                     <div className="max-h-48 overflow-y-auto">
                       {filteredUsers.length === 0 && (
-                        <p className="px-3 py-2 text-sm text-neutral-400">Žiadni klienti</p>
+                        <p className="px-3 py-2 text-sm text-neutral-400">
+                          Žiadni klienti
+                        </p>
                       )}
                       {filteredUsers.map((u) => (
                         <button
                           key={u.id}
                           type="button"
                           onClick={() => {
-                            setSelectedUserId(u.id)
-                            setComboboxOpen(false)
+                            setSelectedUserId(u.id);
+                            setComboboxOpen(false);
                           }}
                           className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-surface-50 text-left"
                         >
@@ -238,7 +280,9 @@ export function BookingDialog({
                             <p className="font-medium text-neutral-800 truncate">
                               {u.nickname ?? u.name}
                             </p>
-                            <p className="text-xs text-neutral-400 truncate">{u.email}</p>
+                            <p className="text-xs text-neutral-400 truncate">
+                              {u.email}
+                            </p>
                           </div>
                         </button>
                       ))}
@@ -279,13 +323,24 @@ export function BookingDialog({
                   <button
                     key={bt.id}
                     type="button"
-                    onClick={() => setSelectedBookingTypeId(selectedBookingTypeId === bt.id ? null : bt.id)}
+                    onClick={() =>
+                      setSelectedBookingTypeId(
+                        selectedBookingTypeId === bt.id ? null : bt.id,
+                      )
+                    }
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                       selectedBookingTypeId === bt.id
                         ? "text-white border-transparent"
                         : "text-neutral-600 border-surface-200 bg-white hover:bg-surface-50"
                     }`}
-                    style={selectedBookingTypeId === bt.id ? { backgroundColor: BOOKING_TYPE_PILL_COLORS[bt.id] ?? "#427a5c" } : undefined}
+                    style={
+                      selectedBookingTypeId === bt.id
+                        ? {
+                            backgroundColor:
+                              BOOKING_TYPE_PILL_COLORS[bt.id] ?? "#427a5c",
+                          }
+                        : undefined
+                    }
                   >
                     {bt.name}
                   </button>
@@ -315,7 +370,6 @@ export function BookingDialog({
             <div className="grid gap-1.5">
               <Label>Poznámka</Label>
               <Textarea
-                placeholder="Interná poznámka k terapii..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
@@ -338,14 +392,26 @@ export function BookingDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={onClose}>Zrušiť</Button>
-            <Button onClick={handleSave}>{isEdit ? "Uložiť" : "Vytvoriť"}</Button>
+            <Button variant="outline" onClick={onClose}>
+              Zrušiť
+            </Button>
+            <Button onClick={handleSave}>
+              {isEdit ? "Uložiť" : "Vytvoriť"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Create new client dialog */}
-      <Dialog open={createUserOpen} onOpenChange={(v) => { if (!v) { setCreateUserOpen(false); setCreateUserError("") } }}>
+      <Dialog
+        open={createUserOpen}
+        onOpenChange={(v) => {
+          if (!v) {
+            setCreateUserOpen(false);
+            setCreateUserError("");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Nový klient</DialogTitle>
@@ -371,7 +437,8 @@ export function BookingDialog({
             </div>
             <div className="grid gap-1.5">
               <Label>
-                Telefón <span className="text-gray-400 font-normal">(voliteľné)</span>
+                Telefón{" "}
+                <span className="text-gray-400 font-normal">(voliteľné)</span>
               </Label>
               <Input
                 type="tel"
@@ -391,17 +458,25 @@ export function BookingDialog({
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => { setCreateUserOpen(false); setCreateUserError("") }}
+              onClick={() => {
+                setCreateUserOpen(false);
+                setCreateUserError("");
+              }}
               disabled={createUserLoading}
             >
               Zrušiť
             </Button>
-            <Button onClick={handleCreateUser} disabled={createUserLoading || !newUserName.trim() || !newUserEmail.trim()}>
+            <Button
+              onClick={handleCreateUser}
+              disabled={
+                createUserLoading || !newUserName.trim() || !newUserEmail.trim()
+              }
+            >
               {createUserLoading ? "Vytváram..." : "Vytvoriť"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
