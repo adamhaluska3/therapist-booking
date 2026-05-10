@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getAbsolvedBookings } from "@/server/queries/absolved-bookings";
 import { AbsolvedBookingsTable } from "@/components/user/absolved-bookings-table";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
+import { db } from "@/lib/db";
 
 const PAGE_SIZE = 10;
 
@@ -16,11 +17,14 @@ const Page = async () => {
         redirect("/");
     }
 
-    const { rows, total } = await getAbsolvedBookings({
-        userId: userSession.user.id,
-        page: 1,
-        pageSize: PAGE_SIZE,
-    });
+    const [{ rows, total }, paymentSettings] = await Promise.all([
+        getAbsolvedBookings({
+            userId: userSession.user.id,
+            page: 1,
+            pageSize: PAGE_SIZE,
+        }),
+        db.query.paymentSettings.findFirst(),
+    ]);
 
     return (
         <article className="bg-linear-to-b from-white to-surface-100">
@@ -37,6 +41,7 @@ const Page = async () => {
                     initialTotal={total}
                     userId={userSession.user.id}
                     pageSize={PAGE_SIZE}
+                    paymentSettings={paymentSettings ?? null}
                 />
             </div>
         </article>

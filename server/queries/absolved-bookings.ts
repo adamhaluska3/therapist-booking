@@ -11,6 +11,8 @@ export type AbsolvedBookingRow = {
   bookingTypeName: string | null;
   variableSymbol: number | null;
   price: number | null;
+  locationType: string;
+  note: string | null;
 };
 
 export async function getAbsolvedBookings({
@@ -51,6 +53,8 @@ export async function getAbsolvedBookings({
         bookingTypeName: bookingType.name,
         variableSymbol: booking.variableSymbol,
         price: booking.price,
+        locationType: booking.locationType,
+        note: booking.note
       })
       .from(booking)
       .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))

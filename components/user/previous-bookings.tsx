@@ -40,7 +40,7 @@ export const PreviousUserBookings = async ({userId, limit}: {userId: string, lim
                         {previousSessions.map(s => {
                             const payment = (
                                 <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
-                                    <Button className="p-5 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
+                                    <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
                                         <span>Platba</span>
                                     </Button>
                                 </ClientPaymentInfo>

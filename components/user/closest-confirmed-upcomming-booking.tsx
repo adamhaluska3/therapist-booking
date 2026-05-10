@@ -1,10 +1,13 @@
 import { Booking, booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
-import { Calendar, Clock5, Play } from "lucide-react"
+import { Calendar, Clock5, MapPin, NotebookText, Play } from "lucide-react"
 import Image from "next/image"
 import { Button } from "../ui/button"
 import Link from "next/link"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
+import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
+import { ClientPaymentInfo } from "./client-payment-info"
+import { NoteDialog } from "./note-dialog"
 
 const bookingTypeImageSrc = {
   "bt-psychoterapia":   "/images/booking-types/psycho-therapy.png",
@@ -25,7 +28,7 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                 <h1 className="text-2xl">{item.bookingType?.name}</h1>
                 <Image
                     className="aspect-4/3 object-cover md:hidden"
-                    src={bookingTypeImageSrc[(item.bookingType?.id ?? "bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
+                    src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
                     alt=""
                     width={280}
                     height={170}
@@ -42,22 +45,49 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                         {item.start.toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" })} - {item.end.toLocaleTimeString("sk-SK", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                 </div>
+                <div className="flex gap-2 text-sm text-brand-700 items-center">
+                    {item.locationType === "online" && (
+                        <>
+                            <Play/>
+                            <span>Online</span>
+                        </>
+                    )}
+                    {item.locationType === "onsite" && (
+                        <>
+                            <MapPin/>
+                            <span>{ADDRESS_SHORT}</span>
+                        </>
+                    )}
+                </div>
                 <div className="flex gap-2 text-sm text-brand-700">
-                    Online / On-site = doplnime v stredu
+                    <NotebookText/>
+                    {item.note && (
+                        <NoteDialog note={item.note}>
+                            <span className="text-sm font-semibold hover:text-taupe-800 underline">
+                                Zobraziť poznámky
+                            </span>
+                        </NoteDialog>
+                    )}
+                    {!item.note && <span>Bez poznámok</span>}
                 </div>
             </div>
-            <div className="flex gap-2 text-sm text-brand-700">
-                {true && (
+            <div className="flex flex-col sm:flex-row gap-2 text-sm text-brand-700">
+                {item.locationType === "online" && (
                     <Link href={item.meetLink ?? "#"}>
-                        <Button className="p-5 bg-brand-500 text-sm rounded-2xl flex gap-2">
+                        <Button className="p-2 px-4 bg-brand-500 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
                             <Play/>
                             <span>Pripojiť sa</span>
                         </Button>
                     </Link>
                 )}
+                <ClientPaymentInfo vs={item.variableSymbol} centPrice={item.price || 0} note={item.bookingType?.name || ""}>
+                    <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
+                        <span>Platba</span>
+                    </Button>
+                </ClientPaymentInfo>
                 {(item.start.getTime() - Date.now() > 2 * 24 * 60 * 60 * 1000) && (
                     <ClientCancelBookingDialog item={item}>
-                        <Button className="p-5 bg-white border border-gray-500 text-black text-sm rounded-2xl flex gap-2">
+                        <Button className="p-2 px-4 bg-white border border-gray-500 text-black text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
                             <span>Zrušiť</span>
                         </Button>
                     </ClientCancelBookingDialog>
@@ -66,7 +96,7 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
         </section>
             <Image
                 className="aspect-4/3 object-cover hidden md:block"
-                src={bookingTypeImageSrc[(item.bookingType?.id ?? "bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
+                src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
                 alt=""
                 width={220}
                 height={155}

@@ -13,9 +13,11 @@ export const PreviousUserBookingItem = ({item, paymentSlot}: PreviousUserBooking
     <div className="flex gap-y-5 items-center w-full mx-auto px-10 py-5 shadow-sm bg-white rounded-2xl flex-col sm:flex-row">
         <div className="flex gap-5 items-center flex-1 flex-col sm:flex-row">
             <div className="flex flex-col gap-2 flex-1">
-                <div className="flex gap-2 justify-center sm:justify-start">
+                <div className="flex gap-1 justify-center sm:justify-start items-center">
                     {bookingStatusIcon[item.status]}
                     <h3 className="font-semibold text-brand-800 sm:text-xl">{item.bookingType?.name}</h3>
+                    <Dot />
+                    <span className="text-gray-400 font-semibold uppercase text-xs sm:text-sm">{item.locationType === "online" ? "ONLINE" : "OSOBNE"}</span>
                 </div>
                 <div className="flex justify-center sm:justify-start">
                     <span>

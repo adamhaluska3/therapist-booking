@@ -44,7 +44,7 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
             )}
             {timeSorted.length > 0 && (
                 <div>
-                    <div className="flex flex-wrap gap-x-5 gap-y-5">
+                    <div className="flex flex-wrap gap-x-5 gap-y-5 justify-center">
                         {confirmed && (
                             <ClosestConfirmedUpcommingBooking item={confirmed} />
                         )}
@@ -58,7 +58,7 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
                                 <UpcomingUserBookingItem key={s.id} item={s} paymentSlot={
                                     (
                                         <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
-                                            <Button className="p-5 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
+                                            <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
                                                 <span>Platba</span>
                                             </Button>
                                         </ClientPaymentInfo>

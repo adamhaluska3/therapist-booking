@@ -6,7 +6,7 @@ import { account, user } from "@/db/auth-schema";
 import { toDateKey, type SlotsByDate } from "@/lib/booking-types";
 import type { UserOption } from "@/server/queries/users";
 import { getUserById } from "@/server/queries/users";
-import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient, sendBookingCancellationToClient, sendBookingRescheduledToClient } from "@/lib/email";
+import { sendBookingNotificationToTherapist, sendBookingConfirmationToClient, sendBookingCancellationToClient, sendBookingRescheduledToClient, sendBookingCancellationToTherapist } from "@/lib/email";
 import { SESSIONS_PAGE_SIZE, DASHBOARD_PAGE_SIZE } from "@/lib/constants";
 import { generateCodeChallenge } from "better-auth";
 import { generateVS } from "../utils/payment";
@@ -14,6 +14,7 @@ import { createMeetLink } from "../utils/meet";
 import { getSession } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 function toBookingWithUser(row: {
   booking: typeof booking.$inferSelect;
@@ -571,13 +572,14 @@ export async function cancelClientBooking(
 
   if (session.user.email) {
     const clientUser = await getUserById(session.user.id);
-    void sendBookingCancellationToClient({
-      clientName: clientUser?.nickname ?? clientUser?.name ?? session.user.name,
+    void sendBookingCancellationToTherapist({
+      clientName: clientUser?.name ?? session.user.name,
       clientEmail: session.user.email,
       start: row.start,
       end: row.end,
     });
   }
 
+  revalidatePath('/client')
   return { ok: true };
 }

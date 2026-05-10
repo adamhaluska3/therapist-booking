@@ -9,6 +9,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { getAbsolvedBookings } from "@/server/queries/absolved-bookings";
+import { PaymentSettings } from "@/db/schema";
+import { PaymentInfoDialog } from "./payment-info-dialog";
+import { NoteDialog } from "./note-dialog";
 
 function formatPrice(cents: number) {
   return (cents / 100).toLocaleString("sk-SK", { style: "currency", currency: "EUR" });
@@ -21,9 +24,10 @@ interface Props {
   initialTotal: number;
   userId: string;
   pageSize: number;
+  paymentSettings: PaymentSettings | null;
 }
 
-export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageSize }: Props) {
+export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageSize, paymentSettings }: Props) {
   const [rows, setRows] = useState<Row[]>(initialRows);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
@@ -40,8 +44,11 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
       {
         accessorKey: "bookingTypeName",
         header: "Typ sedenia",
-        cell: ({ getValue }) => (
-          <span className="font-medium text-brand-800">{getValue() ?? "—"}</span>
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-1">
+            <span className="font-medium text-brand-800">{row.original.bookingTypeName ?? "—"}</span>
+            <span className="text-xs font-semibold uppercase text-gray-400">{row.original.locationType === "online" ? "ONLINE" : "OSOBNE"}</span>
+          </div>
         ),
       },
       {
@@ -55,23 +62,45 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
           }),
       },
       {
-        accessorKey: "variableSymbol",
-        header: "Variabilný symbol",
-        cell: ({ getValue }) => (
-          <span className="tabular-nums text-neutral-500">{getValue() ?? "—"}</span>
-        ),
+        accessorKey: "note",
+        header: "Poznámky",
+        cell: ({ row }) => {
+          const note = row.original.note;
+          if (!note) return <span className="text-neutral-400">—</span>;
+          return (
+            <>
+              <span className="hidden sm:block text-sm text-neutral-600 max-w-xs">{note}</span>
+              <NoteDialog note={note}>
+                <span className="sm:hidden text-xs font-semibold text-brand-600 hover:text-brand-800 underline">
+                  Zobraziť
+                </span>
+              </NoteDialog>
+            </>
+          );
+        },
       },
       {
-        accessorKey: "price",
-        header: () => <span className="block text-right">Cena</span>,
-        cell: ({ getValue }) => (
-          <span className="block text-right tabular-nums text-neutral-700">
-            {getValue() != null ? formatPrice(getValue() as number) : "—"}
-          </span>
+        id: "detail",
+        header: () => <span className="block text-right">Platba</span>,
+        cell: ({ row }) => (
+          <div className="flex justify-end gap-2">
+            <span className="hidden sm:block">{formatPrice(row.original.price as number)}</span>
+            
+            <PaymentInfoDialog
+              centPrice={row.original.price ?? 0}
+              vs={row.original.variableSymbol}
+              note={row.original.bookingTypeName ?? ""}
+              paymentSettings={paymentSettings}
+            >
+              <span className="text-xs font-semibold text-brand-600 hover:text-brand-800 underline cursor-pointer">
+                Detail
+              </span>
+            </PaymentInfoDialog>
+          </div>
         ),
       },
     ],
-    [],
+    [paymentSettings],
   );
 
   const table = useReactTable({
@@ -134,7 +163,7 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-surface-200 bg-white">
+      <div className="overflow-auto rounded-lg border border-surface-200 bg-white">
         {isPending ? (
           <div className="flex justify-center py-12">
             <Loader2 size={22} className="animate-spin text-neutral-300" />
