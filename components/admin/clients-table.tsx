@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState, useMemo, useEffect } from "react";
 import {
   ColumnDef,
+  SortingState,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -39,17 +40,17 @@ export default function ClientsTable({
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
   const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
-  const [sorting, setSorting] = useState<any>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [isFetching, setIsFetching] = useState(false);
 
   const isPending = (search !== debouncedSearch && search !== "") || isFetching;
 
-  const columns = useMemo<ColumnDef<ClientItem, any>[]>(
+  const columns = useMemo<ColumnDef<ClientItem, unknown>[]>(
     () => [
       {
         id: "client",
         header: "Meno klienta",
-        accessorFn: (row) => row,
+        accessorFn: (row: ClientItem) => row,
         cell: ({ getValue }) => {
           const row = getValue() as ClientItem;
           return (
@@ -71,7 +72,7 @@ export default function ClientsTable({
         header: "Posledné sedenie",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">{getValue() ?? "-"}</div>
+          <div className="text-sm text-neutral-600">{(getValue() as string | null | undefined) ?? "-"}</div>
         ),
       },
       {
@@ -79,7 +80,7 @@ export default function ClientsTable({
         header: "Počet sedení",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">{getValue() ?? 0}</div>
+          <div className="text-sm text-neutral-600">{(getValue() as number | undefined) ?? 0}</div>
         ),
       },
       {

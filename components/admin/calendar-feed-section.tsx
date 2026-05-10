@@ -20,7 +20,7 @@ export function CalendarFeedSection({ feedUrl }: { feedUrl: string }) {
       </h2>
       <p className="text-sm text-neutral-500 mb-4">
         Pridajte tento odkaz do Google Calendar, Apple Calendar alebo Outlooku
-        ako "Subscribe from URL". Kalendár sa bude automaticky aktualizovať.
+        ako &quot;Subscribe from URL&quot;. Kalendár sa bude automaticky aktualizovať.
       </p>
       <div className="flex items-center gap-2">
         <input
