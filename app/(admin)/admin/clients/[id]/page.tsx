@@ -14,37 +14,10 @@ type Props = { params: { id: string } };
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
-  const [user, notes, bookings] = await Promise.all([
+  const [user, bookings] = await Promise.all([
     getUserById(id),
-    getUserNotes(id),
     getUserBookings(id),
   ]);
-
-  const userId = id;
-
-  async function addNote(text: string, dateParam: string | Date) {
-    "use server";
-    const date = new Date(dateParam);
-    const newId = await saveUserNote({ userId, date, note: text });
-    return newId;
-  }
-
-  async function updateNote(
-    noteId: string,
-    text: string,
-    dateParam: string | Date,
-  ) {
-    "use server";
-    const date = new Date(dateParam);
-    await saveUserNote({ id: noteId, userId, date, note: text });
-    return noteId;
-  }
-
-  async function deleteNote(noteId: string) {
-    "use server";
-    await deleteUserNote(noteId);
-    return true;
-  }
 
   async function redirectBack() {
     "use server";
@@ -119,17 +92,7 @@ export default async function Page({ params }: Props) {
             }))}
           />
 
-          <ClientNotes
-            notes={notes.map((n: any) => ({
-              id: n.id,
-              date: n.date,
-              note: n.note,
-            }))}
-            userId={id}
-            onAdd={addNote}
-            onUpdate={updateNote}
-            onDelete={deleteNote}
-          />
+          <ClientNotes userId={id} />
         </div>
       </div>
     </>
