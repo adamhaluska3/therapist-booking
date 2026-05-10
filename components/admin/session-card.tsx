@@ -8,7 +8,6 @@ import { Check, Video, Pencil, X, Clock, Hash, MessageSquare, MoreHorizontal } f
 import type { Booking, BookingType } from "@/db/schema"
 import { formatTime, formatMonthShort } from "@/lib/date-utils"
 import { getInitials, formatPrice } from "@/lib/formatting"
-import { updateBookingStatus, updateBookingFromDialog } from "@/server/actions"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { AdminCard } from "@/components/admin/admin-card"
 import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
@@ -35,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
+import { updateBookingFromDialog, updateBookingStatus } from "@/server/booking/mutations";
 
 type ConfirmAction = "finished" | "cancelled";
 
