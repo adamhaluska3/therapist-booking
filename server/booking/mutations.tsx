@@ -12,6 +12,8 @@ import {
 } from "@/lib/email";
 import { getUserById } from "../user/queries";
 import { requireAdmin, requireAuth, requireUser } from "../auth";
+import { fetchPriceForBookingType } from "../booking-type/queries";
+import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 
 export async function saveBookings(
   upserted: BookingUpsert[],
@@ -261,6 +263,7 @@ export async function createClientBooking(
   time: string,
   userId?: string,
   note?: string | null,
+  bookingTypeId?: string | null,
   locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
   await requireUser();
@@ -278,6 +281,8 @@ export async function createClientBooking(
     return { ok: false, error: "Tento termín je už obsadený." };
   }
 
+  const priceSnapshot = bookingTypeId ? await fetchPriceForBookingType(bookingTypeId) : null
+
   const [inserted] = await db
     .insert(booking)
     .values({
@@ -288,11 +293,12 @@ export async function createClientBooking(
       bookingTypeId: await db
         .select({ id: bookingType.id })
         .from(bookingType)
-        .where(eq(bookingType.name, "Psychoterapia"))
+        .where(eq(bookingType.name, DEFAULT_BOOKABLE_TYPE_NAME))
         .limit(1)
         .then((rows) => rows[0]?.id ?? null),
       note: note?.trim() || null,
       locationType,
+      price: priceSnapshot,
     })
     .returning({ id: booking.id });
 
@@ -325,6 +331,8 @@ export async function createAdminBooking(data: {
   locationType: "onsite" | "online";
 }): Promise<void> {
   await requireAdmin();
+  const priceSnapshot = data.price ?? (data.bookingTypeId ? await fetchPriceForBookingType(data.bookingTypeId) : null)
+
   await db.insert(booking).values({
     id: data.id,
     start: data.start,
@@ -332,7 +340,7 @@ export async function createAdminBooking(data: {
     status: data.status,
     userId: data.userId,
     bookingTypeId: data.bookingTypeId,
-    price: data.price,
+    price: priceSnapshot,
     note: data.note,
     locationType: data.locationType,
   });

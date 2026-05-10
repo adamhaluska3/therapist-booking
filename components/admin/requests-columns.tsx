@@ -1,16 +1,18 @@
-import Link from "next/link";
-import { createColumnHelper } from "@tanstack/react-table";
-import { formatTime, formatBookingDate } from "@/lib/date-utils";
-import { getInitials } from "@/lib/formatting";
-import { UNKNOWN_CLIENT } from "@/lib/constants";
-import { MapPin, MessageSquare } from "lucide-react";
-import { BookingWithUser } from "@/server/booking/schema";
-import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
-import { BookingType } from "@/db/schema";
+import Link from "next/link"
+import { createColumnHelper } from "@tanstack/react-table"
+import type { BookingType } from "@/db/schema"
+import { formatTime, formatBookingDate } from "@/lib/date-utils"
+import { getInitials, formatPrice } from "@/lib/formatting"
+import { UNKNOWN_CLIENT } from "@/lib/constants"
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
+import { MessageSquare } from "lucide-react"
+import { LocationBadge } from "@/components/admin/location-badge"
+import { BookingWithUser } from "@/server/booking/schema"
 
 interface ActionHandlers {
   onConfirm: (id: string) => void;
   onCancel: (booking: BookingWithUser) => void;
+  onNote: (booking: BookingWithUser) => void
   isPending: boolean;
   bookingTypes: BookingType[];
 }
@@ -19,7 +21,7 @@ const columnHelper = createColumnHelper<BookingWithUser>();
 
 export function getRequestsColumns({
   onConfirm,
-  onCancel,
+  onCancel, onNote,
   isPending,
   bookingTypes,
 }: ActionHandlers) {
@@ -54,10 +56,7 @@ export function getRequestsColumns({
                   <span className="truncate">{bookingType.name}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
-                <MapPin size={11} className="shrink-0" />
-                <span>Osobne</span>
-              </div>
+              <LocationBadge locationType={booking.locationType} size={11} className="text-xs text-neutral-400" />
             </div>
           </div>
         );
@@ -88,7 +87,15 @@ export function getRequestsColumns({
     columnHelper.display({
       id: "variableSymbol",
       header: "Var. symbol",
-      cell: () => <p className="text-sm text-neutral-600">2400001</p>,
+      cell: (info) => {
+        const price = formatPrice(info.row.original.price)
+        return (
+          <>
+            <p className="text-sm text-neutral-600">2400001</p>
+            {price && <p className="text-xs text-neutral-400 mt-0.5">{price}</p>}
+          </>
+        )
+      },
     }),
     columnHelper.display({
       id: "actions",
@@ -99,6 +106,7 @@ export function getRequestsColumns({
         return (
           <div className="flex items-center justify-end gap-2">
             <button
+              onClick={() => onNote(booking)}
               disabled={isPending}
               className="flex items-center gap-1.5 rounded-full border border-surface-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
             >
