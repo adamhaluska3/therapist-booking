@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { getAbsolvedBookings } from "@/server/queries/absolved-bookings";
 import { AbsolvedBookingsTable } from "@/components/user/absolved-bookings-table";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
 import { db } from "@/lib/db";
+import { getClientAbsolvedBookings } from "@/server/booking/queries";
 
 const PAGE_SIZE = 10;
 
@@ -18,7 +18,7 @@ const Page = async () => {
     }
 
     const [{ rows, total }, paymentSettings] = await Promise.all([
-        getAbsolvedBookings({
+        getClientAbsolvedBookings({
             userId: userSession.user.id,
             page: 1,
             pageSize: PAGE_SIZE,

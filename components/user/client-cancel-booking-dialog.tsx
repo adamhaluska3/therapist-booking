@@ -12,7 +12,8 @@ import { booking, BookingType } from "@/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { cancelClientBooking } from "@/server/actions/index";
+import { cancelClientBooking } from "@/server/booking/mutations";
+import { toast } from "sonner";
 
 export type ClientEditBookingDialogProps = {
   item: InferSelectModel<typeof booking> & { bookingType: BookingType | null };
@@ -29,6 +30,7 @@ export const ClientCancelBookingDialog = ({
     mutationFn: () => cancelClientBooking(item.id),
     onSuccess: (result) => {
       if (!result.ok) throw new Error(result.error ?? "Nepodarilo sa zrušiť rezerváciu.");
+      toast.success("Rezervácia zrušená");
     },
   });
 

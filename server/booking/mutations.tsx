@@ -6,6 +6,7 @@ import { eq, inArray, and, gt, lt, ne } from "drizzle-orm";
 import { account, user } from "@/db/auth-schema";
 import {
   sendBookingCancellationToClient,
+  sendBookingCancellationToTherapist,
   sendBookingConfirmationToClient,
   sendBookingNotificationToTherapist,
   sendBookingRescheduledToClient,
@@ -16,6 +17,7 @@ import { fetchPriceForBookingType } from "../booking-type/queries";
 import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { createMeetLink } from "../utils/meet";
 import { generateVS } from "../utils/payment";
+import { revalidatePath } from "next/cache";
 
 export async function saveBookings(
   upserted: BookingUpsert[],
@@ -380,4 +382,34 @@ export async function createAdminBooking(data: {
       });
     }
   }
+}
+
+export async function cancelClientBooking(
+  bookingId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const authUser = await requireUser();
+
+  const row = await db.query.booking.findFirst({ where: eq(booking.id, bookingId) });
+  if (!row) return { ok: false, error: "Rezervácia sa nenašla." };
+  if (row.userId !== authUser.id) return { ok: false, error: "Nemáte oprávnenie." };
+  if (row.start.getTime() < Date.now() + (2 * 24 * 60 * 60 * 1000)) {
+    return {
+      ok: false,
+      error: "Rezerváciu je možné zrušiť iba do 48 hodín"
+    }
+  }
+
+  await db.update(booking).set({ status: "cancelled" }).where(eq(booking.id, bookingId));
+
+  if (authUser.email) {
+    void sendBookingCancellationToTherapist({
+      clientName: authUser.name,
+      clientEmail: authUser.email,
+      start: row.start,
+      end: row.end,
+    });
+  }
+
+  revalidatePath('/client')
+  return { ok: true };
 }
