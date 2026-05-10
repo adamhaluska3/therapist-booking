@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/lib/db";
 import { BookingUpsert } from "./schema";
-import { booking } from "@/db/schema";
+import { booking, bookingType } from "@/db/schema";
 import { eq, inArray, and, gt, lt, ne } from "drizzle-orm";
 import { user } from "@/db/auth-schema";
 import {
@@ -263,7 +263,7 @@ export async function createClientBooking(
   note?: string | null,
   locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
-  // await requireUser();
+  await requireUser();
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
   const start = new Date(y, m - 1, d, hh, mm, 0, 0);
@@ -285,6 +285,12 @@ export async function createClientBooking(
       end,
       status: "pending",
       userId: userId ?? null,
+      bookingTypeId: await db
+        .select({ id: bookingType.id })
+        .from(bookingType)
+        .where(eq(bookingType.name, "Psychoterapia"))
+        .limit(1)
+        .then((rows) => rows[0]?.id ?? null),
       note: note?.trim() || null,
       locationType,
     })
