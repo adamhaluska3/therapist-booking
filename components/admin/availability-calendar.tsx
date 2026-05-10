@@ -286,7 +286,6 @@ export function AvailabilityCalendar({
           ),
     );
     persistBooking(updatedBooking, isNew, previous?.start);
-
     return true;
   }
 
@@ -307,6 +306,7 @@ export function AvailabilityCalendar({
         const target = moved.find((b) => b.id === event.bookingId)!;
         applyAndPersistBookingChange(target, bookings);
       }
+      toast.success("Zmena uložená");
     },
     [slots, bookings],
   );
@@ -317,6 +317,9 @@ export function AvailabilityCalendar({
       applyAndPersistSlotChange(
         [...slots, { id, start, end, label: null }],
         id,
+      );
+      toast.success(
+        `Dostupný čas ${format(start, "d.M HH:mm")} - ${format(end, "HH:mm")} vytvorený`,
       );
     },
     [slots],
@@ -382,7 +385,12 @@ export function AvailabilityCalendar({
           : null,
       };
       const ok = applyAndPersistBookingChange(savedWithUser, bookings);
-      if (ok) setBookingDialog(null);
+      if (ok) {
+        setBookingDialog(null);
+        toast.success(
+          `Rezervácia ${bookings.some((b) => b.id === saved.id) ? "aktualizovaná" : "vytvorená"}`,
+        );
+      }
     },
     [bookings, users],
   );
@@ -602,7 +610,10 @@ export function AvailabilityCalendar({
           onSave={handleBookingSave}
           onDelete={
             bookingDialog.booking
-              ? () => handleBookingDelete(bookingDialog.booking!.id)
+              ? () => {
+                  handleBookingDelete(bookingDialog.booking!.id);
+                  toast.success("Rezervácia vymazaná");
+                }
               : undefined
           }
           onClose={() => setBookingDialog(null)}

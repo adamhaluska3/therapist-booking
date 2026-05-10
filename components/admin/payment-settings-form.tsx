@@ -62,7 +62,7 @@ export function PaymentSettingsForm({ settings }: Props) {
       });
       toast.success("Platobné nastavenia uložené");
     } catch {
-      toast.error("Nepodarilo sa uložiť nastavenia");
+      toast.error("Nepodarilo sa uložiť nastavenia, skúste to prosím znovu");
     }
   }
 

@@ -24,6 +24,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const nicknameSchema = z.object({
   nickname: z.string().max(100, "Prezývka nesmie byť dlhšia ako 100 znakov"),
@@ -51,10 +52,16 @@ export function NicknameChangeDialog({
 
   async function onSubmit(data: NicknameFormData) {
     startTransition(async () => {
-      await updateUserNickname(userId, data.nickname);
-      setOpen(false);
-      form.reset();
-      router.refresh();
+      try {
+        await updateUserNickname(userId, data.nickname);
+        setOpen(false);
+        form.reset();
+        router.refresh();
+        toast.success("Prezývka aktualizovaná");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa aktualizovať prezývku");
+      }
     });
   }
 

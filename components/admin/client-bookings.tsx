@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { formatTime } from "@/lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
+import { bookingStatusTranslate } from "@/lib/utils";
 
 type BookingItem = {
   id: string;
@@ -93,11 +94,11 @@ export default function ClientBookings({
         header: "Stav",
         meta: { className: "whitespace-nowrap" },
         cell: ({ row }) => {
-          const status = row.original.status;
-
-          return (
-            <div className="text-sm text-muted-foreground">{status ?? "-"}</div>
-          );
+          const status =
+            row.original.status !== undefined && row.original.status !== null
+              ? bookingStatusTranslate(row.original.status)
+              : "-";
+          return <div className="text-sm text-muted-foreground">{status}</div>;
         },
       },
     ],
@@ -112,12 +113,6 @@ export default function ClientBookings({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-
-  const formatSedenia = (n: number) => {
-    if (n === 1) return "sedenie";
-    if (n >= 2 && n <= 4) return "sedenia";
-    return "sedení";
-  };
 
   return (
     <Card>

@@ -41,6 +41,7 @@ import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
 import { BookingType } from "@/db/schema";
 import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
+import { toast } from "sonner";
 
 interface Props {
   bookings: BookingWithUser[];
@@ -72,8 +73,14 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   const handleConfirm = useCallback(
     (id: string) => {
       startTransition(async () => {
-        await confirmBooking(id);
-        router.refresh();
+        try {
+          await confirmBooking(id);
+          router.refresh();
+          toast.success("Žiadosť potvrdená");
+        } catch (e) {
+          console.error(e);
+          toast.error("Nepodarilo sa potvrdiť žiadosť");
+        }
       });
     },
     [router],
@@ -86,9 +93,15 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   function handleCancelConfirm() {
     if (!cancelTarget) return;
     startTransition(async () => {
-      await updateBookingStatus(cancelTarget.id, "cancelled");
-      setCancelTarget(null);
-      router.refresh();
+      try {
+        await updateBookingStatus(cancelTarget.id, "cancelled");
+        setCancelTarget(null);
+        router.refresh();
+        toast.success("Žiadosť zrušená");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa zrušiť žiadosť");
+      }
     });
   }
 
