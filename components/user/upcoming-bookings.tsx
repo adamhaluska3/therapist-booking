@@ -1,6 +1,3 @@
-import { booking } from "@/db/schema";
-import { db } from "@/lib/db";
-import { eq, and, gt, ne } from "drizzle-orm";
 import { SmallInfoText } from "../ui/brand-text-ui/small-info-text";
 import Link from "next/link";
 import { ClosestConfirmedUpcommingBooking } from "./closest-confirmed-upcomming-booking";

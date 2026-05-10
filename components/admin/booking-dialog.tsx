@@ -152,6 +152,8 @@ export function BookingDialog({
       bookingTypeId: selectedBookingTypeId,
       note: note.trim() || null,
       createdAt: booking?.createdAt ?? new Date(),
+      variableSymbol: null,
+      meetLink: null
     });
   }
 

@@ -1,5 +1,4 @@
 'use client'
-import { deletePost, setPublicity } from '@/server/blog/mutations'
 import {
     useReactTable,
     getCoreRowModel,
@@ -7,11 +6,10 @@ import {
     ColumnDef,
     getPaginationRowModel,
 } from '@tanstack/react-table'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2 } from 'lucide-react'
 import Link from 'next/link'
 import { PaginationControls } from './pagination-controls'
 import { useState } from 'react'
-import { Button } from '../ui/button'
 import { RemovePostDialog } from './remove-post-dialog'
 import { PublicityToggle } from './publicity-toggle'
 

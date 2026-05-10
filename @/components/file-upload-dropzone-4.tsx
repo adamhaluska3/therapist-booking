@@ -50,15 +50,14 @@ const Example = () => {
             </p>
           </div>
         </div>
-        <FileUploadTrigger render={<Button size="sm" className="mt-3" />}>Select Images
-                        </FileUploadTrigger>
+        <FileUploadTrigger asChild><Button size="sm" className="mt-3">Select Images</Button></FileUploadTrigger>
       </FileUploadDropzone>
       <FileUploadList>
         {files.map((file, index) => (
           <FileUploadItem key={index} value={file}>
             <FileUploadItemPreview />
             <FileUploadItemMetadata />
-            <FileUploadItemDelete render={<Button variant="ghost" size="icon" className="size-7" />}><X className="size-4" /></FileUploadItemDelete>
+            <FileUploadItemDelete asChild><Button variant="ghost" size="icon" className="size-7"><X className="size-4" /></Button></FileUploadItemDelete>
           </FileUploadItem>
         ))}
       </FileUploadList>
