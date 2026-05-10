@@ -7,7 +7,10 @@ import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
 
-const geist = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-sans" });
+const geist = Geist({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Therapist Booking",
@@ -43,7 +46,7 @@ export default async function RootLayout({
     <html lang="sk" className={cn("font-sans", geist.variable)}>
       <body>
         <UserProvider user={user}>{children}</UserProvider>
-        <Toaster richColors />
+        <Toaster richColors theme="light" />
       </body>
     </html>
   );

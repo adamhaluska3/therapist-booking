@@ -16,6 +16,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { useUser } from "@/lib/user-context";
 import { getInitials } from "@/lib/formatting";
+import { toast } from "sonner";
 
 export function AuthControls() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function AuthControls() {
     await authClient.signOut();
     router.push("/");
     router.refresh();
+    toast.success("Úspešne odhlásený");
   };
 
   if (!user) {

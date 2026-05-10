@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 interface NewEventDialogProps {
   open: boolean;
@@ -50,12 +51,18 @@ export function NewEventDialog({
     const dates = buildDates();
     if (!dates) return;
     onCreateSlot(dates.start, dates.end);
+    toast.success(
+      `Dostupný čas ${format(dates.start, "d.M HH:mm")} - ${format(dates.end, "HH:mm")} vytvorený`,
+    );
   }
 
   function handleBooking() {
     const dates = buildDates();
     if (!dates) return;
     onCreateBooking(dates.start, dates.end);
+    toast.success(
+      `Rezervácia ${format(dates.start, "d.M HH:mm")} - ${format(dates.end, "HH:mm")} vytvorená`,
+    );
   }
 
   return (

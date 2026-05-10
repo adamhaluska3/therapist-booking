@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export function RemoveNicknameButton({ userId }: { userId: string }) {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function RemoveNicknameButton({ userId }: { userId: string }) {
       setOpen(false);
       router.refresh();
     });
+    toast.success("Prezývka odstránená");
   }
 
   return (

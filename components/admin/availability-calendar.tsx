@@ -286,7 +286,6 @@ export function AvailabilityCalendar({
           ),
     );
     persistBooking(updatedBooking, isNew, previous?.start);
-
     return true;
   }
 
@@ -317,6 +316,9 @@ export function AvailabilityCalendar({
       applyAndPersistSlotChange(
         [...slots, { id, start, end, label: null }],
         id,
+      );
+      toast.success(
+        `Dostupný čas ${format(start, "d.M HH:mm")} - ${format(end, "HH:mm")} vytvorený`,
       );
     },
     [slots],
@@ -602,7 +604,10 @@ export function AvailabilityCalendar({
           onSave={handleBookingSave}
           onDelete={
             bookingDialog.booking
-              ? () => handleBookingDelete(bookingDialog.booking!.id)
+              ? () => {
+                  handleBookingDelete(bookingDialog.booking!.id);
+                  toast.success("Rezervácia vymazaná");
+                }
               : undefined
           }
           onClose={() => setBookingDialog(null)}

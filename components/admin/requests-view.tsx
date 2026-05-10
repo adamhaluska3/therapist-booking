@@ -41,6 +41,7 @@ import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
 import { BookingType } from "@/db/schema";
 import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
+import { toast } from "sonner";
 
 interface Props {
   bookings: BookingWithUser[];
@@ -75,6 +76,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         await confirmBooking(id);
         router.refresh();
       });
+      toast.success("Žiadosť potvrdená");
     },
     [router],
   );
@@ -90,6 +92,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
       setCancelTarget(null);
       router.refresh();
     });
+    toast.success("Žiadosť zrušená");
   }
 
   const columns = getRequestsColumns({

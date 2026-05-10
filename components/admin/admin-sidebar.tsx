@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/user-context";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const navItems = [
   { label: "Prehľad", href: "/admin", icon: LayoutGrid },
@@ -50,6 +51,7 @@ function SidebarContent({
     await authClient.signOut();
     router.push("/");
     router.refresh();
+    toast.success("Úspešne odhlásený");
   };
 
   return (

@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type NoteItem = {
   id: string;
@@ -161,18 +162,14 @@ export default function ClientNotes({
         setOpen(false);
         setEditing(null);
       }
+      toast.success("Poznámka vymazaná");
     } catch (e) {
       console.error(e);
       setNotesState(prev);
+      toast.error("Nepodarilo sa vymazať poznámku");
     } finally {
       setPendingDeleteId(null);
     }
-  };
-
-  const formatPoznamky = (n: number) => {
-    if (n === 1) return "poznámka";
-    if (n >= 2 && n <= 4) return "poznámky";
-    return "poznámok";
   };
 
   return (
@@ -309,21 +306,13 @@ export default function ClientNotes({
               if (onUpdate) {
                 await onUpdate(editing.id, text, date);
               } else {
-                await fetch("/api/notes", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    id: editing.id,
-                    userId,
-                    date: (date as Date).toISOString(),
-                    note: text,
-                  }),
-                });
+                
               }
             } catch (e) {
               console.error(e);
               setNotesState(prev);
               setEditing(prevEditing);
+              toast.error("Nepodarilo sa aktualizovat poznámku");
             }
           } else {
             setOpen(false);

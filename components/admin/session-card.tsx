@@ -46,6 +46,7 @@ import {
   updateBookingFromDialog,
   updateBookingStatus,
 } from "@/server/booking/mutations";
+import { toast } from "sonner";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -108,6 +109,9 @@ export function SessionCard({
       await updateBookingStatus(booking.id, confirmDialog);
       setConfirmDialog(null);
       invalidateAndRefresh();
+      toast.success(
+        `Sedenie ${confirmDialog === "finished" ? "označené ako absolvované" : "zrušené"}.`,
+      );
     });
   }
 
@@ -118,14 +122,16 @@ export function SessionCard({
         {
           start: updated.start,
           end: updated.end,
-          userId: updated.userId ?? null,
           bookingTypeId: updated.bookingTypeId ?? null,
+          userId: updated.userId ?? null,
           note: updated.note ?? null,
+          locationType: updated.locationType,
         },
         booking.start,
       );
       setEditOpen(false);
       invalidateAndRefresh();
+      toast.success(`Sedenie aktualizované`);
     });
   }
 
