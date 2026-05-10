@@ -1,5 +1,6 @@
-import { getPendingBookings, getBookingTypes } from "@/server/queries";
+import { getPendingBookings } from "@/server/booking/queries";
 import { RequestsView } from "@/components/admin/requests-view";
+import { getBookingTypes } from "@/server/booking-type/queries";
 
 interface Props {
   searchParams: Promise<{ page?: string }>;
@@ -14,5 +15,12 @@ export default async function RequestsPage({ searchParams }: Props) {
     getBookingTypes(),
   ]);
 
-  return <RequestsView bookings={bookings} total={total} page={page} bookingTypes={bookingTypes} />;
+  return (
+    <RequestsView
+      bookings={bookings}
+      total={total}
+      page={page}
+      bookingTypes={bookingTypes}
+    />
+  );
 }

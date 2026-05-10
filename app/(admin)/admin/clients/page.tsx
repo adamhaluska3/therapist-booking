@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 
 import ClientsTable from "@/components/admin/clients-table";
-import { getClientsTableRows } from "@/server/queries";
+import { getClientsTableRows } from "@/server/user/queries";
 
 export const metadata = {
   title: "Správa klientov",

@@ -1,24 +1,34 @@
-"use client"
+"use client";
 
-import { Loader2 } from "lucide-react"
-import { useInfiniteQuery } from "@tanstack/react-query"
-import { groupByMonth } from "@/lib/date-utils"
-import { fetchFinishedBookings } from "@/server/actions"
-import { ArchiveCard } from "@/components/admin/archive-card"
-import { Button } from "@/components/ui/button"
-import type { BookingType } from "@/db/schema"
+import { Loader2 } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { groupByMonth } from "@/lib/date-utils";
+import { getFinishedBookingsPaginated } from "@/server/booking/queries";
+import { ArchiveCard } from "@/components/admin/archive-card";
+import { Button } from "@/components/ui/button";
+import type { BookingType } from "@/db/schema";
 
-export function SessionsArchiveView({ bookingTypes }: { bookingTypes: BookingType[] }) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteQuery({
-      queryKey: ["finished-bookings"],
-      queryFn: ({ pageParam }) => fetchFinishedBookings(pageParam),
-      initialPageParam: 0,
-      getNextPageParam: (lastPage) => lastPage.nextOffset,
-    })
+export function SessionsArchiveView({
+  bookingTypes,
+}: {
+  bookingTypes: BookingType[];
+}) {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ["finished-bookings"],
+    queryFn: ({ pageParam }) => getFinishedBookingsPaginated(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+  });
 
-  const allBookings = data?.pages.flatMap((p) => p.bookings) ?? []
-  const groups = groupByMonth(allBookings)
+  const allBookings = data?.pages.flatMap((p) => p.bookings) ?? [];
+  const groups = groupByMonth(allBookings);
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -52,7 +62,11 @@ export function SessionsArchiveView({ bookingTypes }: { bookingTypes: BookingTyp
               </h2>
               <div className="flex flex-col gap-3">
                 {items.map((b) => (
-                  <ArchiveCard key={b.id} booking={b} bookingTypes={bookingTypes} />
+                  <ArchiveCard
+                    key={b.id}
+                    booking={b}
+                    bookingTypes={bookingTypes}
+                  />
                 ))}
               </div>
             </section>
@@ -79,5 +93,5 @@ export function SessionsArchiveView({ bookingTypes }: { bookingTypes: BookingTyp
         </div>
       )}
     </div>
-  )
+  );
 }

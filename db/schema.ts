@@ -94,11 +94,6 @@ export type UserNote = typeof userNote.$inferSelect;
 export type PaymentSettings = typeof paymentSettings.$inferSelect;
 export type BookingType = typeof bookingType.$inferSelect;
 
-export type BookingUser = {
-  id: string;
-  name: string;
-  nickname: string | null;
-  email: string;
-};
 
-export type BookingWithUser = Booking & { user: BookingUser | null };
+
+

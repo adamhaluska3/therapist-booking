@@ -110,9 +110,7 @@ export function TimeSlotPanel({
         <p className="text-xs leading-relaxed text-brand-700">{sc.note}</p>
       </div>
 
-      {error && (
-        <p className="text-center text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
       <Button
         disabled={!selectedTime || pending || disableConfirm}
@@ -126,7 +124,12 @@ export function TimeSlotPanel({
         <p className="text-center text-sm text-neutral-500">
           Pre rezerváciu sa musíte{" "}
           <button
-            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/booking" })}
+            onClick={() =>
+              authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/booking",
+              })
+            }
             className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800"
           >
             prihlásiť

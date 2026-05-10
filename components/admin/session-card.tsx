@@ -1,26 +1,35 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { useQueryClient } from "@tanstack/react-query"
-import Link from "next/link"
-import { Check, Video, Pencil, X, Clock, Hash, MessageSquare, MapPin, Monitor, MoreHorizontal } from "lucide-react"
-import type { Booking, BookingType, BookingWithUser } from "@/db/schema"
-import type { UserOption } from "@/server/queries/users"
-import { formatTime, formatMonthShort } from "@/lib/date-utils"
-import { getInitials } from "@/lib/formatting"
-import { updateBookingStatus, updateBookingFromDialog } from "@/server/actions"
-import { UNKNOWN_CLIENT } from "@/lib/constants"
-import { AdminCard } from "@/components/admin/admin-card"
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
-import { BookingDialog } from "@/components/admin/booking-dialog"
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import {
+  Check,
+  Video,
+  Pencil,
+  X,
+  Clock,
+  Hash,
+  MessageSquare,
+  MapPin,
+  Monitor,
+  MoreHorizontal,
+} from "lucide-react";
+import type { Booking, BookingType } from "@/db/schema";
+import { formatTime, formatMonthShort } from "@/lib/date-utils";
+import { getInitials } from "@/lib/formatting";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
+import { AdminCard } from "@/components/admin/admin-card";
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card";
+import { BookingDialog } from "@/components/admin/booking-dialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -29,75 +38,95 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { BookingWithUser } from "@/server/booking/schema";
+import { UserOption } from "@/server/user/schema";
+import {
+  updateBookingFromDialog,
+  updateBookingStatus,
+} from "@/server/booking/mutations";
 
-type ConfirmAction = "finished" | "cancelled"
+type ConfirmAction = "finished" | "cancelled";
 
-const CONFIRM_CONFIG: Record<ConfirmAction, {
-  title: string
-  description: (name: string) => string
-  label: string
-  className: string
-}> = {
+const CONFIRM_CONFIG: Record<
+  ConfirmAction,
+  {
+    title: string;
+    description: (name: string) => string;
+    label: string;
+    className: string;
+  }
+> = {
   finished: {
     title: "Označiť ako absolvované?",
-    description: (name) => `Sedenie s klientom ${name} bude označené ako absolvované a zmizne zo zoznamu.`,
+    description: (name) =>
+      `Sedenie s klientom ${name} bude označené ako absolvované a zmizne zo zoznamu.`,
     label: "Potvrdiť",
     className: "bg-brand-600 hover:bg-brand-700 text-white",
   },
   cancelled: {
     title: "Zrušiť sedenie?",
-    description: (name) => `Sedenie s klientom ${name} bude zrušené a zmizne zo zoznamu.`,
+    description: (name) =>
+      `Sedenie s klientom ${name} bude zrušené a zmizne zo zoznamu.`,
     label: "Zrušiť sedenie",
     className: "bg-red-500 hover:bg-red-600 text-white",
   },
-}
-
+};
 
 export function SessionCard({
   booking,
   bookingTypes,
   users,
 }: {
-  booking: BookingWithUser
-  bookingTypes: BookingType[]
-  users: UserOption[]
+  booking: BookingWithUser;
+  bookingTypes: BookingType[];
+  users: UserOption[];
 }) {
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const [isPending, startTransition] = useTransition()
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(null)
-  const [editOpen, setEditOpen] = useState(false)
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isPending, startTransition] = useTransition();
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmAction | null>(
+    null,
+  );
+  const [editOpen, setEditOpen] = useState(false);
 
-  const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
-  const bookingType = bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null
-  const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null
+  const clientName =
+    booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
+  const bookingType =
+    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+  const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null;
 
   function invalidateAndRefresh() {
-    void queryClient.invalidateQueries({ queryKey: ["dashboard-bookings"] })
-    router.refresh()
+    void queryClient.invalidateQueries({ queryKey: ["dashboard-bookings"] });
+    router.refresh();
   }
 
   function handleConfirm() {
-    if (!confirmDialog) return
+    if (!confirmDialog) return;
     startTransition(async () => {
-      await updateBookingStatus(booking.id, confirmDialog)
-      setConfirmDialog(null)
-      invalidateAndRefresh()
-    })
+      await updateBookingStatus(booking.id, confirmDialog);
+      setConfirmDialog(null);
+      invalidateAndRefresh();
+    });
   }
 
   function handleSave(updated: Booking) {
     startTransition(async () => {
       await updateBookingFromDialog(
         updated.id,
-        { start: updated.start, end: updated.end, userId: updated.userId ?? null, bookingTypeId: updated.bookingTypeId ?? null, note: updated.note ?? null },
+        {
+          start: updated.start,
+          end: updated.end,
+          userId: updated.userId ?? null,
+          bookingTypeId: updated.bookingTypeId ?? null,
+          note: updated.note ?? null,
+        },
         booking.start,
-      )
-      setEditOpen(false)
-      invalidateAndRefresh()
-    })
+      );
+      setEditOpen(false);
+      invalidateAndRefresh();
+    });
   }
 
   return (
@@ -105,8 +134,12 @@ export function SessionCard({
       <AdminCard className="gap-3">
         <div className="flex items-center gap-4">
           <div className="w-12 shrink-0 text-center border-r border-surface-200 pr-4">
-            <p className="text-2xl font-bold text-neutral-800 leading-none">{booking.start.getDate()}</p>
-            <p className="text-[10px] font-medium tracking-widest text-neutral-400 mt-1">{formatMonthShort(booking.start)}</p>
+            <p className="text-2xl font-bold text-neutral-800 leading-none">
+              {booking.start.getDate()}
+            </p>
+            <p className="text-[10px] font-medium tracking-widest text-neutral-400 mt-1">
+              {formatMonthShort(booking.start)}
+            </p>
           </div>
 
           <div className="flex items-center gap-6 flex-1 min-w-0">
@@ -119,10 +152,14 @@ export function SessionCard({
                   {getInitials(clientName)}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate group-hover:text-brand-700 transition-colors">{clientName}</p>
+                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate group-hover:text-brand-700 transition-colors">
+                    {clientName}
+                  </p>
                   <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
                     <Clock size={11} className="shrink-0" />
-                    <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                    <span>
+                      {formatTime(booking.start)} – {formatTime(booking.end)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
@@ -136,10 +173,14 @@ export function SessionCard({
                   {getInitials(clientName)}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">{clientName}</p>
+                  <p className="font-semibold text-neutral-800 text-sm leading-tight truncate">
+                    {clientName}
+                  </p>
                   <div className="flex items-center gap-1 text-xs text-neutral-500 mt-0.5">
                     <Clock size={11} className="shrink-0" />
-                    <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                    <span>
+                      {formatTime(booking.start)} – {formatTime(booking.end)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
@@ -154,7 +195,10 @@ export function SessionCard({
                 <div className="flex items-center gap-1.5 text-sm text-neutral-500">
                   <span
                     className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                    style={{
+                      backgroundColor:
+                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                    }}
                   />
                   <span>{bookingType.name}</span>
                 </div>
@@ -208,7 +252,10 @@ export function SessionCard({
             <div className="flex items-center gap-1.5 text-sm text-neutral-500">
               <span
                 className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                style={{
+                  backgroundColor:
+                    BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                }}
               />
               <span>{bookingType.name}</span>
             </div>
@@ -262,27 +309,44 @@ export function SessionCard({
         users={users}
         bookingTypes={bookingTypes}
         onSave={handleSave}
-        onDelete={() => { setEditOpen(false); setConfirmDialog("cancelled") }}
+        onDelete={() => {
+          setEditOpen(false);
+          setConfirmDialog("cancelled");
+        }}
         onClose={() => setEditOpen(false)}
         onUserCreated={() => {}}
       />
 
-      <Dialog open={confirmDialog !== null} onOpenChange={(open) => { if (!open) setConfirmDialog(null) }}>
+      <Dialog
+        open={confirmDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDialog(null);
+        }}
+      >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>{config?.title}</DialogTitle>
-            <DialogDescription>{config?.description(clientName)}</DialogDescription>
+            <DialogDescription>
+              {config?.description(clientName)}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />} disabled={isPending}>
+            <DialogClose
+              render={<Button variant="outline" />}
+              disabled={isPending}
+            >
               Späť
             </DialogClose>
-            <Button onClick={handleConfirm} disabled={isPending} className={config?.className}>
+            <Button
+              onClick={handleConfirm}
+              disabled={isPending}
+              className={config?.className}
+            >
               {isPending ? "Ukladám..." : config?.label}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

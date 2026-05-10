@@ -52,14 +52,20 @@ export function BookingCalendar({
 
   const prevMonth = useCallback(() => {
     setViewMonth((m) => {
-      if (m === 0) { setViewYear((y) => y - 1); return 11; }
+      if (m === 0) {
+        setViewYear((y) => y - 1);
+        return 11;
+      }
       return m - 1;
     });
   }, []);
 
   const nextMonth = useCallback(() => {
     setViewMonth((m) => {
-      if (m === 11) { setViewYear((y) => y + 1); return 0; }
+      if (m === 11) {
+        setViewYear((y) => y + 1);
+        return 0;
+      }
       return m + 1;
     });
   }, []);
@@ -140,7 +146,12 @@ export function BookingCalendar({
               >
                 {date.getDate()}
                 {available && (
-                  <span className={cn("absolute -bottom-1 left-1/2 h-1 w-4 -translate-x-1/2 rounded-full", isSelected ? "bg-white/70" : "bg-brand-500")} />
+                  <span
+                    className={cn(
+                      "absolute -bottom-1 left-1/2 h-1 w-4 -translate-x-1/2 rounded-full",
+                      isSelected ? "bg-white/70" : "bg-brand-500",
+                    )}
+                  />
                 )}
               </span>
             </button>

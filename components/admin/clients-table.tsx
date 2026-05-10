@@ -17,7 +17,7 @@ import { useDebounce } from "use-debounce";
 
 import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
-import { getClientsTableRows } from "@/server/queries";
+import { getClientsTableRows } from "@/server/user/queries";
 
 type ClientItem = {
   id: string | number;

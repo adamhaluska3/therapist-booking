@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface Props {
-  className?: string
-  children: React.ReactNode
+  className?: string;
+  children: React.ReactNode;
 }
 
 export function AdminCard({ className, children }: Props) {
@@ -15,5 +15,5 @@ export function AdminCard({ className, children }: Props) {
     >
       {children}
     </div>
-  )
+  );
 }

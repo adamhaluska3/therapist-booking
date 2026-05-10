@@ -10,6 +10,8 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-export const db = drizzle(client, { schema: { ...authSchema, ...bookingSchema } });
+export const db = drizzle(client, {
+  schema: { ...authSchema, ...bookingSchema },
+});
 
 export type Database = typeof db;

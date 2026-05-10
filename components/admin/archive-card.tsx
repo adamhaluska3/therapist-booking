@@ -1,18 +1,27 @@
-import Link from "next/link"
-import { Clock, MapPin } from "lucide-react"
-import type { BookingWithUser, BookingType } from "@/db/schema"
-import { formatTime, formatMonthShort } from "@/lib/date-utils"
-import { getInitials } from "@/lib/formatting"
-import { UNKNOWN_CLIENT } from "@/lib/constants"
-import { AdminCard } from "@/components/admin/admin-card"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
+import Link from "next/link";
+import { Clock, MapPin } from "lucide-react";
+import type { BookingWithUser } from "@/server/booking/schema";
+import { formatTime, formatMonthShort } from "@/lib/date-utils";
+import { getInitials } from "@/lib/formatting";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
+import { AdminCard } from "@/components/admin/admin-card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card";
+import { BookingType } from "@/db/schema";
 
-export function ArchiveCard({ booking, bookingTypes }: { booking: BookingWithUser; bookingTypes: BookingType[] }) {
-  const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
-  const isLinked = Boolean(booking.userId)
-  const bookingType = bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null
+export function ArchiveCard({
+  booking,
+  bookingTypes,
+}: {
+  booking: BookingWithUser;
+  bookingTypes: BookingType[];
+}) {
+  const clientName =
+    booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
+  const isLinked = Boolean(booking.userId);
+  const bookingType =
+    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
 
   const inner = (
     <AdminCard
@@ -43,7 +52,10 @@ export function ArchiveCard({ booking, bookingTypes }: { booking: BookingWithUse
               <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                 <span
                   className="inline-block w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                  style={{
+                    backgroundColor:
+                      BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                  }}
                 />
                 <span className="truncate">{bookingType.name}</span>
               </div>
@@ -54,7 +66,13 @@ export function ArchiveCard({ booking, bookingTypes }: { booking: BookingWithUse
         <div className="hidden sm:flex flex-col gap-1 flex-1 min-w-0">
           <div className="flex items-center gap-1.5 text-sm text-neutral-600">
             <Clock size={11} className="shrink-0 text-neutral-400" />
-            <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+            <span>
+              {formatTime(booking.start)} – {formatTime(booking.end)}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+            <MapPin size={11} className="shrink-0 text-neutral-400" />
+            <span>Osobne</span>
           </div>
           <div className="flex items-center gap-1.5 text-sm text-neutral-500">
             <MapPin size={11} className="shrink-0 text-neutral-400" />
@@ -69,15 +87,15 @@ export function ArchiveCard({ booking, bookingTypes }: { booking: BookingWithUse
         </div>
       </div>
     </AdminCard>
-  )
+  );
 
   if (booking.userId) {
     return (
       <Link href={`/admin/clients/${booking.userId}`} className="group block">
         {inner}
       </Link>
-    )
+    );
   }
 
-  return inner
+  return inner;
 }

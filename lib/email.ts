@@ -1,24 +1,29 @@
-import { Resend } from "resend"
-import { generateIcs } from "@/lib/ics"
-import { format } from "date-fns"
-import { sk } from "date-fns/locale"
+import { Resend } from "resend";
+import { generateIcs } from "@/lib/ics";
+import { format } from "date-fns";
+import { sk } from "date-fns/locale";
 
-const EMAILS_ENABLED = process.env.ENABLE_EMAILS === "true"
-const resend = EMAILS_ENABLED ? new Resend(process.env.RESEND_API_KEY) : null
+const EMAILS_ENABLED = process.env.ENABLE_EMAILS === "true";
+const resend = EMAILS_ENABLED ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const FROM = process.env.EMAIL_FROM ?? "noreply@example.com"
-const THERAPIST_EMAIL = process.env.THERAPIST_EMAIL ?? ""
+const FROM = process.env.EMAIL_FROM ?? "noreply@example.com";
+const THERAPIST_EMAIL = process.env.THERAPIST_EMAIL ?? "";
 
 async function send(params: Parameters<Resend["emails"]["send"]>[0]) {
-  if (!resend) return
-  await resend.emails.send(params)
+  if (!resend) return;
+  await resend.emails.send(params);
 }
 
 function formatDateTime(date: Date) {
-  return format(date, "d. MMMM yyyy 'o' HH:mm", { locale: sk })
+  return format(date, "d. MMMM yyyy 'o' HH:mm", { locale: sk });
 }
 
-function buildIcsAttachment(start: Date, end: Date, uid: string, clientEmail?: string) {
+function buildIcsAttachment(
+  start: Date,
+  end: Date,
+  uid: string,
+  clientEmail?: string,
+) {
   const ics = generateIcs({
     uid,
     start,
@@ -27,11 +32,11 @@ function buildIcsAttachment(start: Date, end: Date, uid: string, clientEmail?: s
     description: "Vaše sedenie bolo naplánované.",
     organizerEmail: THERAPIST_EMAIL,
     attendeeEmail: clientEmail,
-  })
+  });
   return {
     filename: "sedenie.ics",
     content: Buffer.from(ics).toString("base64"),
-  }
+  };
 }
 
 export async function sendBookingNotificationToTherapist({
@@ -40,15 +45,15 @@ export async function sendBookingNotificationToTherapist({
   clientName,
   clientEmail,
 }: {
-  start: Date
-  end: Date
-  clientName: string
-  clientEmail?: string
+  start: Date;
+  end: Date;
+  clientName: string;
+  clientEmail?: string;
 }) {
-  if (!THERAPIST_EMAIL) return
+  if (!THERAPIST_EMAIL) return;
 
-  const dateStr = formatDateTime(start)
-  const endTimeStr = format(end, "HH:mm")
+  const dateStr = formatDateTime(start);
+  const endTimeStr = format(end, "HH:mm");
 
   await send({
     from: FROM,
@@ -93,13 +98,17 @@ export async function sendBookingNotificationToTherapist({
                           <span style="font-size:14px;font-weight:600;color:#1f2937;">${clientName}</span>
                         </td>
                       </tr>
-                      ${clientEmail ? `
+                      ${
+                        clientEmail
+                          ? `
                       <tr>
                         <td style="padding:7px 0;border-top:1px solid #ede8df;">
                           <span style="font-size:13px;color:#6b7280;min-width:80px;display:inline-block;">Email</span>
                           <a href="mailto:${clientEmail}" style="font-size:14px;font-weight:600;color:#2d5a3d;text-decoration:none;">${clientEmail}</a>
                         </td>
-                      </tr>` : ""}
+                      </tr>`
+                          : ""
+                      }
                       <tr>
                         <td style="padding:7px 0;border-top:1px solid #ede8df;">
                           <span style="font-size:13px;color:#6b7280;min-width:80px;display:inline-block;">Termín</span>
@@ -134,7 +143,7 @@ export async function sendBookingNotificationToTherapist({
 </body>
 </html>
     `,
-  })
+  });
 }
 
 export async function sendBookingConfirmationToClient({
@@ -144,14 +153,14 @@ export async function sendBookingConfirmationToClient({
   clientName,
   clientEmail,
 }: {
-  bookingId: string
-  start: Date
-  end: Date
-  clientName: string
-  clientEmail: string
+  bookingId: string;
+  start: Date;
+  end: Date;
+  clientName: string;
+  clientEmail: string;
 }) {
-  const dateStr = formatDateTime(start)
-  const endTimeStr = format(end, "HH:mm")
+  const dateStr = formatDateTime(start);
+  const endTimeStr = format(end, "HH:mm");
 
   await send({
     from: FROM,
@@ -232,7 +241,7 @@ export async function sendBookingConfirmationToClient({
 </html>
     `,
     attachments: [buildIcsAttachment(start, end, bookingId, clientEmail)],
-  })
+  });
 }
 
 export async function sendBookingCancellationToClient({
@@ -241,13 +250,13 @@ export async function sendBookingCancellationToClient({
   start,
   end,
 }: {
-  clientName: string
-  clientEmail: string
-  start: Date
-  end: Date
+  clientName: string;
+  clientEmail: string;
+  start: Date;
+  end: Date;
 }) {
-  const dateStr = formatDateTime(start)
-  const endTimeStr = format(end, "HH:mm")
+  const dateStr = formatDateTime(start);
+  const endTimeStr = format(end, "HH:mm");
 
   await send({
     from: FROM,
@@ -331,7 +340,7 @@ export async function sendBookingCancellationToClient({
 </body>
 </html>
     `,
-  })
+  });
 }
 
 export async function sendBookingRescheduledToClient({
@@ -342,16 +351,16 @@ export async function sendBookingRescheduledToClient({
   newStart,
   newEnd,
 }: {
-  clientName: string
-  clientEmail: string
-  bookingId: string
-  oldStart: Date
-  newStart: Date
-  newEnd: Date
+  clientName: string;
+  clientEmail: string;
+  bookingId: string;
+  oldStart: Date;
+  newStart: Date;
+  newEnd: Date;
 }) {
-  const oldDateStr = formatDateTime(oldStart)
-  const newDateStr = formatDateTime(newStart)
-  const newEndTimeStr = format(newEnd, "HH:mm")
+  const oldDateStr = formatDateTime(oldStart);
+  const newDateStr = formatDateTime(newStart);
+  const newEndTimeStr = format(newEnd, "HH:mm");
 
   await send({
     from: FROM,
@@ -436,7 +445,7 @@ export async function sendBookingRescheduledToClient({
 </html>
     `,
     attachments: [buildIcsAttachment(newStart, newEnd, bookingId, clientEmail)],
-  })
+  });
 }
 
 export async function sendContactFormEmail({
@@ -445,14 +454,14 @@ export async function sendContactFormEmail({
   serviceType,
   message,
 }: {
-  name: string
-  email: string
-  serviceType: string
-  message: string
+  name: string;
+  email: string;
+  serviceType: string;
+  message: string;
 }) {
-  if (!THERAPIST_EMAIL) return
+  if (!THERAPIST_EMAIL) return;
 
-  const serviceLabel = serviceType
+  const serviceLabel = serviceType;
 
   await send({
     from: FROM,
@@ -545,5 +554,5 @@ export async function sendContactFormEmail({
 </body>
 </html>
     `,
-  })
+  });
 }

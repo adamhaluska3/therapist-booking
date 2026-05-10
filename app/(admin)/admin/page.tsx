@@ -1,12 +1,12 @@
-import { getBookingTypes } from "@/server/queries"
-import { getAllUsers } from "@/server/queries/users"
-import { DashboardView } from "./_content/dashboard-view"
+import { getBookingTypes } from "@/server/booking-type/queries";
+import { DashboardView } from "./_content/dashboard-view";
+import { getAllUsers } from "@/server/user/queries";
 
 export default async function AdminPage() {
   const [bookingTypes, users] = await Promise.all([
     getBookingTypes(),
     getAllUsers(),
-  ])
+  ]);
 
-  return <DashboardView bookingTypes={bookingTypes} users={users} />
+  return <DashboardView bookingTypes={bookingTypes} users={users} />;
 }

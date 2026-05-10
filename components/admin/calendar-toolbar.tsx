@@ -1,33 +1,39 @@
-"use client"
+"use client";
 
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
-import { format, startOfWeek, endOfWeek } from "date-fns"
-import { sk } from "date-fns/locale"
-import { cn } from "@/lib/utils"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { format, startOfWeek, endOfWeek } from "date-fns";
+import { sk } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
-export type CalendarView = "week" | "day"
+export type CalendarView = "week" | "day";
 
 interface CalendarToolbarProps {
-  date: Date
-  onNavigate: (action: "PREV" | "NEXT" | "TODAY") => void
-  view: CalendarView
-  onViewChange: (view: CalendarView) => void
-  onNewEvent: () => void
+  date: Date;
+  onNavigate: (action: "PREV" | "NEXT" | "TODAY") => void;
+  view: CalendarView;
+  onViewChange: (view: CalendarView) => void;
+  onNewEvent: () => void;
 }
 
-export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEvent }: CalendarToolbarProps) {
-  const weekStart = startOfWeek(date, { weekStartsOn: 1 })
-  const weekEnd   = endOfWeek(date,   { weekStartsOn: 1 })
+export function CalendarToolbar({
+  date,
+  onNavigate,
+  view,
+  onViewChange,
+  onNewEvent,
+}: CalendarToolbarProps) {
+  const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
 
-  let dateLabel: string
+  let dateLabel: string;
   if (view === "day") {
-    dateLabel = format(date, "d. MMMM yyyy", { locale: sk })
-    dateLabel = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)
+    dateLabel = format(date, "d. MMMM yyyy", { locale: sk });
+    dateLabel = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
   } else {
-    const startDay = format(weekStart, "d")
-    const endDay   = format(weekEnd,   "d")
-    const month    = format(weekEnd, "MMMM", { locale: sk })
-    dateLabel = `${startDay}. – ${endDay}. ${month.charAt(0).toUpperCase() + month.slice(1)}`
+    const startDay = format(weekStart, "d");
+    const endDay = format(weekEnd, "d");
+    const month = format(weekEnd, "MMMM", { locale: sk });
+    dateLabel = `${startDay}. – ${endDay}. ${month.charAt(0).toUpperCase() + month.slice(1)}`;
   }
 
   return (
@@ -37,7 +43,9 @@ export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEve
           <h2 className="hidden sm:block text-xl font-semibold text-gray-900">
             Definujte svoje voľné hodiny
           </h2>
-          <div className="text-sm font-medium text-gray-700 sm:text-gray-400 sm:font-normal sm:mt-0.5">{dateLabel}</div>
+          <div className="text-sm font-medium text-gray-700 sm:text-gray-400 sm:font-normal sm:mt-0.5">
+            {dateLabel}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -88,5 +96,5 @@ export function CalendarToolbar({ date, onNavigate, view, onViewChange, onNewEve
         </div>
       </div>
     </div>
-  )
+  );
 }

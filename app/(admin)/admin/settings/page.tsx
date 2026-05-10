@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
-import { getPaymentSettings } from "@/server/queries/payment-settings";
-import { getBookingTypes } from "@/server/queries";
 import { PaymentSettingsForm } from "@/components/admin/payment-settings-form";
 import { BookingTypePricesForm } from "@/components/admin/booking-type-prices-form";
 import { CalendarFeedSection } from "@/components/admin/calendar-feed-section";
+import { getPaymentSettings } from "@/server/payment-settings/queries";
+import { getBookingTypes } from "@/server/booking-type/queries";
 
 export default async function SettingsPage() {
   const [settings, bookingTypes, headersList] = await Promise.all([
@@ -12,12 +12,12 @@ export default async function SettingsPage() {
     headers(),
   ]);
 
-  const token = process.env.CALENDAR_FEED_TOKEN
-  const host = headersList.get("host") ?? ""
-  const protocol = host.startsWith("localhost") ? "http" : "https"
+  const token = process.env.CALENDAR_FEED_TOKEN;
+  const host = headersList.get("host") ?? "";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
   const feedUrl = token
     ? `${protocol}://${host}/api/calendar/feed?token=${token}`
-    : null
+    : null;
 
   return (
     <div className="mx-auto max-w-2xl">

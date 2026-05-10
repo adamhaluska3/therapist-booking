@@ -1,7 +1,7 @@
 import { addDays } from "date-fns";
 import { bookingContent } from "./_content/booking";
 import { BookingWidget } from "@/components/booking/booking-widget";
-import { getBookingSlots } from "@/server/queries/index";
+import { getBookingSlots } from "@/server/booking/queries";
 
 const { hero, main } = bookingContent;
 

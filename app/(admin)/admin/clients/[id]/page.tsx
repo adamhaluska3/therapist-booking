@@ -1,20 +1,13 @@
 import React from "react";
-import { getUserById, getUserNotes, getUserBookings } from "@/server/queries";
-import { saveUserNote, deleteUserNote } from "@/server/actions/notes";
+import { getUserById, getUserBookings } from "@/server/user/queries";
 import ClientBookings from "@/components/admin/client-bookings";
 import { NicknameChangeDialog } from "@/components/admin/nickname-change-dialog";
 import { RemoveNicknameButton } from "@/components/admin/remove-nickname-button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientNotes from "@/components/admin/client-notes";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/formatting";
-import { Button } from "@/components/ui/button";
+import { getUserNotes } from "@/server/user-note/queries";
+import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
 import { RedirectBackButton } from "@/components/admin/redirect-back-button";
 
 type Props = { params: { id: string } };
