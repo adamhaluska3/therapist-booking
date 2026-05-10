@@ -8,17 +8,10 @@ import { ClosestPendingUpcommingBooking } from "./closest-pending-upcoming-booki
 import { UpcomingUserBookingItem } from "./upcoming-booking-item";
 import { ClientPaymentInfo } from "./client-payment-info";
 import { Button } from "../ui/button";
+import { getClientUpcomingSessions } from "@/server/client/queries";
 
 export const UpcomingUserBookings = async ({userId, limit}: {userId: string, limit?: number}) => {
-    const upcomingSessions = await db.query.booking.findMany({
-        where: and(
-            eq(booking.userId, userId),
-            ne(booking.status, "cancelled"),
-            ne(booking.status, "finished")
-        ),
-        with: { bookingType: true },
-        ...(limit ? { limit } : {}),
-    });
+    const upcomingSessions = await getClientUpcomingSessions(userId, limit);
 
     const timeSorted = upcomingSessions.sort((s1, s2) => s1.start < s2.start ? -1 : s1.start === s2.start ? 0 : 1)
     const confirmed = timeSorted.filter(s => s.status === "confirmed")[0] || null;

@@ -7,17 +7,10 @@ import { PreviousUserBookingItem } from "./previous-booking-item";
 import { ClientPaymentInfo } from "./client-payment-info";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
+import { getClientPreviousSessions } from "@/server/client/queries";
 
 export const PreviousUserBookings = async ({userId, limit}: {userId: string, limit?: number}) => {
-    const previousSessions = await db.query.booking.findMany({
-            where: and(
-                eq(booking.userId, userId),
-                eq(booking.status, "finished"),
-            ),
-            with: { bookingType: true },
-            orderBy: desc(booking.start),
-            ...(limit ? { limit } : {}),
-        });
+    const previousSessions = await getClientPreviousSessions(userId, limit);
 
         return (
             <section>
