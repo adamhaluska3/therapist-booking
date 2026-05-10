@@ -8,16 +8,16 @@ import {
   flexRender,
   useReactTable,
 } from "@tanstack/react-table";
-import { getAbsolvedBookings } from "@/server/queries/absolved-bookings";
 import { PaymentSettings } from "@/db/schema";
 import { PaymentInfoDialog } from "./payment-info-dialog";
 import { NoteDialog } from "./note-dialog";
+import { getClientAbsolvedBookings } from "@/server/booking/queries";
 
 function formatPrice(cents: number) {
   return (cents / 100).toLocaleString("sk-SK", { style: "currency", currency: "EUR" });
 }
 
-type Row = Awaited<ReturnType<typeof getAbsolvedBookings>>["rows"][number];
+type Row = Awaited<ReturnType<typeof getClientAbsolvedBookings>>["rows"][number];
 
 interface Props {
   initialRows: Row[];
@@ -111,7 +111,7 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
 
   const navigate = (nextPage: number, nextFrom = from, nextTo = to) => {
     startTransition(async () => {
-      const result = await getAbsolvedBookings({
+      const result = await getClientAbsolvedBookings({
         userId,
         page: nextPage,
         pageSize,
