@@ -424,7 +424,7 @@ export function BookingDialog({
             <Button variant="outline" onClick={onClose}>
               Zrušiť
             </Button>
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={!isEdit && !selectedUserId}>
               {isEdit ? "Uložiť" : "Vytvoriť"}
             </Button>
           </DialogFooter>
