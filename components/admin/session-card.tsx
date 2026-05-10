@@ -221,10 +221,17 @@ export function SessionCard({
           </div>
 
           <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
-            <button className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors">
-              <Video size={13} />
-              <span>Pripojiť sa</span>
-            </button>
+            {booking.locationType === "online" && (
+              <a
+                href={booking.meetLink ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors"
+              >
+                <Video size={13} />
+                <span>Pripojiť sa</span>
+              </a>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors">
                 <MoreHorizontal size={13} />

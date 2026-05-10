@@ -224,7 +224,6 @@ export async function createAdminBooking(data: {
   });
 
   const clientUser = data.userId ? await getUserById(data.userId) : null;
-  // we can validte - when online/on-site will be defined
   const meet = await createMeetLink(data.start.toISOString(), data.end.toISOString(), googleAccount?.refreshToken ?? "", clientUser?.email ?? undefined);
   await db.insert(booking).values({
     id: data.id,
@@ -320,7 +319,6 @@ export async function confirmBooking(id: string): Promise<void> {
   }
 
   const clientUser = b.userId ? await getUserById(b.userId) : null;
-  // we can validte - when online/on-site will be defined
   const meet = await createMeetLink(b.start.toISOString(), b.end.toISOString(), googleAccount?.refreshToken ?? "", clientUser?.email ?? undefined);
 
   await db
