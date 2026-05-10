@@ -3,7 +3,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials } from "@/lib/formatting";
 import { UNKNOWN_CLIENT } from "@/lib/constants";
-import { MessageSquare } from "lucide-react";
+import { MapPin, MessageSquare } from "lucide-react";
 import { BookingWithUser } from "@/server/booking/schema";
 import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
 import { BookingType } from "@/db/schema";

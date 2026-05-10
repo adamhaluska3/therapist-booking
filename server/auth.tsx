@@ -10,7 +10,10 @@ export async function requireAuth() {
 }
 async function requireRole(role: UserRole) {
   const user = await requireAuth();
-  if (user.role !== role) throw new Error("Forbidden");
+  if (user.role !== role)
+    throw new Error(
+      "Forbidden, required role: " + role + ", current role: " + user.role,
+    );
   return user;
 }
 

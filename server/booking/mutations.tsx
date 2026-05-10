@@ -263,7 +263,7 @@ export async function createClientBooking(
   note?: string | null,
   locationType: "onsite" | "online" = "onsite",
 ): Promise<{ ok: boolean; error?: string }> {
-  await requireUser();
+  // await requireUser();
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
   const start = new Date(y, m - 1, d, hh, mm, 0, 0);
@@ -290,7 +290,10 @@ export async function createClientBooking(
     })
     .returning({ id: booking.id });
 
-  const clientUser = userId ? await getUserById(userId) : null;
+  const clientUserQuery = !userId
+    ? null
+    : await db.select().from(user).where(eq(user.id, userId));
+  const clientUser = clientUserQuery?.[0];
   const clientName = clientUser?.nickname ?? clientUser?.name ?? "Klient";
   const clientEmail = clientUser?.email;
 

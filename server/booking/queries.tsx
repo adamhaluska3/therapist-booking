@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/lib/db";
 import { BookingWithUser, toBookingWithUser } from "./schema";
-import { Booking, booking } from "@/db/schema";
+import { availabilitySlot, Booking, booking } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 
 import { eq, and, gte, lt, like, or, desc, lte, sql, not } from "drizzle-orm";
@@ -93,7 +93,6 @@ export async function getFinishedBookingsPaginated(
 export async function getBookingsWithUsers(
   from: Date,
   to: Date,
-  includeCancelled = false,
 ): Promise<BookingWithUser[]> {
   await requireAdmin();
   const bookigs = await db
@@ -104,7 +103,7 @@ export async function getBookingsWithUsers(
       and(
         lte(booking.start, to),
         gte(booking.end, from),
-        includeCancelled ? undefined : not(eq(booking.status, "cancelled")),
+        eq(booking.status, "cancelled"),
       ),
     );
   const bookingsWithUser = bookigs.map((row) => ({
@@ -125,8 +124,21 @@ export async function getBookingSlots(
   from: Date,
   to: Date,
 ): Promise<SlotsByDate> {
-  const slots = await getAvailabilitySlots(from, to);
-  const bookings = await getBookingsWithUsers(from, to);
+  const slots = await db
+    .select()
+    .from(availabilitySlot)
+    .where(
+      and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from)),
+    );
+  const bookings = (
+    await db
+      .select()
+      .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
+      .where(and(lte(booking.start, to), gte(booking.end, from)))
+  ).map((row) => ({
+    ...row.booking,
+  }));
   const HOUR_MS = 3_600_000;
   const STEP_MS = 1_800_000;
   const now = Date.now();

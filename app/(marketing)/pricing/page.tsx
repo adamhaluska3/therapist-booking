@@ -1,12 +1,16 @@
-import { Info } from "lucide-react"
-import { getBookingTypes } from "@/server/queries"
-import { PricingTable } from "@/components/marketing/pricing-table"
+import { Info } from "lucide-react";
+import { PricingTable } from "@/components/marketing/pricing-table";
+import { getBookingTypes } from "@/server/booking-type/queries";
 
 export default async function PricingPage() {
-  const allServices = await getBookingTypes()
+  const allServices = await getBookingTypes();
   const services = [...allServices].sort((a, b) =>
-    a.name.toLowerCase() === "psychoterapia" ? -1 : b.name.toLowerCase() === "psychoterapia" ? 1 : 0
-  )
+    a.name.toLowerCase() === "psychoterapia"
+      ? -1
+      : b.name.toLowerCase() === "psychoterapia"
+        ? 1
+        : 0,
+  );
 
   return (
     <section className="bg-linear-to-b from-white to-surface-100">
@@ -33,5 +37,5 @@ export default async function PricingPage() {
         </div>
       </div>
     </section>
-  )
+  );
 }
