@@ -10,7 +10,7 @@ import { getUserNotes } from "@/server/user-note/queries";
 import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
 import { RedirectBackButton } from "@/components/admin/redirect-back-button";
 
-type Props = { params: { id: string } };
+type Props = { params: Promise<{ id: string }> };
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
@@ -18,11 +18,6 @@ export default async function Page({ params }: Props) {
     getUserById(id),
     getUserBookings(id),
   ]);
-
-  async function redirectBack() {
-    "use server";
-    navigation.back();
-  }
 
   if (!user) return <div className="p-6">Klient nenájdený</div>;
 
@@ -84,7 +79,7 @@ export default async function Page({ params }: Props) {
 
         <div className="flex w-full flex-col gap-6 lg:col-span-8">
           <ClientBookings
-            bookings={bookings.map((b: any) => ({
+            bookings={bookings.map((b) => ({
               id: b.id,
               start: b.start,
               end: b.end,

@@ -18,9 +18,10 @@ export function ImageCarousel({
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }) {
-  if (images.length === 0) return null;
-
-  const slides = [images[images.length - 1], ...images, images[0]];
+  const slides =
+    images.length > 0
+      ? [images[images.length - 1], ...images, images[0]]
+      : [];
 
   const [index, setIndex] = useState(1);
   const [animated, setAnimated] = useState(true);
@@ -72,6 +73,8 @@ export function ImageCarousel({
       return () => cancelAnimationFrame(raf);
     }
   }, [animated]);
+
+  if (images.length === 0) return null;
 
   const realIndex =
     index === 0
