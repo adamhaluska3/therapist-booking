@@ -289,32 +289,7 @@ export function AvailabilityCalendar({
     return true;
   }
 
-  const handleEventDrop = useCallback(
-    ({ event, start }: EventInteractionArgs<TherapistEvent>) => {
-      if (event.source === "slot" && event.slotId && event.isDraggable) {
-        const original = slots.find((s) => s.id === event.slotId)!;
-        const duration = original.end.getTime() - original.start.getTime();
-        const newStart = start as Date;
-        const newEnd = new Date(newStart.getTime() + duration);
-        applyAndPersistSlotChange(
-          applySlotMove(slots, event.slotId, newStart, newEnd),
-          event.slotId,
-        );
-      } else if (event.source === "booking" && event.bookingId) {
-        const original = bookings.find((b) => b.id === event.bookingId)!;
-        const duration = original.end.getTime() - original.start.getTime();
-        const newStart = start as Date;
-        const newEnd = new Date(newStart.getTime() + duration);
-        const moved = applyBookingMove(bookings, event.bookingId, newStart, newEnd);
-        const target = moved.find((b) => b.id === event.bookingId)!;
-        applyAndPersistBookingChange(target, bookings);
-      }
-      toast.success("Zmena uložená");
-    },
-    [slots, bookings],
-  );
-
-  const handleEventResize = useCallback(
+  const handleEventInteraction = useCallback(
     ({ event, start, end }: EventInteractionArgs<TherapistEvent>) => {
       if (event.source === "slot" && event.slotId && event.isDraggable) {
         applyAndPersistSlotChange(
@@ -322,7 +297,12 @@ export function AvailabilityCalendar({
           event.slotId,
         );
       } else if (event.source === "booking" && event.bookingId) {
-        const moved = applyBookingMove(bookings, event.bookingId, start as Date, end as Date);
+        const moved = applyBookingMove(
+          bookings,
+          event.bookingId,
+          start as Date,
+          end as Date,
+        );
         const target = moved.find((b) => b.id === event.bookingId)!;
         applyAndPersistBookingChange(target, bookings);
       }
@@ -564,8 +544,8 @@ export function AvailabilityCalendar({
           onView={() => {}}
           selectable={!isMobile}
           resizable
-          onEventDrop={handleEventDrop}
-          onEventResize={handleEventResize}
+          onEventDrop={handleEventInteraction}
+          onEventResize={handleEventInteraction}
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
           components={components}
