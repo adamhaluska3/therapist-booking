@@ -1,0 +1,214 @@
+"use server";
+import { db } from "@/lib/db";
+import { BookingWithUser, toBookingWithUser } from "./schema";
+import { availabilitySlot, Booking, booking } from "@/db/schema";
+import { user } from "@/db/auth-schema";
+
+import { eq, and, gte, lt, like, or, desc, lte, sql, not } from "drizzle-orm";
+import {
+  BOOKINGS_PAGE_SIZE,
+  DASHBOARD_PAGE_SIZE,
+  SESSIONS_PAGE_SIZE,
+} from "@/lib/constants";
+import { SlotsByDate, toDateKey } from "@/lib/booking-types";
+import { cache } from "react";
+import { getAvailabilitySlots } from "../availability-slots/queries";
+import { requireAdmin } from "../auth";
+
+export async function getDashboardBookings(): Promise<BookingWithUser[]> {
+  await requireAdmin();
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const rows = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(
+      and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")),
+    )
+    .orderBy(booking.start);
+
+  return rows.map(toBookingWithUser);
+}
+
+export async function getDashboardBookingsFiltered(
+  offset: number,
+  search = "",
+  from?: Date,
+  to?: Date,
+): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
+  await requireAdmin();
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const items = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(
+      and(
+        gte(booking.start, from ?? startOfToday),
+        to ? lt(booking.start, to) : undefined,
+        eq(booking.status, "confirmed"),
+        search
+          ? or(
+              like(user.name, `%${search}%`),
+              like(user.nickname, `%${search}%`),
+            )
+          : undefined,
+      ),
+    )
+    .orderBy(booking.start)
+    .limit(DASHBOARD_PAGE_SIZE + 1)
+    .offset(offset);
+
+  const hasMore = items.length > DASHBOARD_PAGE_SIZE;
+  return {
+    bookings: items.slice(0, DASHBOARD_PAGE_SIZE).map(toBookingWithUser),
+    nextOffset: hasMore ? offset + DASHBOARD_PAGE_SIZE : undefined,
+  };
+}
+
+export async function getFinishedBookingsPaginated(
+  offset: number,
+): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
+  await requireAdmin();
+  const items = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(eq(booking.status, "finished"))
+    .orderBy(desc(booking.start))
+    .limit(SESSIONS_PAGE_SIZE + 1)
+    .offset(offset);
+
+  const hasMore = items.length > SESSIONS_PAGE_SIZE;
+  return {
+    bookings: items.slice(0, SESSIONS_PAGE_SIZE).map(toBookingWithUser),
+    nextOffset: hasMore ? offset + SESSIONS_PAGE_SIZE : undefined,
+  };
+}
+
+export async function getBookingsWithUsers(
+  from: Date,
+  to: Date,
+): Promise<BookingWithUser[]> {
+  await requireAdmin();
+  const bookigs = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(
+      and(
+        lte(booking.start, to),
+        gte(booking.end, from),
+        eq(booking.status, "cancelled"),
+      ),
+    );
+  const bookingsWithUser = bookigs.map((row) => ({
+    ...row.booking,
+    user: row.user
+      ? {
+          id: row.user.id,
+          name: row.user.name,
+          nickname: row.user.nickname,
+          email: row.user.email,
+        }
+      : null,
+  }));
+  return bookingsWithUser;
+}
+
+export async function getBookingSlots(
+  from: Date,
+  to: Date,
+): Promise<SlotsByDate> {
+  const slots = await db
+    .select()
+    .from(availabilitySlot)
+    .where(
+      and(lte(availabilitySlot.start, to), gte(availabilitySlot.end, from)),
+    );
+  const bookings = (
+    await db
+      .select()
+      .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
+      .where(and(lte(booking.start, to), gte(booking.end, from)))
+  ).map((row) => ({
+    ...row.booking,
+  }));
+  const HOUR_MS = 3_600_000;
+  const STEP_MS = 1_800_000;
+  const now = Date.now();
+  const result: SlotsByDate = {};
+
+  for (const slot of slots) {
+    let cursor = new Date(slot.start);
+    const slotEnd = slot.end.getTime();
+
+    while (cursor.getTime() + HOUR_MS <= slotEnd) {
+      if (cursor.getTime() >= now) {
+        const end = new Date(cursor.getTime() + HOUR_MS);
+
+        const available = !bookings.some(
+          (b) =>
+            b.start.getTime() < end.getTime() &&
+            b.end.getTime() > cursor.getTime(),
+        );
+
+        const dateKey = toDateKey(cursor);
+        const time = `${String(cursor.getHours()).padStart(2, "0")}:${String(cursor.getMinutes()).padStart(2, "0")}`;
+
+        (result[dateKey] ??= []).push({ time, available });
+      }
+      cursor = new Date(cursor.getTime() + STEP_MS);
+    }
+  }
+
+  return result;
+}
+
+export const getPendingCount = cache(async (): Promise<number> => {
+  await requireAdmin();
+  const [{ total }] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(booking)
+    .where(eq(booking.status, "pending"));
+  return Number(total);
+});
+
+export async function getPendingBookings(page = 1): Promise<{
+  bookings: BookingWithUser[];
+  total: number;
+}> {
+  await requireAdmin();
+  const offset = (page - 1) * BOOKINGS_PAGE_SIZE;
+
+  const [items, [{ total }]] = await Promise.all([
+    db
+      .select()
+      .from(booking)
+      .leftJoin(user, eq(booking.userId, user.id))
+      .where(eq(booking.status, "pending"))
+      .orderBy(booking.start)
+      .limit(BOOKINGS_PAGE_SIZE)
+      .offset(offset),
+    db
+      .select({ total: sql<number>`count(*)` })
+      .from(booking)
+      .where(eq(booking.status, "pending")),
+  ]);
+
+  return { bookings: items.map(toBookingWithUser), total: Number(total) };
+}
+
+export async function getFinishedBookings(): Promise<Booking[]> {
+  await requireAdmin();
+  return db
+    .select()
+    .from(booking)
+    .where(eq(booking.status, "finished"))
+    .orderBy(desc(booking.start));
+}
