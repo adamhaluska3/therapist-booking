@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Globe,
+  LucideBookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/user-context";
@@ -33,6 +34,7 @@ const navItems = [
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
+  { label: "Kategórie príspevkov", href: "/admin/post-categories", icon: LucideBookmark },
   { label: "Nastavenia", href: "/admin/settings", icon: Settings },
 ];
 

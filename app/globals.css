@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -146,4 +147,15 @@
   html {
     @apply font-sans;
   }
+}
+
+.prose :where(p) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose :where(p, li, blockquote, h1, h2, h3, h4, h5, h6, td, th) {
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  hyphens: none !important;
 }
