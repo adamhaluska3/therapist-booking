@@ -23,7 +23,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { addCategory, AddCategoryFormData } from "@/server/actions/postCategory";
+import { addCategory, AddCategoryFormData } from "@/server/postCategory/mutations";
 import { addCategorySchema } from "@/lib/schemas/post-category";
 import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";

@@ -1,6 +1,6 @@
 "use client";
 
-import { setPublicity } from "@/server/actions/blog";
+import { setPublicity } from "@/server/blog/mutations";
 import { cn } from "@/lib/utils";
 
 export function PublicityToggle({ id, isPublic }: { id: string; isPublic: boolean }) {

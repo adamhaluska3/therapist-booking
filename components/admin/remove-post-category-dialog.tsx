@@ -15,7 +15,7 @@ import { PostCategory } from "@/db/schema";
 import { CategoryCombobox } from "./category-combobox";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { removeCategory } from "@/server/actions/postCategory";
+import { removeCategory } from "@/server/postCategory/mutations";
 
 export const RemovePostCategoryDialog = ({id, name, categories}: {id: string, name: string, categories: PostCategory[]}) => {
     const [open, setOpen] = useState(false)

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@base-ui/react";
 import 'react-quill-new/dist/quill.snow.css'
 import dynamic from "next/dynamic";
-import { createPost, updatePost } from "@/server/actions/blog";
+import { createPost, updatePost } from "@/server/blog/mutations";
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from "@/lib/utils";

@@ -10,6 +10,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { PcCase } from 'lucide-react'
 import z from 'zod'
+import { requireAdmin } from '../auth'
 
 const toSlug = (title: string) => {
   return title
@@ -35,6 +36,7 @@ export async function createPost(data: {
   isPublic: boolean
   titleImage?: File | null
 }) {
+    await requireAdmin();
     let titleImage: string | null = null
 
     if (data.titleImage && data.titleImage.size > 0) {
@@ -68,6 +70,7 @@ export async function updatePost(id: string, data: {
   existingTitleImage?: string | null
   removeTitleImage?: boolean
 }) {
+  await requireAdmin();
   let titleImage = data.existingTitleImage ?? null
 
   if (data.removeTitleImage && data.existingTitleImage) {
@@ -101,11 +104,13 @@ export async function updatePost(id: string, data: {
 }
 
 export const deletePost = async (id: string) => {
+    await requireAdmin();
     await db.delete(posts).where(eq(posts.id, id))
     revalidatePath('/admin/blog')
 }
 
 export const setPublicity = async (id: string, isPublic: boolean) => {
+    await requireAdmin();
     await db.update(posts).set({isPublic}).where(eq(posts.id, id));
     revalidatePath('/admin/blog')
     revalidatePath(`/admin/blog/${isPublic}`)

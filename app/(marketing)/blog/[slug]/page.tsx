@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
+import { and } from "drizzle-orm";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -13,7 +14,7 @@ export async function generateStaticParams() {
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
   const post = await db.query.posts.findFirst({
-    where: (fields, { eq }) => eq(fields.slug, slug),
+    where: (fields, { eq }) => and(eq(fields.slug, slug), eq(fields.isPublic, true)),
     with: { category: true }
   })
 

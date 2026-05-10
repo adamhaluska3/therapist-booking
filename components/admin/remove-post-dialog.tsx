@@ -1,6 +1,6 @@
 "use client"
 
-import { deletePost } from "@/server/actions/blog"
+import { deletePost } from "@/server/blog/mutations"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import {

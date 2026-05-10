@@ -1,5 +1,5 @@
 'use client'
-import { deletePost, setPublicity } from '@/server/actions/blog'
+import { deletePost, setPublicity } from '@/server/blog/mutations'
 import {
     useReactTable,
     getCoreRowModel,

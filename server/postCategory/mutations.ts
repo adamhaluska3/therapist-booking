@@ -6,6 +6,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { addCategorySchema, type AddCategoryFormData } from "@/lib/schemas/post-category";
 import type { PostCategory } from "@/db/schema";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "../auth";
 
 export type { AddCategoryFormData };
 
@@ -17,6 +18,7 @@ export type AddCategoryResponse = {
     error: string
 }
 export const addCategory = async (anyData: any): Promise<AddCategoryResponse> => {
+    await requireAdmin();
     const data = addCategorySchema.safeParse(anyData);
     if (data.error) {
         return {result: false, error: data.error.message}
@@ -44,6 +46,7 @@ export type EditCategoryResponse = {
 }
 
 export const editCategory = async (id: string, anyData: any): Promise<EditCategoryResponse> => {
+    await requireAdmin();
     const data = addCategorySchema.safeParse(anyData);
     if (data.error) {
         return {result: false, error: data.error.message}
@@ -71,6 +74,7 @@ export type RemoveCategoryResponse = {
 }
 
 export const removeCategory = async (id: string, newCategory: PostCategory | null): Promise<RemoveCategoryResponse> => {
+    await requireAdmin();
     if (id === newCategory?.id) {
         return {result: false, error: "Vyberte inú kategóriu"}
     }

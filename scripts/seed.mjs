@@ -263,7 +263,7 @@ async function main() {
       title: "Ako sa pripraviť na prvé terapeutické sedenie",
       description: "Prvé stretnutie s terapeutom môže byť nervózne. Tu je niekoľko tipov, ako sa naň pripraviť a čo očakávať.",
       content: "<p>Prvé sedenie je predovšetkým spoznávanie – terapeut sa vám bude chcieť dozvedieť viac o vás a o dôvode, prečo ste prišli. Nemusíte mať pripravené odpovede na všetky otázky.</p><p>Odporúčame si vopred premyslieť, čo vás trápi najviac a čo by ste chceli v terapii dosiahnuť. Pamätajte, že terapia je spolupráca – váš terapeut je tu na to, aby vám pomohol, nie aby vás hodnotil.</p>",
-      slug: "prvé-terapeuticke-sedenie",
+      slug: "prve-terapeuticke-sedenie",
       titleImage: "/uploads/seed-blog-5.png",
       categoryId: null,
       isPublic: 1,
