@@ -23,11 +23,16 @@ export function RemoveNicknameButton({ userId }: { userId: string }) {
 
   async function handleRemove() {
     startTransition(async () => {
-      await updateUserNickname(userId, "");
-      setOpen(false);
-      router.refresh();
+      try {
+        await updateUserNickname(userId, "");
+        setOpen(false);
+        router.refresh();
+        toast.success("Prezývka odstránená");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa odstrániť prezývku");
+      }
     });
-    toast.success("Prezývka odstránená");
   }
 
   return (

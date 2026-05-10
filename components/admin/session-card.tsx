@@ -105,33 +105,48 @@ export function SessionCard({
 
   function handleConfirm() {
     if (!confirmDialog) return;
+    const action = confirmDialog;
     startTransition(async () => {
-      await updateBookingStatus(booking.id, confirmDialog);
-      setConfirmDialog(null);
-      invalidateAndRefresh();
-      toast.success(
-        `Sedenie ${confirmDialog === "finished" ? "označené ako absolvované" : "zrušené"}.`,
-      );
+      try {
+        await updateBookingStatus(booking.id, action);
+        setConfirmDialog(null);
+        invalidateAndRefresh();
+        toast.success(
+          `Sedenie ${action === "finished" ? "označené ako absolvované" : "zrušené"}.`,
+        );
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa aktualizovať sedenie");
+      }
     });
   }
 
   function handleSave(updated: Booking) {
     startTransition(async () => {
-      await updateBookingFromDialog(
-        updated.id,
-        {
-          start: updated.start,
-          end: updated.end,
-          bookingTypeId: updated.bookingTypeId ?? null,
-          userId: updated.userId ?? null,
-          note: updated.note ?? null,
-          locationType: updated.locationType,
-        },
-        booking.start,
-      );
-      setEditOpen(false);
-      invalidateAndRefresh();
-      toast.success(`Sedenie aktualizované`);
+      try {
+        const result = await updateBookingFromDialog(
+          updated.id,
+          {
+            start: updated.start,
+            end: updated.end,
+            userId: updated.userId ?? null,
+            bookingTypeId: updated.bookingTypeId ?? null,
+            note: updated.note ?? null,
+            locationType: updated.locationType,
+          },
+          booking.start,
+        );
+        if (!result.ok) {
+          toast.error(result.error ?? "Nepodarilo sa uložiť sedenie");
+          return;
+        }
+        setEditOpen(false);
+        invalidateAndRefresh();
+        toast.success("Sedenie aktualizované");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa uložiť sedenie");
+      }
     });
   }
 

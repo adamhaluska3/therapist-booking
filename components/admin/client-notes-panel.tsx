@@ -95,6 +95,7 @@ export function ClientNotesPanel({
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(row.original)}
+            disabled={isPending}
           >
             Detail
           </Button>
@@ -102,6 +103,7 @@ export function ClientNotesPanel({
             variant="destructive"
             size="sm"
             onClick={() => confirmDelete(row.original.id)}
+            disabled={isPending}
           >
             Vymazať
           </Button>
@@ -199,7 +201,7 @@ export function ClientNotesPanel({
         </CardHeader>
         <CardContent>
           <div className="mb-3 flex justify-end">
-            <Button variant="outline" onClick={openNew}>
+            <Button variant="outline" onClick={openNew} disabled={isPending}>
               + Pridať poznámku
             </Button>
           </div>

@@ -384,7 +384,12 @@ export function AvailabilityCalendar({
           : null,
       };
       const ok = applyAndPersistBookingChange(savedWithUser, bookings);
-      if (ok) setBookingDialog(null);
+      if (ok) {
+        setBookingDialog(null);
+        toast.success(
+          `Rezervácia ${bookings.some((b) => b.id === saved.id) ? "aktualizovaná" : "vytvorená"}`,
+        );
+      }
     },
     [bookings, users],
   );

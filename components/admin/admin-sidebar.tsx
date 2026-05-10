@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -46,12 +46,20 @@ function SidebarContent({
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
+  const [isPending, startTransition] = useTransition();
 
-  const handleLogout = async () => {
-    await authClient.signOut();
-    router.push("/");
-    router.refresh();
-    toast.success("Úspešne odhlásený");
+  const handleLogout = () => {
+    startTransition(async () => {
+      try {
+        await authClient.signOut();
+        router.push("/");
+        router.refresh();
+        toast.success("Úspešne odhlásený");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa odhlásiť");
+      }
+    });
   };
 
   return (
@@ -125,7 +133,8 @@ function SidebarContent({
             </div>
             <button
               onClick={handleLogout}
-              className="shrink-0 rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-100 hover:text-neutral-700"
+              disabled={isPending}
+              className="shrink-0 rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-100 hover:text-neutral-700 disabled:opacity-50"
               title="Odhlásiť sa"
             >
               <LogOut size={16} />

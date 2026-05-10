@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 export function AuthControls() {
   const router = useRouter();
   const { user } = useUser();
+  const [isPending, setIsPending] = useState(false);
 
   const handleGoogleLogin = async () => {
     await authClient.signIn.social({
@@ -30,10 +32,18 @@ export function AuthControls() {
   };
 
   const handleLogout = async () => {
-    await authClient.signOut();
-    router.push("/");
-    router.refresh();
-    toast.success("Úspešne odhlásený");
+    setIsPending(true);
+    try {
+      await authClient.signOut();
+      router.push("/");
+      router.refresh();
+      toast.success("Úspešne odhlásený");
+    } catch (e) {
+      console.error(e);
+      toast.error("Nepodarilo sa odhlásiť");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   if (!user) {
@@ -64,9 +74,9 @@ export function AuthControls() {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
+          <DropdownMenuItem onClick={handleLogout} disabled={isPending}>
             <LogOut size={16} className="mr-2" />
-            Odhlásiť sa
+            {isPending ? "Odhlasovanie..." : "Odhlásiť sa"}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

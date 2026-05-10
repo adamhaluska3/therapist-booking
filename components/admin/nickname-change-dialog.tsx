@@ -52,12 +52,17 @@ export function NicknameChangeDialog({
 
   async function onSubmit(data: NicknameFormData) {
     startTransition(async () => {
-      await updateUserNickname(userId, data.nickname);
-      setOpen(false);
-      form.reset();
-      router.refresh();
+      try {
+        await updateUserNickname(userId, data.nickname);
+        setOpen(false);
+        form.reset();
+        router.refresh();
+        toast.success("Prezývka aktualizovaná");
+      } catch (e) {
+        console.error(e);
+        toast.error("Nepodarilo sa aktualizovať prezývku");
+      }
     });
-    toast.success("Prezývka aktualizována");
   }
 
   return (
