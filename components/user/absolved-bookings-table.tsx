@@ -39,7 +39,7 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = Math.min(page * pageSize, total);
 
-  const columns = useMemo<ColumnDef<Row, any>[]>(
+  const columns = useMemo<ColumnDef<Row, unknown>[]>(
     () => [
       {
         accessorKey: "bookingTypeName",

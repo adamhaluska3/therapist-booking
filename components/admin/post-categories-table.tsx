@@ -1,7 +1,7 @@
 "use client";
 
 import { PostCategory } from "@/db/schema";
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { EditCategoryDialog } from "./edit-category-dialog";
 import { Edit2 } from "lucide-react";
@@ -10,8 +10,8 @@ import { PaginationControls } from "./pagination-controls";
 
 
 export const PostCategoriesTable = ({categories}: {categories: PostCategory[]}) => {
-    const [sorting, setSorting] = useState<any>([]);
-    const columns = useMemo<ColumnDef<PostCategory, any>[]>(
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const columns = useMemo<ColumnDef<PostCategory>[]>(
         () => [
           {
             id: "name",
