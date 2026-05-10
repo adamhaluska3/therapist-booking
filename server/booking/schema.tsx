@@ -30,3 +30,14 @@ export function toBookingWithUser(row: {
       : null,
   };
 }
+
+export type ClientAbsolvedBookingRow = {
+  id: string;
+  start: Date;
+  end: Date;
+  bookingTypeName: string | null;
+  variableSymbol: number | null;
+  price: number | null;
+  locationType: string;
+  note: string | null;
+};

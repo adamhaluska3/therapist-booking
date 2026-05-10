@@ -64,12 +64,16 @@ export function PayBySquareQr({ payment, size = 300 }: Props) {
   const url = buildUrl(payment, size);
 
   return (
-    <img
-      src={url}
-      alt="Pay by Square QR"
-      width={size}
-      height={size}
-      style={{ display: "block", background: "#fff" }}
-    />
+    <div className="overflow-hidden relative" style={{ width: size, height: size }}>
+      <img
+        src={url}
+        alt="Pay by Square QR"
+        width={size}
+        height={size}
+        style={{ display: "block", background: "#fff" }}
+        className="absolute left-0 top-0 object-contain scale-111"
+      />
+    </div>
+    
   );
 }
