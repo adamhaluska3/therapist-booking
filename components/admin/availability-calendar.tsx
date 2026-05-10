@@ -306,6 +306,7 @@ export function AvailabilityCalendar({
         const target = moved.find((b) => b.id === event.bookingId)!;
         applyAndPersistBookingChange(target, bookings);
       }
+      toast.success("Zmena uložená");
     },
     [slots, bookings],
   );

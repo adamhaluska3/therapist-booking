@@ -1,4 +1,4 @@
-import { getUserNotes } from "@/server/queries/notes";
+import { getUserNotes } from "@/server/user-note/queries";
 import { ClientNotesPanel } from "./client-notes-panel";
 
 export default async function ClientNotes({ userId }: { userId: string }) {
@@ -6,7 +6,11 @@ export default async function ClientNotes({ userId }: { userId: string }) {
   return (
     <ClientNotesPanel
       userId={userId}
-      initialNotes={notes.map((n) => ({ id: n.id, date: n.date, note: n.note }))}
+      initialNotes={notes.map((n) => ({
+        id: n.id,
+        date: n.date,
+        note: n.note,
+      }))}
     />
   );
 }

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import NoteEditorOverlay from "@/components/admin/note-editor-overlay";
-import { saveUserNote, deleteUserNote } from "@/server/actions/notes";
+import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
 
 type NoteItem = {
   id: string;
