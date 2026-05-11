@@ -6,10 +6,7 @@ import { writeFile, unlink } from 'fs/promises'
 import path from 'path'
 import { randomBytes } from 'crypto'
 import { eq } from 'drizzle-orm'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { PcCase } from 'lucide-react'
-import z from 'zod'
 import { requireAdmin } from '../auth'
 
 const toSlug = (title: string) => {
@@ -35,8 +32,17 @@ export async function createPost(data: {
   categoryId: string | null
   isPublic: boolean
   titleImage?: File | null
-}) {
+}): Promise<{ success: false; error: string } | { success: true }> {
     await requireAdmin();
+
+    const slug = generateSlug(data.title, data.isPublic)
+    const existing = await db.query.posts.findFirst({
+      where: eq(posts.slug, slug),
+    })
+    if (existing) {
+      return { success: false, error: 'Príspevok s podobným názvom už je zverejnený.' }
+    }
+
     let titleImage: string | null = null
 
     if (data.titleImage && data.titleImage.size > 0) {
@@ -54,10 +60,10 @@ export async function createPost(data: {
         categoryId: data.categoryId,
         isPublic: data.isPublic,
         titleImage,
-        slug: generateSlug(data.title, data.isPublic),
+        slug: slug,
     });
 
-    redirect("/admin/blog")
+    return { success: true }
 }
 
 export async function updatePost(id: string, data: {
@@ -69,8 +75,17 @@ export async function updatePost(id: string, data: {
   titleImage?: File | null
   existingTitleImage?: string | null
   removeTitleImage?: boolean
-}) {
+}): Promise<{ success: false; error: string } | { success: true }> {
   await requireAdmin();
+
+  const slug = generateSlug(data.title, data.isPublic)
+  const conflict = await db.query.posts.findFirst({
+    where: eq(posts.slug, slug),
+  })
+  if (conflict && conflict.id !== id) {
+    return { success: false, error: 'Príspevok s podobným názvom už je zverejnený.' }
+  }
+
   let titleImage = data.existingTitleImage ?? null
 
   if (data.removeTitleImage && data.existingTitleImage) {
@@ -96,11 +111,11 @@ export async function updatePost(id: string, data: {
     content: data.content,
     categoryId: data.categoryId,
     isPublic: data.isPublic,
-    slug: generateSlug(data.title, data.isPublic),
+    slug: slug,
     titleImage,
   }).where(eq(posts.id, id))
 
-  redirect("/admin/blog")
+  return { success: true }
 }
 
 export const deletePost = async (id: string) => {
@@ -109,9 +124,17 @@ export const deletePost = async (id: string) => {
     revalidatePath('/admin/blog')
 }
 
-export const setPublicity = async (id: string, isPublic: boolean) => {
+export const setPublicity = async (id: string, isPublic: boolean): Promise<{ success: false; error: string } | { success: true }> => {
     await requireAdmin();
-    await db.update(posts).set({isPublic}).where(eq(posts.id, id));
-    revalidatePath('/admin/blog')
-    revalidatePath(`/admin/blog/${isPublic}`)
+    const post = await db.query.posts.findFirst({ where: eq(posts.id, id) })
+    if (!post) return { success: false, error: 'Príspevok nebol nájdený' }
+    const slug = generateSlug(post.title, isPublic)
+    const conflict = await db.query.posts.findFirst({
+      where: eq(posts.slug, slug),
+    })
+    if (conflict && conflict.id !== id) {
+      return { success: false, error: 'Príspevok s podobným názvom už je zverejnený.' }
+    }
+    await db.update(posts).set({isPublic, slug}).where(eq(posts.id, id));
+    return { success: true }
 }

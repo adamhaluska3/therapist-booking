@@ -3,10 +3,13 @@ import { PostCategory } from "@/db/schema";
 import { useState } from "react";
 import { CategoryCombobox } from "./category-combobox";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Button } from "@base-ui/react";
 import 'react-quill-new/dist/quill.snow.css'
 import dynamic from "next/dynamic";
 import { createPost, updatePost } from "@/server/blog/mutations";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from "@/lib/utils";
@@ -45,6 +48,7 @@ const postSchema = z.object({
 type PostFormValues = z.infer<typeof postSchema>
 
 export const PostEditor = ({post, categories}: PostEditorProps) => {
+    const router = useRouter();
     const [content, setContent] = useState(post.content);
     const [category, setCategory] = useState(categories.find(c => c.id === post.categoryId) || null);
     const [titleImageFile, setTitleImageFile] = useState<File | null>(null)
@@ -71,27 +75,42 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
         ],
     }
 
-    const onSubmit = async (values: PostFormValues, isPublic: boolean) => {
-        console.log(content)
-        if (!post.id) {
-            await createPost({
-                ...values,
-                content: setNewLines(content),
-                categoryId: category?.id ?? null,
-                isPublic,
-                titleImage: titleImageFile
-            })
-        } else {
-            await updatePost(post.id, {
-                ...values,
-                content: setNewLines(content),
-                categoryId: category?.id ?? null,
-                isPublic,
-                existingTitleImage: post.titleImage,
-                removeTitleImage: titleImageRemoved,
-                titleImage: titleImageFile
-            })
-        }
+    const { mutate, isPending } = useMutation({
+        mutationFn: async ({ values, isPublic }: { values: PostFormValues, isPublic: boolean }) => {
+            let result;
+            if (!post.id) {
+                result = await createPost({
+                    ...values,
+                    content: setNewLines(content),
+                    categoryId: category?.id ?? null,
+                    isPublic,
+                    titleImage: titleImageFile
+                })
+            } else {
+                result = await updatePost(post.id, {
+                    ...values,
+                    content: setNewLines(content),
+                    categoryId: category?.id ?? null,
+                    isPublic,
+                    existingTitleImage: post.titleImage,
+                    removeTitleImage: titleImageRemoved,
+                    titleImage: titleImageFile
+                })
+            }
+            if (!result.success) {
+                throw new Error(result.error)
+            }
+        },
+        onError: (e) => {
+            toast.error(e instanceof Error ? e.message : 'Nepodarilo sa uložiť príspevok.')
+        },
+        onSuccess: () => {
+            router.push('/admin/blog')
+        },
+    })
+
+    const onSubmit = (values: PostFormValues, isPublic: boolean) => {
+        mutate({ values, isPublic })
     }
 
     const blockPublish = isContentBlank(content) || watch("title") === "" || watch("description") === ""
@@ -147,20 +166,21 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
                 <ReactQuill className="mt-5" value={content} onChange={setContent} modules={modules} theme="snow" />
                 <div className="mt-5 flex flex-col sm:flex-row justify-end gap-3">
                     <Button
+                        disabled={isPending}
                         onClick={handleSubmit(vals => onSubmit(vals, false))}
                         className="mt-5 p-2text-gray-400 text-xs font-semibold uppercase tracking-widest"
                         >
-                            Uložiť ako koncept
+                            {isPending ? 'Ukladám...' : 'Uložiť ako koncept'}
                     </Button>
                     <Button
-                        disabled={blockPublish}
+                        disabled={blockPublish || isPending}
                         onClick={handleSubmit(vals => onSubmit(vals, true))}
                         className={
                             cn("mt-5 py-2 px-5 bg-brand-500 rounded-2xl text-white text-xs font-semibold uppercase tracking-widest",
-                            blockPublish && "bg-brand-300"
+                            (blockPublish || isPending) && "bg-brand-300"
                         )}   
                         >
-                            Uložiť a publikovať článok
+                            {isPending ? 'Ukladám...' : 'Uložiť a publikovať článok'}
                     </Button>
                 </div>
             </form>
