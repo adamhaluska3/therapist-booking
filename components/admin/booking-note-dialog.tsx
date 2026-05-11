@@ -1,6 +1,4 @@
 "use client"
-
-import type { BookingWithUser } from "@/db/schema"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import {
   Dialog,
@@ -12,6 +10,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { BookingWithUser } from "@/server/booking/schema"
 
 interface Props {
   open: boolean
