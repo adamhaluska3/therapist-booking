@@ -7,7 +7,10 @@ import { Metadata } from "next";
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: {
+    template: "%s | V Rozhovore Admin",
+    default: "V Rozhovore Admin",
+  },
 };
 
 export default async function AdminLayout({

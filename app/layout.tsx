@@ -15,8 +15,8 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | V rozhovore",
-    default: "V rozhovore",
+    template: "%s | V Rozhovore",
+    default: "V Rozhovore",
   },
 };
 
@@ -50,9 +50,7 @@ export default async function RootLayout({
       <body>
         <UserProvider user={user}>
           <Toaster richColors theme="light" />
-          <QueryProvider>
-            {children}
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </UserProvider>
       </body>
     </html>

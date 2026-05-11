@@ -5,10 +5,11 @@ import { AbsolvedBookingsTable } from "@/components/user/absolved-bookings-table
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
 import { db } from "@/lib/db";
 import { getClientAbsolvedBookings } from "@/server/booking/queries";
+import { Metadata } from "next";
 
 const PAGE_SIZE = 10;
 
-export const metadata = { title: "Záznamy sedení" };
+export const metadata: Metadata = { title: "Záznamy sedení" };
 
 const Page = async () => {
   const userSession = await auth.api.getSession({ headers: await headers() });

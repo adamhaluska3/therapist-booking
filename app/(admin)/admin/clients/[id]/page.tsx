@@ -6,9 +6,14 @@ import { RemoveNicknameButton } from "@/components/admin/remove-nickname-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientNotes from "@/components/admin/client-notes";
 import { getInitials } from "@/lib/formatting";
-import { getUserNotes } from "@/server/user-note/queries";
-import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
 import { RedirectBackButton } from "@/components/admin/redirect-back-button";
+
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const user = await getUserById(params.id);
+  if (!user) return { title: "Klient nenájdený" };
+
+  return { title: `${user.nickname ?? user.name}` };
+}
 
 type Props = { params: Promise<{ id: string }> };
 

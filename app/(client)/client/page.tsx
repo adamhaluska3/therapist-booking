@@ -4,6 +4,9 @@ import { auth } from "@/lib/auth";
 import { UpcomingUserBookings } from "@/components/user/upcoming-bookings";
 import { PreviousUserBookings } from "@/components/user/previous-bookings";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
+import { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Prehľad sedení" };
 
 const Page = async () => {
   const userSession = await auth.api.getSession({ headers: await headers() });
