@@ -14,8 +14,10 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Therapist Booking",
-  description: "Book appointments with qualified therapists.",
+  title: {
+    template: "%s | V rozhovore",
+    default: "V rozhovore",
+  },
 };
 
 async function getCurrentUser(): Promise<User | null> {

@@ -2,8 +2,13 @@ import { Lora } from "next/font/google";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { getPendingCount } from "@/server/booking/queries";
+import { Metadata } from "next";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
+
+export const metadata: Metadata = {
+  title: "Admin",
+};
 
 export default async function AdminLayout({
   children,
