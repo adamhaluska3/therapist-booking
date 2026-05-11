@@ -91,7 +91,7 @@ export function getRequestsColumns({
         const price = formatPrice(info.row.original.price)
         return (
           <>
-            <p className="text-sm text-neutral-600">2400001</p>
+            <p className="text-sm text-neutral-600">{info.row.original.variableSymbol}</p>
             {price && <p className="text-xs text-neutral-400 mt-0.5">{price}</p>}
           </>
         )
