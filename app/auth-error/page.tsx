@@ -4,7 +4,7 @@ const messages = {
   unauthorized: {
     title: "Vyžaduje sa prihlásenie",
     description: "Pre prístup na túto stránku sa musíte prihlásiť.",
-    action: { label: "Prihlásiť sa", href: "/sign-in" },
+    action: { label: "Domov", href: "/" },
   },
   forbidden: {
     title: "Prístup zamietnutý",
