@@ -8,7 +8,7 @@ export const blogHeader = {
   label: "Múdrosť & pohyb",
   heading: "Blog & Inšpirácia",
   subheading:
-    "Články o duševnom zdraví, sebapознаní a životnej rovnováhe. Priestor pre vaše ticho a rast.",
+    "Články o duševnom zdraví, sebapoznaní a životnej rovnováhe. Priestor pre vaše ticho a rast.",
 };
 
 export const blogCategories: {
