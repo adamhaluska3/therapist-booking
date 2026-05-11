@@ -1,24 +1,23 @@
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { Lora } from "next/font/google";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { getPendingCount } from "@/server/booking/queries";
-import { auth } from "@/lib/auth";
+import { Metadata } from "next";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | V Rozhovore Admin",
+    default: "V Rozhovore Admin",
+  },
+};
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session?.user || session.user.role !== "admin") {
-    redirect("/")
-  }
-
   const pendingCount = await getPendingCount();
 
   return (

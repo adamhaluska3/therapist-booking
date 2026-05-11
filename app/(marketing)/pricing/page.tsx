@@ -1,6 +1,11 @@
 import { Info } from "lucide-react";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { getBookingTypes } from "@/server/booking-type/queries";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cenník",
+};
 
 export default async function PricingPage() {
   const allServices = await getBookingTypes();

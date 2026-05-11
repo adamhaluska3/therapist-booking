@@ -3,6 +3,11 @@ import { BlogPostsSection } from "@/components/marketing/blog-posts-section";
 import { db } from "@/lib/db";
 import { posts } from "@/db/schema";
 import { and, count, eq } from "drizzle-orm";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Blog",
+};
 
 const PAGE_SIZE = 6;
 

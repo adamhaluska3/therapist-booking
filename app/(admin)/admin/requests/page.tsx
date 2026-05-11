@@ -2,6 +2,10 @@ import { getPendingBookings } from "@/server/booking/queries";
 import { RequestsView } from "@/components/admin/requests-view";
 import { getBookingTypes } from "@/server/booking-type/queries";
 
+export const metadata = {
+  title: "Žiadosti",
+};
+
 interface Props {
   searchParams: Promise<{ page?: string }>;
 }

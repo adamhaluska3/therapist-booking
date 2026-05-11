@@ -14,8 +14,10 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Therapist Booking",
-  description: "Book appointments with qualified therapists.",
+  title: {
+    template: "%s | V Rozhovore",
+    default: "V Rozhovore",
+  },
 };
 
 async function getCurrentUser(): Promise<User | null> {
@@ -48,9 +50,7 @@ export default async function RootLayout({
       <body>
         <UserProvider user={user}>
           <Toaster richColors theme="light" />
-          <QueryProvider>
-            {children}
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </UserProvider>
       </body>
     </html>

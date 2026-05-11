@@ -4,7 +4,7 @@ import ClientsTable from "@/components/admin/clients-table";
 import { getClientsTableRows } from "@/server/user/queries";
 
 export const metadata = {
-  title: "Správa klientov",
+  title: "Klienti",
 };
 
 export default async function ClientsPage() {

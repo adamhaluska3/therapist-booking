@@ -5,6 +5,10 @@ import { CalendarFeedSection } from "@/components/admin/calendar-feed-section";
 import { getPaymentSettings } from "@/server/payment-settings/queries";
 import { getBookingTypes } from "@/server/booking-type/queries";
 
+export const metadata = {
+  title: "Nastavenia",
+};
+
 export default async function SettingsPage() {
   const [settings, bookingTypes, headersList] = await Promise.all([
     getPaymentSettings(),
