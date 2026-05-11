@@ -1,10 +1,26 @@
 "use server";
 import { db } from "@/lib/db";
-import { BookingWithUser, ClientAbsolvedBookingRow, toBookingWithUser } from "./schema";
+import {
+  BookingWithUser,
+  ClientAbsolvedBookingRow,
+  toBookingWithUser,
+} from "./schema";
 import { availabilitySlot, Booking, booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 
-import { eq, and, gte, lt, like, or, desc, lte, sql, not, count } from "drizzle-orm";
+import {
+  eq,
+  and,
+  gte,
+  lt,
+  like,
+  or,
+  desc,
+  lte,
+  sql,
+  not,
+  count,
+} from "drizzle-orm";
 import {
   BOOKINGS_PAGE_SIZE,
   DASHBOARD_PAGE_SIZE,
@@ -103,7 +119,7 @@ export async function getBookingsWithUsers(
       and(
         lte(booking.start, to),
         gte(booking.end, from),
-        eq(booking.status, "cancelled"),
+        not(eq(booking.status, "cancelled")),
       ),
     );
   const bookingsWithUser = bookigs.map((row) => ({
@@ -226,14 +242,15 @@ export async function getClientAbsolvedBookings({
   from?: string;
   to?: string;
 }): Promise<{ rows: ClientAbsolvedBookingRow[]; total: number }> {
-  await requireUser()
+  await requireUser();
   const fromDate = from ? new Date(from) : undefined;
-  const toDate = to ? (
-    () => {
+  const toDate = to
+    ? (() => {
         const d = new Date(to);
         d.setHours(23, 59, 59, 999);
         return d;
-    })() : undefined;
+      })()
+    : undefined;
 
   const conditions = and(
     eq(booking.userId, userId),
@@ -253,7 +270,7 @@ export async function getClientAbsolvedBookings({
         variableSymbol: booking.variableSymbol,
         price: booking.price,
         locationType: booking.locationType,
-        note: booking.note
+        note: booking.note,
       })
       .from(booking)
       .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
