@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 import { ClientPaymentInfo } from "./client-payment-info"
 import { Calendar, Clock5, MapPin, NotebookText, Play } from "lucide-react"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
-import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
+import { ADDRESS_SHORT } from "@/lib/constants"
 import { NoteDialog } from "./note-dialog"
 
 export type ClosestPendingUpcommingBookingProps = {

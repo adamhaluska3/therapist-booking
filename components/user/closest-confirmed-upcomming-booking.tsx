@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button } from "../ui/button"
 import Link from "next/link"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
-import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
+import { ADDRESS_SHORT } from "@/lib/constants"
 import { ClientPaymentInfo } from "./client-payment-info"
 import { NoteDialog } from "./note-dialog"
 

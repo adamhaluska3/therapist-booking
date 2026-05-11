@@ -54,6 +54,7 @@ export function generateIcs({
   description,
   organizerEmail,
   attendeeEmail,
+  meetLink,
 }: {
   uid: string;
   start: Date;
@@ -62,8 +63,12 @@ export function generateIcs({
   description: string;
   organizerEmail: string;
   attendeeEmail?: string;
+  meetLink?: string;
 }): string {
   const now = toIcsDate(new Date());
+  const fullDescription = meetLink
+    ? `${description}\\nOdkaz na Google Meet: ${meetLink}`
+    : description;
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -76,9 +81,12 @@ export function generateIcs({
     `DTSTART:${toIcsDate(start)}`,
     `DTEND:${toIcsDate(end)}`,
     `SUMMARY:${summary}`,
-    `DESCRIPTION:${description}`,
+    `DESCRIPTION:${fullDescription}`,
     `ORGANIZER:mailto:${organizerEmail}`,
     attendeeEmail ? `ATTENDEE;RSVP=TRUE:mailto:${attendeeEmail}` : null,
+    meetLink ? `URL:${meetLink}` : null,
+    meetLink ? `X-GOOGLE-CONFERENCE:${meetLink}` : null,
+    meetLink ? `CONFERENCE;FEATURE=VIDEO;LABEL=Google Meet;VALUE=URI:${meetLink}` : null,
     "STATUS:CONFIRMED",
     "END:VEVENT",
     "END:VCALENDAR",

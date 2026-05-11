@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
 import { createClientBooking } from "@/server/booking/mutations";
@@ -11,6 +12,7 @@ import {
   type TimeSlot,
 } from "@/lib/booking-types";
 import { useUser } from "@/lib/user-context";
+import { ADDRESS_SHORT } from "@/lib/constants";
 
 function firstAvailableDate(slots: SlotsByDate): Date {
   const todayKey = toDateKey(new Date());
@@ -110,6 +112,14 @@ export function BookingWidget({
           Vaša žiadosť o sedenie bola úspešne prijatá. Terapeut ju musí ešte
           schváliť — o schválení budete informovaní e-mailom.
         </p>
+        {locationType === "onsite" && (
+          <div className="mb-6 flex items-center justify-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-600" />
+            <p className="text-sm text-brand-700">
+              Adresa stretnutia: <span className="font-semibold">{ADDRESS_SHORT}</span>
+            </p>
+          </div>
+        )}
         <Link
           href="/"
           className="inline-block rounded-full bg-brand-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-800 transition-colors"

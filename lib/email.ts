@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { generateIcs } from "@/lib/ics";
 import { format } from "date-fns";
 import { sk } from "date-fns/locale";
+import { ADDRESS_SHORT } from "@/lib/constants";
 
 const EMAILS_ENABLED = process.env.ENABLE_EMAILS === "true";
 const resend = EMAILS_ENABLED ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -23,6 +24,7 @@ function buildIcsAttachment(
   end: Date,
   uid: string,
   clientEmail?: string,
+  meetLink?: string,
 ) {
   const ics = generateIcs({
     uid,
@@ -32,6 +34,7 @@ function buildIcsAttachment(
     description: "Vaše sedenie bolo naplánované.",
     organizerEmail: THERAPIST_EMAIL,
     attendeeEmail: clientEmail,
+    meetLink,
   });
   return {
     filename: "sedenie.ics",
@@ -251,12 +254,16 @@ export async function sendBookingConfirmationToClient({
   end,
   clientName,
   clientEmail,
+  meetLink,
+  locationType,
 }: {
   bookingId: string;
   start: Date;
   end: Date;
   clientName: string;
   clientEmail: string;
+  meetLink?: string;
+  locationType?: string;
 }) {
   const dateStr = formatDateTime(start);
   const endTimeStr = format(end, "HH:mm");
@@ -310,10 +317,35 @@ export async function sendBookingConfirmationToClient({
                           <span style="display:inline-block;font-size:12px;font-weight:600;color:#166534;background:#dcfce7;padding:3px 10px;border-radius:20px;">Potvrdené</span>
                         </td>
                       </tr>
+                      ${locationType === "onsite" ? `
+                      <tr>
+                        <td style="padding:7px 0;border-top:1px solid #ede8df;">
+                          <span style="font-size:13px;color:#6b7280;min-width:80px;display:inline-block;">Adresa</span>
+                          <span style="font-size:14px;font-weight:600;color:#1f2937;">${ADDRESS_SHORT}</span>
+                        </td>
+                      </tr>` : ""}
                     </table>
                   </td>
                 </tr>
               </table>
+
+              ${locationType === "online" && meetLink ? `
+              <!-- Meet link -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="${meetLink}" style="display:inline-block;background:#2d5a3d;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;">
+                      🎥 Pripojiť sa na Google Meet
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:10px;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;">Odkaz na sedenie: <a href="${meetLink}" style="color:#2d5a3d;">${meetLink}</a></p>
+                  </td>
+                </tr>
+              </table>
+              ` : ""}
 
               <!-- ICS note -->
               <div style="background:#f0fdf4;border-left:3px solid #3d7a52;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
@@ -339,7 +371,7 @@ export async function sendBookingConfirmationToClient({
 </body>
 </html>
     `,
-    attachments: [buildIcsAttachment(start, end, bookingId, clientEmail)],
+    attachments: [buildIcsAttachment(start, end, bookingId, clientEmail, locationType === "online" ? meetLink : undefined)],
   });
 }
 
@@ -449,6 +481,8 @@ export async function sendBookingRescheduledToClient({
   oldStart,
   newStart,
   newEnd,
+  meetLink,
+  locationType,
 }: {
   clientName: string;
   clientEmail: string;
@@ -456,6 +490,8 @@ export async function sendBookingRescheduledToClient({
   oldStart: Date;
   newStart: Date;
   newEnd: Date;
+  meetLink?: string;
+  locationType?: string;
 }) {
   const oldDateStr = formatDateTime(oldStart);
   const newDateStr = formatDateTime(newStart);
@@ -516,10 +552,35 @@ export async function sendBookingRescheduledToClient({
                           <span style="display:inline-block;font-size:12px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 10px;border-radius:20px;">Presunuté</span>
                         </td>
                       </tr>
+                      ${locationType === "onsite" ? `
+                      <tr>
+                        <td style="padding:7px 0;border-top:1px solid #ede8df;">
+                          <span style="font-size:13px;color:#6b7280;min-width:120px;display:inline-block;">Adresa</span>
+                          <span style="font-size:14px;font-weight:600;color:#1f2937;">${ADDRESS_SHORT}</span>
+                        </td>
+                      </tr>` : ""}
                     </table>
                   </td>
                 </tr>
               </table>
+
+              ${locationType === "online" && meetLink ? `
+              <!-- Meet link -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="${meetLink}" style="display:inline-block;background:#2d5a3d;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;">
+                      🎥 Pripojiť sa na Google Meet
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:10px;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;">Odkaz na sedenie: <a href="${meetLink}" style="color:#2d5a3d;">${meetLink}</a></p>
+                  </td>
+                </tr>
+              </table>
+              ` : ""}
 
               <!-- ICS note -->
               <div style="background:#fffbeb;border-left:3px solid #d97706;border-radius:0 8px 8px 0;padding:16px 20px;">
@@ -543,7 +604,7 @@ export async function sendBookingRescheduledToClient({
 </body>
 </html>
     `,
-    attachments: [buildIcsAttachment(newStart, newEnd, bookingId, clientEmail)],
+    attachments: [buildIcsAttachment(newStart, newEnd, bookingId, clientEmail, locationType === "online" ? meetLink : undefined)],
   });
 }
 
