@@ -14,6 +14,7 @@ export function PublicityToggle({ id, isPublic }: { id: string; isPublic: boolea
       if (!result.success) {
         toast.error(result.error)
       } else {
+        toast.success(`Príspevok je ${!isPublic ? "verejný" : "neverejný"}`)
         router.refresh()
       }
     },

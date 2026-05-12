@@ -105,6 +105,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
             toast.error(e instanceof Error ? e.message : 'Nepodarilo sa uložiť príspevok.')
         },
         onSuccess: () => {
+            toast.success("Príspevok je úspešne uložený")
             router.push('/admin/blog')
         },
     })
