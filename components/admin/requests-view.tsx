@@ -257,15 +257,15 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         />
       </div>
 
-      <div className="hidden lg:block overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
+      <div className="hidden lg:block overflow-hidden rounded-lg border border-surface-200 bg-white">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface-100">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-surface-200">
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-widest text-neutral-400 last:text-right"
+                    className="px-4 py-3 text-xs font-medium text-neutral-500"
                   >
                     {header.column.getCanSort() ? (
                       <button
@@ -297,12 +297,12 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-surface-100">
+          <tbody>
             {table.getRowModel().rows.length === 0 && (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-sm text-neutral-400"
+                  className="px-4 py-12 text-center text-sm text-neutral-400"
                 >
                   Žiadne nové žiadosti
                 </td>
@@ -311,10 +311,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="transition-colors hover:bg-surface-50"
+                className="border-t border-surface-200 transition-colors hover:bg-surface-50"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4 last:text-right">
+                  <td key={cell.id} className="px-4 py-4 align-top">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -323,7 +323,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
           </tbody>
         </table>
 
-        <div className="border-t border-surface-100 px-6 py-3">
+        <div className="border-t border-surface-200 px-4 py-3">
           <PaginationControls
             page={page}
             totalPages={totalPages}
