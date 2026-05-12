@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, Hash, MapPin } from "lucide-react";
 import { LocationBadge } from "@/components/admin/location-badge"
 import type { BookingWithUser } from "@/server/booking/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
@@ -60,19 +60,25 @@ export function ArchiveCard({
           </div>
 
           <div className="flex items-center justify-between mt-1.5">
-            <div className="flex items-center gap-1 text-xs text-neutral-400">
-              {bookingType && (
-                <>
-                  <span
-                    className="inline-block w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
-                  />
-                  <span>{bookingType.name}</span>
-                  {formatPrice(booking.price) && (
-                    <span>· {formatPrice(booking.price)}</span>
-                  )}
-                </>
-              )}
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-1 text-xs text-neutral-400">
+                {bookingType && (
+                  <>
+                    <span
+                      className="inline-block w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                    />
+                    <span>{bookingType.name}</span>
+                    {formatPrice(booking.price) && (
+                      <span>· {formatPrice(booking.price)}</span>
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-neutral-400">
+                <Hash size={11} className="shrink-0"/>
+                <span>{booking.variableSymbol}</span>
+              </div>
             </div>
             <Badge className="bg-brand-100 text-brand-700 border-brand-200 px-3 py-1 h-auto text-xs font-medium shrink-0 ml-2">
               Absolvované
@@ -115,6 +121,10 @@ export function ArchiveCard({
                 )}
               </div>
             )}
+            <div className="flex items-center gap-1 text-xs text-neutral-400">
+              <Hash size={11} className="shrink-0"/>
+              <span>{booking.variableSymbol}</span>
+            </div>
           </div>
         </div>
 

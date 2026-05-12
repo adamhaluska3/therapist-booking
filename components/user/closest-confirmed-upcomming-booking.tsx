@@ -18,21 +18,23 @@ export type ClosestConfirmedUpcommingBookingProps = {
 }
 
 export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommingBookingProps) => (
-    <article className="flex bg-white rounded-2xl p-10 overflow-hidden gap-10">
-        <section className="flex flex-col gap-5">
+    <article className="flex bg-white rounded-2xl p-10 overflow-hidden gap-10 h-full">
+        <section className="flex flex-col gap-5 w-full">
             <div className="flex flex-1 flex-col gap-5">
                 <div className="flex justify-start gap-2 items-center">
                     <span className="p-2 bg-brand-300 text-brand-800 rounded-2xl font-bold uppercase text-xs">Potvrdené</span>
                     <span className="text-sm text-gray-400 uppercase">Najbližšie stretnutie</span>
                 </div>
                 <h1 className="text-2xl">{item.bookingType?.name}</h1>
-                <Image
-                    className="aspect-4/3 object-cover md:hidden"
-                    src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
-                    alt=""
-                    width={280}
-                    height={170}
-                />
+                <div className="flex justify-center">
+                    <Image
+                        className="aspect-4/3 object-cover md:hidden"
+                        src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
+                        alt=""
+                        width={280}
+                        height={170}
+                    />
+                </div>
                 <div className="flex gap-2 text-sm text-brand-700">
                     <Calendar />
                     <span>{item.start.toLocaleDateString("sk-SK", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
@@ -71,7 +73,7 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                     {!item.note && <span>Bez poznámok</span>}
                 </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 text-sm text-brand-700">
+            <div className="flex flex-col sm:flex-row gap-2 text-sm text-brand-700 w-full">
                 {item.locationType === "online" && (
                     <Link href={item.meetLink ?? "#"}>
                         <Button className="p-2 px-4 bg-brand-500 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
@@ -94,12 +96,12 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                 )}
             </div>
         </section>
-            <Image
-                className="aspect-4/3 object-cover hidden md:block"
-                src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
-                alt=""
-                width={220}
-                height={155}
-            />
+        <Image
+            className="aspect-4/3 object-cover hidden lg:block"
+            src={bookingTypeImageSrc[("bt-psychoterapia") as keyof typeof bookingTypeImageSrc]}
+            alt=""
+            width={220}
+            height={155}
+        />
     </article>
 )

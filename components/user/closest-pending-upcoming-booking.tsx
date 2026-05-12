@@ -12,8 +12,8 @@ export type ClosestPendingUpcommingBookingProps = {
 }
 
 export const ClosestPendingUpcommingBooking = ({item}: ClosestPendingUpcommingBookingProps) => (
-    <article className="flex flex-col bg-taupe-300 rounded-2xl overflow-hidden p-10 min-w-85">
-        <section className="flex flex-col gap-5">
+    <article className="flex flex-col bg-taupe-300 rounded-2xl overflow-hidden p-10 h-full">
+        <section className="flex flex-col gap-5 w-full flex-1">
             <div className="flex-1 flex flex-col gap-5">
                 <div className="flex justify-start gap-2 items-center">
                     <span className="p-2 bg-taupe-400 text-taupe-700 rounded-2xl font-bold uppercase text-xs">Čaká na potvrdenie</span>
@@ -57,7 +57,7 @@ export const ClosestPendingUpcommingBooking = ({item}: ClosestPendingUpcommingBo
                     {!item.note && <span>Bez poznámok</span>}
                 </div>
             </div>
-            <div className="flex gap-2 text-sm text-brand-700 flex-col sm:flex-row">
+            <div className="flex gap-2 text-sm text-brand-700 flex-col sm:flex-row w-full">
                 <ClientPaymentInfo vs={item.variableSymbol} centPrice={item.price || 0} note={item.bookingType?.name || ""}>
                     <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
                         <span>Platba</span>
