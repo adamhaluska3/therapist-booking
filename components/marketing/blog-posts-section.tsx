@@ -22,7 +22,7 @@ export function BlogPostsSection({ posts, page, totalPages, activeCategory }: Bl
   };
 
   return (
-    <section className="bg-linear-to-b from-surface-100 to-surface-50">
+    <section>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 md:px-8 md:pb-24 md:pt-12">
         {posts.length === 0 && (
           <p className="py-16 text-center text-sm text-neutral-400">

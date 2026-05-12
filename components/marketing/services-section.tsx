@@ -46,7 +46,7 @@ const SERVICE_VISUALS = [
 
 export function ServicesSection({ content }: Props) {
   return (
-    <section className="bg-linear-to-b from-white to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 md:px-8 md:pb-24 md:pt-20">
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
           {content.label}

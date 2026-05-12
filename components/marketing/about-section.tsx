@@ -7,7 +7,7 @@ type Props = {
 
 export function AboutSection({ content }: Props) {
   return (
-    <section className="bg-linear-to-b from-surface-50 to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start md:gap-12">
           <div className="relative">
