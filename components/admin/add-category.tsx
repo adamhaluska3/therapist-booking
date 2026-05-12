@@ -54,6 +54,7 @@ export const AddCategoryDialog = ({onCreate, children, nativeButton = false}: {o
                 onCreate(res.category)
             }
         }
+        
     })
 
     return (
