@@ -19,6 +19,7 @@ import { useDebounce } from "use-debounce";
 import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getClientsTableRows } from "@/server/user/queries";
+import { toast } from "sonner";
 
 type ClientItem = {
   id: string | number;
@@ -72,7 +73,9 @@ export default function ClientsTable({
         header: "Posledné sedenie",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">{(getValue() as string | null | undefined) ?? "-"}</div>
+          <div className="text-sm text-neutral-600">
+            {(getValue() as string | null | undefined) ?? "-"}
+          </div>
         ),
       },
       {
@@ -80,7 +83,9 @@ export default function ClientsTable({
         header: "Počet sedení",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">{(getValue() as number | undefined) ?? 0}</div>
+          <div className="text-sm text-neutral-600">
+            {(getValue() as number | undefined) ?? 0}
+          </div>
         ),
       },
       {
@@ -130,7 +135,7 @@ export default function ClientsTable({
     setIsFetching(true);
     getClientsTableRows(debouncedSearch)
       .then((items) => setData(items ?? []))
-      .catch(() => {})
+      .catch(() => toast.error("Nepodarilo sa načítať klientov"))
       .finally(() => setIsFetching(false));
   }, [debouncedSearch, initialItems]);
 
