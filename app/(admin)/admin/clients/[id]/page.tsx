@@ -6,9 +6,15 @@ import { RemoveNicknameButton } from "@/components/admin/remove-nickname-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientNotes from "@/components/admin/client-notes";
 import { getInitials } from "@/lib/formatting";
-import { getUserNotes } from "@/server/user-note/queries";
-import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
 import { RedirectBackButton } from "@/components/admin/redirect-back-button";
+
+export async function generateMetadata({ params }: Props) {
+  const paramsId = (await params).id;
+  const user = await getUserById(paramsId);
+  if (!user) return { title: "Klient nenájdený" };
+
+  return { title: `${user.nickname ?? user.name}` };
+}
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -31,23 +37,18 @@ export default async function Page({ params }: Props) {
         <div className="w-full lg:col-span-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 shrink-0 mt-1">
                     {getInitials(user.nickname ?? user.name)}
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="mb-1">
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <CardTitle className="mb-1 line-clamp-2 wrap-anywhere">
                       {user.nickname ?? user.name}
                     </CardTitle>
-                    {user.nickname && (
-                      <p className="text-xs text-muted-foreground">
-                        {user.name}
-                      </p>
-                    )}
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 shrink-0">
                   <NicknameChangeDialog
                     userId={user.id}
                     currentNickname={user.nickname}
@@ -58,6 +59,12 @@ export default async function Page({ params }: Props) {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-3">
+                {user.nickname && (
+                  <div>
+                    <div className="text-sm text-muted-foreground">Meno</div>
+                    <div className="font-medium">{user.name}</div>
+                  </div>
+                )}
                 <div>
                   <div className="text-sm text-muted-foreground">
                     Emailová adresa

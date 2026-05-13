@@ -2,16 +2,33 @@
 
 import { cn } from "@/lib/utils";
 import {
-  blogCategories,
   blogHeader,
 } from "../../app/(marketing)/_content/blog";
-import { useBlogFilter } from "./blog-filter-context";
+import { useRouter, useSearchParams } from "next/navigation";
+import { PostCategory } from "@/db/schema";
 
-export function BlogHeaderSection() {
-  const { active, setActive } = useBlogFilter();
+export type BlogHeaderSectionProp = {
+  categories: PostCategory[];
+  activeCategory: string | null;
+};
+
+export function BlogHeaderSection({ categories, activeCategory }: BlogHeaderSectionProp) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const toggle = (catId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (params.get("category") === catId) {
+      params.delete("category");
+    } else {
+      params.set("category", catId);
+    }
+    params.delete("page");
+    router.push(`/blog?${params.toString()}`);
+  };
 
   return (
-    <section className="bg-linear-to-b from-white to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-12 md:px-8 md:pb-12 md:pt-20">
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
           {blogHeader.label}
@@ -24,18 +41,18 @@ export function BlogHeaderSection() {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {blogCategories.map((cat) => (
+          {categories.map((cat) => (
             <button
-              key={cat.value}
-              onClick={() => setActive(cat.value)}
+              key={cat.id}
+              onClick={() => toggle(cat.id)}
               className={cn(
                 "rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
-                active === cat.value
+                activeCategory === cat.id
                   ? "bg-brand-700 text-white"
                   : "bg-surface-200 text-neutral-600 hover:bg-surface-300",
               )}
             >
-              {cat.label}
+              {cat.name}
             </button>
           ))}
         </div>

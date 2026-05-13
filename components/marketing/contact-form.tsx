@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,7 @@ import {
 import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
 import { submitContactForm } from "@/server/contact-form/contact";
 import type { BookingType } from "@/db/schema";
+import { toast } from "sonner";
 
 export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
   const form = useForm<ContactFormValues>({
@@ -39,6 +41,11 @@ export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
     const result = await submitContactForm(values);
     if (result.success) {
       form.reset();
+      toast.success("Správa bola úspešne odoslaná!");
+    } else {
+      toast.error(
+        "Nastala chyba pri odosielaní správy. Skúste to prosím znovu neskôr.",
+      );
     }
   }
 
@@ -140,6 +147,7 @@ export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
           disabled={form.formState.isSubmitting}
           className="w-full rounded-lg bg-brand-700 py-3 text-white hover:bg-brand-800"
         >
+          <Mail className="size-4" />
           {form.formState.isSubmitting ? "Odosielam…" : "Odoslať správu"}
         </Button>
       </form>

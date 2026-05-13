@@ -7,7 +7,7 @@ type Props = {
 
 export function AboutSection({ content }: Props) {
   return (
-    <section className="bg-linear-to-b from-surface-50 to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start md:gap-12">
           <div className="relative">
@@ -20,12 +20,12 @@ export function AboutSection({ content }: Props) {
                 className="object-cover"
               />
             </div>
-            <div className="absolute right-6 top-6 flex h-16 w-16 flex-col items-center justify-center rounded-full bg-brand-800 text-white">
+            <div className="absolute right-6 top-6 flex h-18 w-18 flex-col items-center justify-center rounded-full bg-brand-800 text-white">
               <span className="text-xl font-bold leading-none">
                 {content.yearsOfExperience}
               </span>
               <span className="text-center text-[10px] leading-tight text-brand-200">
-                rokov
+                rokov skúseností
               </span>
             </div>
           </div>

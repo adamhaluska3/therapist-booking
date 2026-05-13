@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { UserProvider, type User } from "@/lib/user-context";
+import { QueryProvider } from "@/components/providers/query-provider";
 import { auth } from "@/lib/auth";
 import "./globals.css";
 import { Geist } from "next/font/google";
@@ -13,8 +14,10 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Therapist Booking",
-  description: "Book appointments with qualified therapists.",
+  title: {
+    template: "%s | V Rozhovore",
+    default: "V Rozhovore",
+  },
 };
 
 async function getCurrentUser(): Promise<User | null> {
@@ -45,8 +48,10 @@ export default async function RootLayout({
   return (
     <html lang="sk" className={cn("font-sans", geist.variable)}>
       <body>
-        <UserProvider user={user}>{children}</UserProvider>
-        <Toaster richColors theme="light" />
+        <UserProvider user={user}>
+          <Toaster richColors theme="light" />
+          <QueryProvider>{children}</QueryProvider>
+        </UserProvider>
       </body>
     </html>
   );

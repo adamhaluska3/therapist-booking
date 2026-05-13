@@ -2,18 +2,33 @@ import { addDays } from "date-fns";
 import { bookingContent } from "./_content/booking";
 import { BookingWidget } from "@/components/booking/booking-widget";
 import { getBookingSlots } from "@/server/booking/queries";
+import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
+import { getBookingTypes } from "@/server/booking-type/queries";
+import { Metadata } from "next";
 
 const { hero, main } = bookingContent;
 
+export const metadata: Metadata = {
+  title: "Rezervácia termínu",
+};
+
 export default async function BookingPage() {
   const today = new Date();
-  const slots = await getBookingSlots(today, addDays(today, 90));
+  const [slots, bookingTypes] = await Promise.all([
+    getBookingSlots(today, addDays(today, 90)),
+    getBookingTypes(),
+  ]);
+  const defaultBookingTypeId =
+    bookingTypes.find((t) => t.name === DEFAULT_BOOKABLE_TYPE_NAME)?.id ??
+    bookingTypes[0]?.id ??
+    null;
   return (
     <>
       <section className="bg-linear-to-b from-white to-surface-100">
         <div className="mx-auto max-w-6xl px-8 pb-16 pt-12">
           <BookingWidget
             slots={slots}
+            bookingTypeId={defaultBookingTypeId}
             leftHeader={
               <>
                 <h1 className="mb-3 font-serif text-3xl font-semibold italic leading-tight text-brand-900 md:text-4xl">

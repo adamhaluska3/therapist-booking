@@ -8,10 +8,12 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  MapPin,
+  Check,
+  X,
   Hash,
   MessageSquare,
 } from "lucide-react";
+import { LocationBadge } from "@/components/booking/location-badge"
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,8 +22,13 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
-import { getInitials } from "@/lib/formatting";
-import { BOOKINGS_PAGE_SIZE, UNKNOWN_CLIENT } from "@/lib/constants";
+import { getInitials, formatPrice } from "@/lib/formatting";
+import {
+  BOOKING_TYPE_COLORS,
+  BOOKINGS_PAGE_SIZE,
+  UNKNOWN_CLIENT,
+  DEFAULT_THERAPY_COLOR,
+} from "@/lib/constants";
 import {
   confirmBooking,
   updateBookingStatus,
@@ -40,8 +47,8 @@ import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
 import { BookingType } from "@/db/schema";
-import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
 import { toast } from "sonner";
+import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
 
 interface Props {
   bookings: BookingWithUser[];
@@ -57,6 +64,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(
     null,
   );
+  const [noteTarget, setNoteTarget] = useState<BookingWithUser | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const totalPages = Math.max(1, Math.ceil(total / BOOKINGS_PAGE_SIZE));
@@ -90,6 +98,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     setCancelTarget(booking);
   }, []);
 
+  const handleNoteOpen = useCallback((booking: BookingWithUser) => {
+    setNoteTarget(booking);
+  }, []);
+
   function handleCancelConfirm() {
     if (!cancelTarget) return;
     startTransition(async () => {
@@ -108,6 +120,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   const columns = getRequestsColumns({
     onConfirm: handleConfirm,
     onCancel: handleCancelOpen,
+    onNote: handleNoteOpen,
     isPending,
     bookingTypes,
   });
@@ -126,10 +139,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
-          Administratíva
-        </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-2">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Nové žiadosti o terapiu
         </h1>
       </div>
@@ -173,7 +183,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 </p>
                 <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                   <Hash size={11} className="shrink-0" />
-                  <span>2400001</span>
+                  <span>{b.variableSymbol}</span>
+                  {formatPrice(b.price) && (
+                    <span>· {formatPrice(b.price)}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -202,20 +215,22 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                         style={{
                           backgroundColor:
                             BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                            "#427a5c",
+                            DEFAULT_THERAPY_COLOR,
                         }}
                       />
                       <span>{bookingType.name}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1 text-xs text-neutral-500">
-                    <MapPin size={11} className="shrink-0" />
-                    <span>Osobne</span>
-                  </div>
+                  <LocationBadge
+                    locationType={b.locationType}
+                    size={11}
+                    className="text-xs text-neutral-500"
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button
+                  onClick={() => handleNoteOpen(b)}
                   disabled={isPending}
                   className="flex items-center gap-1.5 rounded-full border border-surface-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
                 >
@@ -225,15 +240,17 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 <button
                   onClick={() => handleConfirm(b.id)}
                   disabled={isPending}
-                  className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
                 >
+                  <Check size={12} />
                   Potvrdiť
                 </button>
                 <button
                   onClick={() => handleCancelOpen(b)}
                   disabled={isPending}
-                  className="rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
                 >
+                  <X size={12} />
                   Zrušiť
                 </button>
               </div>
@@ -254,15 +271,15 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         />
       </div>
 
-      <div className="hidden lg:block overflow-hidden rounded-xl border border-surface-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
+      <div className="hidden lg:block overflow-hidden rounded-lg border border-surface-200 bg-white">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-surface-100">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-surface-200">
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-widest text-neutral-400 last:text-right"
+                    className="px-4 py-3 text-xs font-medium text-neutral-500"
                   >
                     {header.column.getCanSort() ? (
                       <button
@@ -294,12 +311,12 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-surface-100">
+          <tbody>
             {table.getRowModel().rows.length === 0 && (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-sm text-neutral-400"
+                  className="px-4 py-12 text-center text-sm text-neutral-400"
                 >
                   Žiadne nové žiadosti
                 </td>
@@ -308,10 +325,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="transition-colors hover:bg-surface-50"
+                className="border-t border-surface-200 transition-colors hover:bg-surface-50"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4 last:text-right">
+                  <td key={cell.id} className="px-4 py-4 align-top">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -320,7 +337,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
           </tbody>
         </table>
 
-        <div className="border-t border-surface-100 px-6 py-3">
+        <div className="border-t border-surface-200 px-4 py-3">
           <PaginationControls
             page={page}
             totalPages={totalPages}
@@ -332,6 +349,14 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
           />
         </div>
       </div>
+
+      {noteTarget && (
+        <BookingNoteDialog
+          open
+          booking={noteTarget}
+          onClose={() => setNoteTarget(null)}
+        />
+      )}
 
       <Dialog
         open={cancelTarget !== null}

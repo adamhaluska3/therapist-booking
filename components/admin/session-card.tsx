@@ -12,17 +12,20 @@ import {
   Clock,
   Hash,
   MessageSquare,
-  MapPin,
-  Monitor,
   MoreHorizontal,
 } from "lucide-react";
 import type { Booking, BookingType } from "@/db/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
-import { getInitials } from "@/lib/formatting";
-import { UNKNOWN_CLIENT } from "@/lib/constants";
+import { getInitials, formatPrice } from "@/lib/formatting";
+import {
+  BOOKING_TYPE_COLORS,
+  UNKNOWN_CLIENT,
+  DEFAULT_THERAPY_COLOR,
+} from "@/lib/constants";
 import { AdminCard } from "@/components/admin/admin-card";
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card";
 import { BookingDialog } from "@/components/admin/booking-dialog";
+import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
+import { LocationBadge } from "@/components/booking/location-badge";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -40,13 +43,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import {
   updateBookingFromDialog,
   updateBookingStatus,
 } from "@/server/booking/mutations";
-import { toast } from "sonner";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -91,6 +94,7 @@ export function SessionCard({
     null,
   );
   const [editOpen, setEditOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
 
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
@@ -184,7 +188,7 @@ export function SessionCard({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
-                    <span>2400001</span>
+                    <span>{booking.variableSymbol}</span>
                   </div>
                 </div>
               </Link>
@@ -205,7 +209,7 @@ export function SessionCard({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
-                    <span>2400001</span>
+                    <span>{booking.variableSymbol}</span>
                   </div>
                 </div>
               </div>
@@ -218,24 +222,34 @@ export function SessionCard({
                     className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                     style={{
                       backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
+                        DEFAULT_THERAPY_COLOR,
                     }}
                   />
                   <span>{bookingType.name}</span>
+                  {formatPrice(booking.price) && (
+                    <span className="text-neutral-400">
+                      · {formatPrice(booking.price)}
+                    </span>
+                  )}
                 </div>
               )}
-              <div className="flex items-center gap-1.5 text-sm text-neutral-500">
-                <MapPin size={13} className="shrink-0" />
-                <span>Osobne</span>
-              </div>
+              <LocationBadge locationType={booking.locationType} />
             </div>
           </div>
 
           <div className="hidden lg:flex items-center gap-2 ml-auto shrink-0">
-            <button className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors">
-              <Video size={13} />
-              <span>Pripojiť sa</span>
-            </button>
+            {booking.locationType === "online" && (
+              <a
+                href={booking.meetLink ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors"
+              >
+                <Video size={13} />
+                <span>Pripojiť sa</span>
+              </a>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-600 hover:bg-surface-50 transition-colors">
                 <MoreHorizontal size={13} />
@@ -247,7 +261,7 @@ export function SessionCard({
                   Absolvované
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setNoteOpen(true)}>
                   <MessageSquare size={13} />
                   Poznámka
                 </DropdownMenuItem>
@@ -275,16 +289,19 @@ export function SessionCard({
                 className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                 style={{
                   backgroundColor:
-                    BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                    BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
+                    DEFAULT_THERAPY_COLOR,
                 }}
               />
               <span>{bookingType.name}</span>
+              {formatPrice(booking.price) && (
+                <span className="text-neutral-400">
+                  · {formatPrice(booking.price)}
+                </span>
+              )}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
-            <MapPin size={13} className="shrink-0" />
-            <span>Osobne</span>
-          </div>
+          <LocationBadge locationType={booking.locationType} />
         </div>
 
         <div className="flex lg:hidden items-center justify-end gap-2">
@@ -336,6 +353,18 @@ export function SessionCard({
         }}
         onClose={() => setEditOpen(false)}
         onUserCreated={() => {}}
+      />
+
+      <BookingNoteDialog
+        open={noteOpen}
+        booking={booking}
+        onClose={() => setNoteOpen(false)}
+      />
+
+      <BookingNoteDialog
+        open={noteOpen}
+        booking={booking}
+        onClose={() => setNoteOpen(false)}
       />
 
       <Dialog

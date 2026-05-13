@@ -1,6 +1,7 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth-schema";
+import { BookingUser } from "@/server/user/schema";
 
 export const statusEnum = [
   "pending",
@@ -40,6 +41,8 @@ export const booking = sqliteTable("booking", {
   locationType: text("location_type", { enum: locationTypeEnum }).notNull().default("onsite"),
   price: integer("price"), // snapshot of booking_type.price at time of booking
   note: text("note"),
+  variableSymbol: integer("variable_symbol"),
+  meetLink: text("meet_link"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -57,6 +60,39 @@ export const userNote = sqliteTable("user_note", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$onUpdateFn(() => new Date()),
+});
+
+export const postCategories = sqliteTable('post_categories', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text('name').notNull().unique(),
+})
+
+export const posts = sqliteTable('posts', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  content: text('content').notNull(),
+  titleImage: text('title_image'),
+  slug: text('slug').notNull().unique(),
+  isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$onUpdateFn(() => new Date()),
+  categoryId: text('category_id').references(() => postCategories.id),
+})
+
+export const paymentSettings = sqliteTable("payment_settings", {
+  id: text("id").primaryKey().default("singleton"),
+  iban: text("iban"),
+  bic: text("bic"),
+  beneficiaryName: text("beneficiary_name"),
+  paymentNote: text("payment_note"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdateFn(
+    () => new Date(),
+  ),
 });
 
 export const bookingRelations = relations(booking, ({ one }) => ({
@@ -77,23 +113,32 @@ export const userNoteRelations = relations(userNote, ({ one }) => ({
   }),
 }));
 
-export const paymentSettings = sqliteTable("payment_settings", {
-  id: text("id").primaryKey().default("singleton"),
-  iban: text("iban"),
-  bic: text("bic"),
-  beneficiaryName: text("beneficiary_name"),
-  paymentNote: text("payment_note"),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdateFn(
-    () => new Date(),
-  ),
-});
+export const categoriesRelations = relations(postCategories, ({ many }) => ({
+  posts: many(posts),
+}))
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  category: one(postCategories, {
+    fields: [posts.categoryId],
+    references: [postCategories.id],
+  }),
+}))
 
 export type Booking = typeof booking.$inferSelect;
 export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
 export type UserNote = typeof userNote.$inferSelect;
 export type PaymentSettings = typeof paymentSettings.$inferSelect;
 export type BookingType = typeof bookingType.$inferSelect;
-
-
-
+export type BookingWithUser = Booking & { user: BookingUser | null };
+export type PostCategory = typeof postCategories.$inferSelect;
+export type Post = typeof posts.$inferSelect;
+export type PostPreview = {
+  id: string,
+  slug: string,
+  title: string,
+  titleImage: string | null,
+  description: string,
+  createdAt: Date,
+  category: PostCategory | null
+}
 

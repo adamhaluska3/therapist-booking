@@ -1,6 +1,7 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Info, MapPin } from "lucide-react";
+import { ADDRESS_SHORT } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -91,6 +92,15 @@ export function TimeSlotPanel({
           ))}
         </div>
       </div>
+
+      {locationType === "onsite" && (
+        <div className="flex items-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-600" />
+          <p className="text-sm text-brand-700">
+            Adresa stretnutia: <span className="font-semibold">{ADDRESS_SHORT}</span>
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-neutral-700">

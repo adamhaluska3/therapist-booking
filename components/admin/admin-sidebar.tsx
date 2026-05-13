@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Globe,
+  LucideBookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/user-context";
@@ -33,15 +34,16 @@ const navItems = [
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
+  { label: "Kategórie príspevkov", href: "/admin/post-categories", icon: LucideBookmark },
   { label: "Nastavenia", href: "/admin/settings", icon: Settings },
 ];
 
 function SidebarContent({
   onNavigate,
-  pendingCount,
+  pendingCount = 0,
 }: {
   onNavigate?: () => void;
-  pendingCount: number;
+  pendingCount?: number;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -67,9 +69,6 @@ function SidebarContent({
       <div className="px-6 pt-8 pb-6">
         <p className="text-lg font-semibold text-neutral-800 leading-tight">
           Admin Portal
-        </p>
-        <p className="text-xs tracking-widest uppercase text-neutral-400 mt-0.5">
-          Clinical Management
         </p>
       </div>
 
@@ -146,7 +145,7 @@ function SidebarContent({
   );
 }
 
-export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
+export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

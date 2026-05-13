@@ -1,4 +1,6 @@
-import { Booking } from "@/db/schema";
+import { Booking, locationTypeEnum } from "@/db/schema";
+
+export type LocationType = typeof locationTypeEnum[number];
 import { BookingUser } from "../user/schema";
 import { user } from "@/db/auth-schema";
 
@@ -30,3 +32,14 @@ export function toBookingWithUser(row: {
       : null,
   };
 }
+
+export type ClientAbsolvedBookingRow = {
+  id: string;
+  start: Date;
+  end: Date;
+  bookingTypeName: string | null;
+  variableSymbol: number | null;
+  price: number | null;
+  locationType: LocationType;
+  note: string | null;
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -50,12 +50,15 @@ export function NicknameChangeDialog({
     },
   });
 
+  useEffect(() => {
+    form.reset({ nickname: currentNickname ?? "" });
+  }, [currentNickname, form]);
+
   async function onSubmit(data: NicknameFormData) {
     startTransition(async () => {
       try {
         await updateUserNickname(userId, data.nickname);
         setOpen(false);
-        form.reset();
         router.refresh();
         toast.success("Prezývka aktualizovaná");
       } catch (e) {

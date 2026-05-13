@@ -1,5 +1,11 @@
 import "dotenv/config";
+import { copyFileSync, existsSync, mkdirSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
 import { createClient } from "@libsql/client";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const publicDir = resolve(__dirname, "../public");
 
 const databaseUrl = process.env.TURSO_DATABASE_URL ?? "file:./sqlite.db";
 const client = createClient({
@@ -62,6 +68,19 @@ const BOOKING_TYPES = [
 ];
 
 async function main() {
+  // Copy blog images into uploads/ so they can be deleted independently
+  const uploadsDir = resolve(publicDir, "uploads");
+  if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
+  const imagesToCopy = [
+    { src: "images/blog/blog-1.png", dest: "uploads/seed-blog-1.png" },
+    { src: "images/blog/blog-3.png", dest: "uploads/seed-blog-3.png" },
+    { src: "images/blog/blog-5.png", dest: "uploads/seed-blog-5.png" },
+  ];
+  for (const { src, dest } of imagesToCopy) {
+    copyFileSync(resolve(publicDir, src), resolve(publicDir, dest));
+  }
+  console.log("Copied seed images to uploads/");
+
   const statements = [];
 
   // 0. Seed Booking Types
@@ -187,11 +206,12 @@ async function main() {
 
         const bookingType = BOOKING_TYPES[getRandomInt(0, BOOKING_TYPES.length - 1)];
         const booking = { id: bookingId, start: bStart, end: bEnd };
+        const variableSymbolExample = 1234567890;
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, variable_symbol, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
@@ -201,6 +221,7 @@ async function main() {
             bEnd,
             status,
             bookingType.price,
+            variableSymbolExample,
             Date.now(),
           ],
         });
@@ -209,12 +230,64 @@ async function main() {
     }
   });
 
-  // 4. Batch Execute
+  // 4. Seed Post Categories and Posts
+  const postCategoryId = "seed-cat-terapia";
+  statements.push({
+    sql: `INSERT INTO post_categories (id, name) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name`,
+    args: [postCategoryId, "Terapia"],
+  });
+
+  const seedPosts = [
+    {
+      id: "seed-post-1",
+      title: "Čo je psychoterapia a komu pomáha?",
+      description: "Psychoterapia je odborná pomoc pri riešení psychických ťažkostí. Zistite, pre koho je vhodná a čo môžete očakávať.",
+      content: "<p>Psychoterapia je forma odbornej pomoci, ktorá využíva rozhovor a rôzne techniky na liečbu psychických ťažkostí. Je vhodná pre každého, kto sa cíti preťažený, úzkostný alebo hľadá lepšie porozumenie sebe samému.</p><p>Terapeut vytvára bezpečný priestor, v ktorom môžete slobodne hovoriť o svojich pocitoch bez odsúdenia. Spolupracujete na pochopení vašich vzorcov myslenia a správania a hľadáte zdravšie spôsoby zvládania každodenných situácií.</p>",
+      slug: "co-je-psychoterapia",
+      titleImage: "/uploads/seed-blog-1.png",
+      categoryId: postCategoryId,
+      isPublic: 1,
+      createdAt: Math.floor(new Date("2026-03-10").getTime() / 1000),
+    },
+    {
+      id: "seed-post-2",
+      title: "Outdoor terapia: liečivá sila prírody",
+      description: "Terapeutické sedenia v prírode ponúkajú jedinečný zážitok. Prečítajte si, prečo je príroda mocným spojencom v procese uzdravovania.",
+      content: "<p>Outdoor terapia spája tradičné terapeutické prístupy s liečivým prostredím prírody. Pohyb, čerstvý vzduch a kontakt so živou prírodou výrazne prehlbujú terapeutický proces.</p><p>Výskumy potvrdzujú, že pobyt v prírode znižuje hladinu kortizolu, zlepšuje náladu a podporuje kreativitu. Sedenia v lese alebo pri vode môžu byť mimoriadne účinné pri zvládaní stresu a úzkosti.</p>",
+      slug: "outdoor-terapia-priroda",
+      titleImage: "/uploads/seed-blog-3.png",
+      categoryId: postCategoryId,
+      isPublic: 1,
+      createdAt: Math.floor(new Date("2026-04-02").getTime() / 1000),
+    },
+    {
+      id: "seed-post-3",
+      title: "Ako sa pripraviť na prvé terapeutické sedenie",
+      description: "Prvé stretnutie s terapeutom môže byť nervózne. Tu je niekoľko tipov, ako sa naň pripraviť a čo očakávať.",
+      content: "<p>Prvé sedenie je predovšetkým spoznávanie – terapeut sa vám bude chcieť dozvedieť viac o vás a o dôvode, prečo ste prišli. Nemusíte mať pripravené odpovede na všetky otázky.</p><p>Odporúčame si vopred premyslieť, čo vás trápi najviac a čo by ste chceli v terapii dosiahnuť. Pamätajte, že terapia je spolupráca – váš terapeut je tu na to, aby vám pomohol, nie aby vás hodnotil.</p>",
+      slug: "prve-terapeuticke-sedenie",
+      titleImage: "/uploads/seed-blog-5.png",
+      categoryId: null,
+      isPublic: 1,
+      createdAt: Math.floor(new Date("2026-04-20").getTime() / 1000),
+    },
+  ];
+
+  for (const post of seedPosts) {
+    statements.push({
+      sql: `INSERT INTO posts (id, title, description, content, slug, title_image, is_public, category_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET title=excluded.title, slug=excluded.slug`,
+      args: [post.id, post.title, post.description, post.content, post.slug, post.titleImage, post.isPublic, post.categoryId, post.createdAt, post.createdAt],
+    });
+  }
+
+  // 5. Batch Execute
   console.log("Starting database sync...");
   try {
     await client.batch(statements, "write");
     console.log(
-      `Success! Synced ${users.length} users and ${bookings.length} bookings.`,
+      `Success! Synced ${users.length} users, ${bookings.length} bookings and ${seedPosts.length} blog posts.`,
     );
   } catch (e) {
     console.error("Batch failed:", e);

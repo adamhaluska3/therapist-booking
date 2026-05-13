@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
+import type { BookingType } from "@/db/schema";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
-import { getInitials } from "@/lib/formatting";
-import { UNKNOWN_CLIENT } from "@/lib/constants";
-import { MapPin, MessageSquare } from "lucide-react";
+import { getInitials, formatPrice } from "@/lib/formatting";
+import {
+  BOOKING_TYPE_COLORS,
+  UNKNOWN_CLIENT,
+  DEFAULT_THERAPY_COLOR,
+} from "@/lib/constants";
+import { MessageSquare, Check, X } from "lucide-react";
+import { LocationBadge } from "@/components/booking/location-badge";
 import { BookingWithUser } from "@/server/booking/schema";
-import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
-import { BookingType } from "@/db/schema";
 
 interface ActionHandlers {
   onConfirm: (id: string) => void;
   onCancel: (booking: BookingWithUser) => void;
+  onNote: (booking: BookingWithUser) => void;
   isPending: boolean;
   bookingTypes: BookingType[];
 }
@@ -20,6 +25,7 @@ const columnHelper = createColumnHelper<BookingWithUser>();
 export function getRequestsColumns({
   onConfirm,
   onCancel,
+  onNote,
   isPending,
   bookingTypes,
 }: ActionHandlers) {
@@ -48,16 +54,18 @@ export function getRequestsColumns({
                     className="inline-block w-2 h-2 rounded-full shrink-0"
                     style={{
                       backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
+                        DEFAULT_THERAPY_COLOR,
                     }}
                   />
                   <span className="truncate">{bookingType.name}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
-                <MapPin size={11} className="shrink-0" />
-                <span>Osobne</span>
-              </div>
+              <LocationBadge
+                locationType={booking.locationType}
+                size={11}
+                className="text-xs text-neutral-400"
+              />
             </div>
           </div>
         );
@@ -88,7 +96,19 @@ export function getRequestsColumns({
     columnHelper.display({
       id: "variableSymbol",
       header: "Var. symbol",
-      cell: () => <p className="text-sm text-neutral-600">2400001</p>,
+      cell: (info) => {
+        const price = formatPrice(info.row.original.price);
+        return (
+          <>
+            <p className="text-sm text-neutral-600">
+              {info.row.original.variableSymbol}
+            </p>
+            {price && (
+              <p className="text-xs text-neutral-400 mt-0.5">{price}</p>
+            )}
+          </>
+        );
+      },
     }),
     columnHelper.display({
       id: "actions",
@@ -99,6 +119,7 @@ export function getRequestsColumns({
         return (
           <div className="flex items-center justify-end gap-2">
             <button
+              onClick={() => onNote(booking)}
               disabled={isPending}
               className="flex items-center gap-1.5 rounded-full border border-surface-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
             >
@@ -108,15 +129,17 @@ export function getRequestsColumns({
             <button
               onClick={() => onConfirm(booking.id)}
               disabled={isPending}
-              className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
             >
+              <Check size={12} />
               Potvrdiť
             </button>
             <button
               onClick={() => onCancel(booking)}
               disabled={isPending}
-              className="rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
             >
+              <X size={12} />
               Zrušiť
             </button>
           </div>
