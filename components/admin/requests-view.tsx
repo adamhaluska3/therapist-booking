@@ -8,7 +8,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
- 
+  Check,
+  X,
   Hash,
   MessageSquare,
 } from "lucide-react";
@@ -225,15 +226,17 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 <button
                   onClick={() => handleConfirm(b.id)}
                   disabled={isPending}
-                  className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
                 >
+                  <Check size={12} />
                   Potvrdiť
                 </button>
                 <button
                   onClick={() => handleCancelOpen(b)}
                   disabled={isPending}
-                  className="rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
                 >
+                  <X size={12} />
                   Zrušiť
                 </button>
               </div>

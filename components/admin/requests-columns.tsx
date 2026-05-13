@@ -5,7 +5,7 @@ import { formatTime, formatBookingDate } from "@/lib/date-utils"
 import { getInitials, formatPrice } from "@/lib/formatting"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Check, X } from "lucide-react"
 import { LocationBadge } from "@/components/admin/location-badge"
 import { BookingWithUser } from "@/server/booking/schema"
 
@@ -116,15 +116,17 @@ export function getRequestsColumns({
             <button
               onClick={() => onConfirm(booking.id)}
               disabled={isPending}
-              className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
             >
+              <Check size={12} />
               Potvrdiť
             </button>
             <button
               onClick={() => onCancel(booking)}
               disabled={isPending}
-              className="rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-full border border-surface-200 px-4 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-surface-50 disabled:opacity-50"
             >
+              <X size={12} />
               Zrušiť
             </button>
           </div>
