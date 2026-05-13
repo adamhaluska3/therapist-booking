@@ -1,4 +1,6 @@
-import { Booking } from "@/db/schema";
+import { Booking, locationTypeEnum } from "@/db/schema";
+
+export type LocationType = typeof locationTypeEnum[number];
 import { BookingUser } from "../user/schema";
 import { user } from "@/db/auth-schema";
 
@@ -38,6 +40,6 @@ export type ClientAbsolvedBookingRow = {
   bookingTypeName: string | null;
   variableSymbol: number | null;
   price: number | null;
-  locationType: string;
+  locationType: LocationType;
   note: string | null;
 };
