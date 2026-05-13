@@ -4,7 +4,7 @@ import { ArrowLeft, MoveLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: "Správa blogu – Nový príspevok",
+  title: "Nový príspevok",
 };
 
 const Page = async () => {

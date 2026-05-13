@@ -4,8 +4,25 @@ import { setPublicity } from "@/server/blog/mutations";
 import { Badge } from "@/components/ui/badge";
 import { Check, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function PublicityToggle({ id, isPublic }: { id: string; isPublic: boolean }) {
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => setPublicity(id, !isPublic),
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast.error(result.error)
+      } else {
+        toast.success(`Príspevok je ${!isPublic ? "verejný" : "neverejný"}`)
+        router.refresh()
+      }
+    },
+    onError: () => toast.error('Nepodarilo sa zmeniť stav príspevku.'),
+  });
+
   return (
     <Badge
       onClick={() => setPublicity(id, !isPublic)}

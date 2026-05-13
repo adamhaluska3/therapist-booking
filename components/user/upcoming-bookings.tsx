@@ -35,12 +35,18 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
             )}
             {timeSorted.length > 0 && (
                 <div>
-                    <div className="flex flex-col gap-5">
+                    <div className="flex flex-wrap gap-x-5 gap-y-5 justify-center h-auto">
                         {confirmed && (
-                            <ClosestConfirmedUpcommingBooking item={confirmed} />
+                            <div className="flex-2">
+                                <ClosestConfirmedUpcommingBooking item={confirmed} />
+                            </div>
+                            
                         )}
                         {pending && (
-                            <ClosestPendingUpcommingBooking item={pending} />
+                            <div className="flex-1">
+                                <ClosestPendingUpcommingBooking item={pending} />
+
+                            </div>
                         )}
                     </div>
                     {rest.length > 0 && (

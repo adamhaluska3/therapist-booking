@@ -173,7 +173,7 @@ export function SessionCard({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
-                    <span>2400001</span>
+                    <span>{booking.variableSymbol}</span>
                   </div>
                 </div>
               </Link>
@@ -194,7 +194,7 @@ export function SessionCard({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                     <Hash size={11} className="shrink-0" />
-                    <span>2400001</span>
+                    <span>{booking.variableSymbol}</span>
                   </div>
                 </div>
               </div>

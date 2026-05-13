@@ -5,7 +5,7 @@ import { ClientPaymentInfo } from "./client-payment-info"
 import { Calendar, Clock5, MapPin, NotebookText, Play, Clock } from "lucide-react"
 import { Badge } from "../ui/badge"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
-import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
+import { ADDRESS_SHORT } from "@/lib/constants"
 import { NoteDialog } from "./note-dialog"
 
 export type ClosestPendingUpcommingBookingProps = {
@@ -58,7 +58,7 @@ export const ClosestPendingUpcommingBooking = ({item}: ClosestPendingUpcommingBo
                     {!item.note && <span>Bez poznámok</span>}
                 </div>
             </div>
-            <div className="flex gap-2 text-sm text-brand-700 flex-col sm:flex-row">
+            <div className="flex gap-2 text-sm text-brand-700 flex-col sm:flex-row w-full">
                 <ClientPaymentInfo vs={item.variableSymbol} centPrice={item.price || 0} note={item.bookingType?.name || ""}>
                     <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">
                         <span>Platba</span>

@@ -1,19 +1,17 @@
 "use server";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import type { UserRole } from "@/lib/user-context";
 
 export async function requireAuth() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user) redirect("/auth-error?reason=unauthorized");
   return session.user;
 }
 async function requireRole(role: UserRole) {
   const user = await requireAuth();
-  if (user.role !== role)
-    throw new Error(
-      "Forbidden, required role: " + role + ", current role: " + user.role,
-    );
+  if (user.role !== role) redirect("/auth-error?reason=forbidden");
   return user;
 }
 

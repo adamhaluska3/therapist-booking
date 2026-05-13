@@ -6,7 +6,7 @@ import { getBookingsWithUsers } from "@/server/booking/queries";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 
 export const metadata = {
-  title: "Správa dostupnosti – Kalendár",
+  title: "Kalendár",
 };
 
 interface Props {

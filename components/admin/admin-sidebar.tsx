@@ -40,10 +40,10 @@ const navItems = [
 
 function SidebarContent({
   onNavigate,
-  pendingCount,
+  pendingCount = 0,
 }: {
   onNavigate?: () => void;
-  pendingCount: number;
+  pendingCount?: number;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -145,7 +145,7 @@ function SidebarContent({
   );
 }
 
-export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
+export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

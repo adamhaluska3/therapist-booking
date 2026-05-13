@@ -206,11 +206,12 @@ async function main() {
 
         const bookingType = BOOKING_TYPES[getRandomInt(0, BOOKING_TYPES.length - 1)];
         const booking = { id: bookingId, start: bStart, end: bEnd };
+        const variableSymbolExample = 1234567890;
         bookings.push(booking);
 
         statements.push({
-          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          sql: `INSERT INTO booking (id, user_id, booking_type_id, start, end, status, price, variable_symbol, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET status=excluded.status, start=excluded.start, end=excluded.end`,
           args: [
             bookingId,
@@ -220,6 +221,7 @@ async function main() {
             bEnd,
             status,
             bookingType.price,
+            variableSymbolExample,
             Date.now(),
           ],
         });

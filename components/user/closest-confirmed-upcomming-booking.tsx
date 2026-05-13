@@ -6,7 +6,7 @@ import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import Link from "next/link"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
-import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
+import { ADDRESS_SHORT } from "@/lib/constants"
 import { ClientPaymentInfo } from "./client-payment-info"
 import { NoteDialog } from "./note-dialog"
 
@@ -74,7 +74,7 @@ export const ClosestConfirmedUpcommingBooking = ({item}: ClosestConfirmedUpcommi
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 text-sm text-brand-700">
+            <div className="flex flex-col sm:flex-row gap-2 text-sm text-brand-700 w-full">
                 {item.locationType === "online" && (
                     <Link href={item.meetLink ?? "#"}>
                         <Button className="p-2 px-4 bg-brand-500 text-sm rounded-2xl flex gap-2 w-full sm:w-auto">

@@ -173,7 +173,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                 </p>
                 <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                   <Hash size={11} className="shrink-0" />
-                  <span>2400001</span>
+                  <span>{b.variableSymbol}</span>
                   {formatPrice(b.price) && (
                     <span>· {formatPrice(b.price)}</span>
                   )}

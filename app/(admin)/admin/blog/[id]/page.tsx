@@ -8,26 +8,30 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 export const metadata = {
-  title: "Správa blogu – Úprava príspevku",
+  title: "Úprava príspevku",
 };
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = await params
+  const { id } = await params;
 
   const post = await db.query.posts.findFirst({
     where: eq(posts.id, id),
-  })
+  });
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  const categories = await db.query.postCategories.findMany()
+  const categories = await db.query.postCategories.findMany();
 
   const props: PostEditorProps = {
-      post: { ...post, titleImage: post.titleImage ?? undefined, categoryId: post.categoryId ?? undefined },
-      categories: categories
-  }
+    post: {
+      ...post,
+      titleImage: post.titleImage ?? undefined,
+      categoryId: post.categoryId ?? undefined,
+    },
+    categories: categories,
+  };
 
   return (
     <div className='mx-auto max-w-5xl'>
@@ -43,7 +47,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         </div>
         <PostEditor {...props} />
     </div>
-  )
-}
+  );
+};
 
 export default Page;

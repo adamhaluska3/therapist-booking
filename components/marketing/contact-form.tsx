@@ -24,6 +24,7 @@ import {
 import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
 import { submitContactForm } from "@/server/contact-form/contact";
 import type { BookingType } from "@/db/schema";
+import { toast } from "sonner";
 
 export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
   const form = useForm<ContactFormValues>({
@@ -40,6 +41,11 @@ export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
     const result = await submitContactForm(values);
     if (result.success) {
       form.reset();
+      toast.success("Správa bola úspešne odoslaná!");
+    } else {
+      toast.error(
+        "Nastala chyba pri odosielaní správy. Skúste to prosím znovu neskôr.",
+      );
     }
   }
 

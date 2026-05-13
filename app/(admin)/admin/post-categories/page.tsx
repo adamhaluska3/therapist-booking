@@ -3,8 +3,9 @@ import { PostCategoriesTable } from "@/components/admin/post-categories-table";
 import { db } from "@/lib/db";
 import { Plus } from "lucide-react";
 
-const Page = async () => {
-    const categories = await db.query.postCategories.findMany();
+export const metadata = {
+  title: "Správa kategórií príspevkov",
+};
 
     return (
          <article className='mx-auto max-w-5xl'>
@@ -29,5 +30,3 @@ const Page = async () => {
         </article>
     )
 }
-
-export default Page;
