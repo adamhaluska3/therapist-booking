@@ -1,7 +1,6 @@
 "use client"
 import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
-import { MediumInfoText } from "../ui/brand-text-ui/medium-info-text"
 import { bookingStatusIcon } from "../booking/booking-status-icon"
 import React, { useMemo } from "react"
 import Link from "next/link"
