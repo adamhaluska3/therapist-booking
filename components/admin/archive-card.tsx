@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Check } from "lucide-react";
 import { LocationBadge } from "@/components/admin/location-badge"
 import type { BookingWithUser } from "@/server/booking/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
@@ -75,7 +75,7 @@ export function ArchiveCard({
               )}
             </div>
             <Badge className="bg-brand-100 text-brand-700 border-brand-200 px-3 py-1 h-auto text-xs font-medium shrink-0 ml-2">
-              Absolvované
+              <Check size={11} />Absolvované
             </Badge>
           </div>
         </div>
@@ -128,7 +128,7 @@ export function ArchiveCard({
 
         <div className="flex items-center gap-2 ml-auto">
           <Badge className="bg-brand-100 text-brand-700 border-brand-200 px-3 py-1 h-auto text-xs font-medium">
-            Absolvované
+            <Check size={11} />Absolvované
           </Badge>
         </div>
       </div>
