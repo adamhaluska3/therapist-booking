@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   ColumnDef,
   SortingState,
@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { ChevronRight, Search } from "lucide-react";
-import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
 
 import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
@@ -39,12 +39,27 @@ export default function ClientsTable({
   items: ClientItem[];
 }) {
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 300);
   const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isFetching, setIsFetching] = useState(false);
 
-  const isPending = (search !== debouncedSearch && search !== "") || isFetching;
+  const fetchClients = useDebouncedCallback(async (value: string) => {
+    if (value === "") {
+      setData(initialItems ?? []);
+      return;
+    }
+    setIsFetching(true);
+    try {
+      const items = await getClientsTableRows(value);
+      setData(items ?? []);
+    } catch {
+      toast.error("Nepodarilo sa načítať klientov");
+    } finally {
+      setIsFetching(false);
+    }
+  }, 300);
+
+  const isPending = fetchClients.isPending() || isFetching;
 
   const columns = useMemo<ColumnDef<ClientItem, unknown>[]>(
     () => [
@@ -127,18 +142,6 @@ export default function ClientsTable({
   const getColumnClassName = (meta: unknown) =>
     (meta as ColumnClassMeta | undefined)?.className ?? "";
 
-  useEffect(() => {
-    if (debouncedSearch === "") {
-      setData(initialItems ?? []);
-      return;
-    }
-    setIsFetching(true);
-    getClientsTableRows(debouncedSearch)
-      .then((items) => setData(items ?? []))
-      .catch(() => toast.error("Nepodarilo sa načítať klientov"))
-      .finally(() => setIsFetching(false));
-  }, [debouncedSearch, initialItems]);
-
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4 gap-3">
@@ -149,7 +152,10 @@ export default function ClientsTable({
           />
           <input
             value={search ?? ""}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              fetchClients(e.target.value);
+            }}
             placeholder="Vyhľadať podľa mena"
             className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
           />
