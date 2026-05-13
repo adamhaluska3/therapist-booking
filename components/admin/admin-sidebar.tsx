@@ -34,7 +34,11 @@ const navItems = [
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
-  { label: "Kategórie príspevkov", href: "/admin/post-categories", icon: LucideBookmark },
+  {
+    label: "Kategórie príspevkov",
+    href: "/admin/post-categories",
+    icon: LucideBookmark,
+  },
   { label: "Nastavenia", href: "/admin/settings", icon: Settings },
 ];
 

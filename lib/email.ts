@@ -155,13 +155,13 @@ export async function sendBookingCancellationToTherapist({
   start,
   end,
 }: {
-  clientName: string
-  clientEmail: string
-  start: Date
-  end: Date
+  clientName: string;
+  clientEmail: string;
+  start: Date;
+  end: Date;
 }) {
-  const dateStr = formatDateTime(start)
-  const endTimeStr = format(end, "HH:mm")
+  const dateStr = formatDateTime(start);
+  const endTimeStr = format(end, "HH:mm");
 
   await send({
     from: FROM,
@@ -245,7 +245,7 @@ export async function sendBookingCancellationToTherapist({
 </body>
 </html>
     `,
-  })
+  });
 }
 
 export async function sendBookingConfirmationToClient({
@@ -317,19 +317,25 @@ export async function sendBookingConfirmationToClient({
                           <span style="display:inline-block;font-size:12px;font-weight:600;color:#166534;background:#dcfce7;padding:3px 10px;border-radius:20px;">Potvrdené</span>
                         </td>
                       </tr>
-                      ${locationType === "onsite" ? `
+                      ${
+                        locationType === "onsite"
+                          ? `
                       <tr>
                         <td style="padding:7px 0;border-top:1px solid #ede8df;">
                           <span style="font-size:13px;color:#6b7280;min-width:80px;display:inline-block;">Adresa</span>
                           <span style="font-size:14px;font-weight:600;color:#1f2937;">${ADDRESS_SHORT}</span>
                         </td>
-                      </tr>` : ""}
+                      </tr>`
+                          : ""
+                      }
                     </table>
                   </td>
                 </tr>
               </table>
 
-              ${locationType === "online" && meetLink ? `
+              ${
+                locationType === "online" && meetLink
+                  ? `
               <!-- Meet link -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
@@ -345,7 +351,9 @@ export async function sendBookingConfirmationToClient({
                   </td>
                 </tr>
               </table>
-              ` : ""}
+              `
+                  : ""
+              }
 
               <!-- ICS note -->
               <div style="background:#f0fdf4;border-left:3px solid #3d7a52;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px;">
@@ -371,7 +379,15 @@ export async function sendBookingConfirmationToClient({
 </body>
 </html>
     `,
-    attachments: [buildIcsAttachment(start, end, bookingId, clientEmail, locationType === "online" ? meetLink : undefined)],
+    attachments: [
+      buildIcsAttachment(
+        start,
+        end,
+        bookingId,
+        clientEmail,
+        locationType === "online" ? meetLink : undefined,
+      ),
+    ],
   });
 }
 
@@ -552,19 +568,25 @@ export async function sendBookingRescheduledToClient({
                           <span style="display:inline-block;font-size:12px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 10px;border-radius:20px;">Presunuté</span>
                         </td>
                       </tr>
-                      ${locationType === "onsite" ? `
+                      ${
+                        locationType === "onsite"
+                          ? `
                       <tr>
                         <td style="padding:7px 0;border-top:1px solid #ede8df;">
                           <span style="font-size:13px;color:#6b7280;min-width:120px;display:inline-block;">Adresa</span>
                           <span style="font-size:14px;font-weight:600;color:#1f2937;">${ADDRESS_SHORT}</span>
                         </td>
-                      </tr>` : ""}
+                      </tr>`
+                          : ""
+                      }
                     </table>
                   </td>
                 </tr>
               </table>
 
-              ${locationType === "online" && meetLink ? `
+              ${
+                locationType === "online" && meetLink
+                  ? `
               <!-- Meet link -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
@@ -580,7 +602,9 @@ export async function sendBookingRescheduledToClient({
                   </td>
                 </tr>
               </table>
-              ` : ""}
+              `
+                  : ""
+              }
 
               <!-- ICS note -->
               <div style="background:#fffbeb;border-left:3px solid #d97706;border-radius:0 8px 8px 0;padding:16px 20px;">
@@ -604,7 +628,15 @@ export async function sendBookingRescheduledToClient({
 </body>
 </html>
     `,
-    attachments: [buildIcsAttachment(newStart, newEnd, bookingId, clientEmail, locationType === "online" ? meetLink : undefined)],
+    attachments: [
+      buildIcsAttachment(
+        newStart,
+        newEnd,
+        bookingId,
+        clientEmail,
+        locationType === "online" ? meetLink : undefined,
+      ),
+    ],
   });
 }
 

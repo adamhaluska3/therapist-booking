@@ -19,7 +19,10 @@ export default function CalendarLoading() {
         <div className="grid grid-cols-8 border-b border-surface-200">
           <div className="border-r border-surface-200 p-3" />
           {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="border-r border-surface-200 p-3 last:border-r-0">
+            <div
+              key={i}
+              className="border-r border-surface-200 p-3 last:border-r-0"
+            >
               <Skeleton className="mx-auto h-4 w-8" />
               <Skeleton className="mx-auto mt-1 h-7 w-7 rounded-full" />
             </div>
@@ -27,12 +30,18 @@ export default function CalendarLoading() {
         </div>
 
         {Array.from({ length: 10 }).map((_, row) => (
-          <div key={row} className="grid grid-cols-8 border-b border-surface-200 last:border-b-0">
+          <div
+            key={row}
+            className="grid grid-cols-8 border-b border-surface-200 last:border-b-0"
+          >
             <div className="border-r border-surface-200 p-3">
               <Skeleton className="ml-auto h-3 w-10" />
             </div>
             {Array.from({ length: 7 }).map((_, col) => (
-              <div key={col} className="min-h-14 border-r border-surface-200 p-1 last:border-r-0">
+              <div
+                key={col}
+                className="min-h-14 border-r border-surface-200 p-1 last:border-r-0"
+              >
                 {row % 3 === 0 && col % 2 === 1 && (
                   <Skeleton className="h-8 w-full rounded-md" />
                 )}

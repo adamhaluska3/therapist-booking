@@ -39,9 +39,15 @@ export default function RequestsLoading() {
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-20" /></td>
+                <td className="px-6 py-4">
+                  <Skeleton className="h-4 w-24" />
+                </td>
+                <td className="px-6 py-4">
+                  <Skeleton className="h-4 w-16" />
+                </td>
+                <td className="px-6 py-4">
+                  <Skeleton className="h-4 w-20" />
+                </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex gap-2 justify-end">
                     <Skeleton className="h-7 w-20 rounded-full" />

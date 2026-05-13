@@ -19,9 +19,7 @@ export function ImageCarousel({
   autoPlayInterval?: number;
 }) {
   const slides =
-    images.length > 0
-      ? [images[images.length - 1], ...images, images[0]]
-      : [];
+    images.length > 0 ? [images[images.length - 1], ...images, images[0]] : [];
 
   const [index, setIndex] = useState(1);
   const [animated, setAnimated] = useState(true);

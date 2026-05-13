@@ -73,7 +73,9 @@ export function TimeSlotPanel({
       </div>
 
       <div className="grid gap-1.5">
-        <label className="text-sm font-medium text-neutral-700">Forma stretnutia</label>
+        <label className="text-sm font-medium text-neutral-700">
+          Forma stretnutia
+        </label>
         <div className="flex gap-2">
           {(["onsite", "online"] as const).map((type) => (
             <button
@@ -97,14 +99,16 @@ export function TimeSlotPanel({
         <div className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-600" />
           <p className="text-sm text-brand-700">
-            Adresa stretnutia: <span className="font-semibold">{ADDRESS_SHORT}</span>
+            Adresa stretnutia:{" "}
+            <span className="font-semibold">{ADDRESS_SHORT}</span>
           </p>
         </div>
       )}
 
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-neutral-700">
-          Správa pre terapeuta <span className="text-neutral-400 font-normal">(voliteľné)</span>
+          Správa pre terapeuta{" "}
+          <span className="text-neutral-400 font-normal">(voliteľné)</span>
         </label>
         <Textarea
           placeholder="Napíšte krátku správu alebo dôvod návštevy..."

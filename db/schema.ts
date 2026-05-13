@@ -34,11 +34,15 @@ export const booking = sqliteTable("booking", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-  bookingTypeId: text("booking_type_id").references(() => bookingType.id, { onDelete: "set null" }),
+  bookingTypeId: text("booking_type_id").references(() => bookingType.id, {
+    onDelete: "set null",
+  }),
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
   status: text("status", { enum: statusEnum }).notNull().default("pending"),
-  locationType: text("location_type", { enum: locationTypeEnum }).notNull().default("onsite"),
+  locationType: text("location_type", { enum: locationTypeEnum })
+    .notNull()
+    .default("onsite"),
   price: integer("price"), // snapshot of booking_type.price at time of booking
   note: text("note"),
   variableSymbol: integer("variable_symbol"),
@@ -62,18 +66,22 @@ export const userNote = sqliteTable("user_note", {
     .$onUpdateFn(() => new Date()),
 });
 
-export const postCategories = sqliteTable('post_categories', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text('name').notNull().unique(),
-})
+export const postCategories = sqliteTable("post_categories", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(),
+});
 
-export const posts = sqliteTable('posts', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  title: text('title').notNull(),
-  description: text('description').notNull(),
-  content: text('content').notNull(),
-  titleImage: text('title_image'),
-  slug: text('slug').notNull().unique(),
+export const posts = sqliteTable("posts", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  content: text("content").notNull(),
+  titleImage: text("title_image"),
+  slug: text("slug").notNull().unique(),
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -81,8 +89,8 @@ export const posts = sqliteTable('posts', {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$onUpdateFn(() => new Date()),
-  categoryId: text('category_id').references(() => postCategories.id),
-})
+  categoryId: text("category_id").references(() => postCategories.id),
+});
 
 export const paymentSettings = sqliteTable("payment_settings", {
   id: text("id").primaryKey().default("singleton"),
@@ -115,14 +123,14 @@ export const userNoteRelations = relations(userNote, ({ one }) => ({
 
 export const categoriesRelations = relations(postCategories, ({ many }) => ({
   posts: many(posts),
-}))
+}));
 
 export const postsRelations = relations(posts, ({ one }) => ({
   category: one(postCategories, {
     fields: [posts.categoryId],
     references: [postCategories.id],
   }),
-}))
+}));
 
 export type Booking = typeof booking.$inferSelect;
 export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
@@ -133,12 +141,11 @@ export type BookingWithUser = Booking & { user: BookingUser | null };
 export type PostCategory = typeof postCategories.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type PostPreview = {
-  id: string,
-  slug: string,
-  title: string,
-  titleImage: string | null,
-  description: string,
-  createdAt: Date,
-  category: PostCategory | null
-}
-
+  id: string;
+  slug: string;
+  title: string;
+  titleImage: string | null;
+  description: string;
+  createdAt: Date;
+  category: PostCategory | null;
+};

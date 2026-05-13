@@ -1,9 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {
-  blogHeader,
-} from "../../app/(marketing)/_content/blog";
+import { blogHeader } from "../../app/(marketing)/_content/blog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PostCategory } from "@/db/schema";
 
@@ -12,7 +10,10 @@ export type BlogHeaderSectionProp = {
   activeCategory: string | null;
 };
 
-export function BlogHeaderSection({ categories, activeCategory }: BlogHeaderSectionProp) {
+export function BlogHeaderSection({
+  categories,
+  activeCategory,
+}: BlogHeaderSectionProp) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

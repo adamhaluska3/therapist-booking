@@ -1,5 +1,5 @@
-"use client"
-import { UNKNOWN_CLIENT } from "@/lib/constants"
+"use client";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
@@ -8,21 +8,27 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { BookingWithUser } from "@/server/booking/schema"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { BookingWithUser } from "@/server/booking/schema";
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  booking: BookingWithUser
+  open: boolean;
+  onClose: () => void;
+  booking: BookingWithUser;
 }
 
 export function BookingNoteDialog({ open, onClose, booking }: Props) {
-  const clientName = booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT
+  const clientName =
+    booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
 
   return (
-    <Dialog open={open} onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Poznámka k sedeniu</DialogTitle>
@@ -42,5 +48,5 @@ export function BookingNoteDialog({ open, onClose, booking }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

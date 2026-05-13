@@ -7,64 +7,85 @@ import { ClientPaymentInfo } from "./client-payment-info";
 import { Button } from "../ui/button";
 import { getClientUpcomingSessions } from "@/server/client/queries";
 
-export const UpcomingUserBookings = async ({userId, limit}: {userId: string, limit?: number}) => {
-    const upcomingSessions = await getClientUpcomingSessions(userId, limit);
+export const UpcomingUserBookings = async ({
+  userId,
+  limit,
+}: {
+  userId: string;
+  limit?: number;
+}) => {
+  const upcomingSessions = await getClientUpcomingSessions(userId, limit);
 
-    const timeSorted = upcomingSessions.sort((s1, s2) => s1.start < s2.start ? -1 : s1.start === s2.start ? 0 : 1)
-    const confirmed = timeSorted.filter(s => s.status === "confirmed")[0] || null;
-    const pending = timeSorted.filter(s => s.status === "pending")[0] || null;
-    const rest = timeSorted.filter(s => s.id !== confirmed?.id && s.id !== pending?.id)
-    return (
-        <section>
-            <div className="flex flex-row flex-wrap items-center">
-                    <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-3xl flex-1">
-                        Nadchádzajúce sedenia
-                    </h2>
-                </div>
-            {timeSorted.length === 0 && (
-                <>
-                    <SmallInfoText content="Momentálne nemáte žiadne naplánované sedenia." className="mb-2 md:mb-5"/>
-                    <SmallInfoText content="V prípade záujmu o sedenie, vyberte si preferovaný termín" className="mb-2 md:mb-5"/>
-                    <Link href="/booking">
-                        <Button className="h-auto rounded-full bg-brand-700 px-4 py-2 text-xs text-white hover:bg-brand-800">
-                            Zarezerovať termín →
-                        </Button>
-                    </Link>
-                </>
+  const timeSorted = upcomingSessions.sort((s1, s2) =>
+    s1.start < s2.start ? -1 : s1.start === s2.start ? 0 : 1,
+  );
+  const confirmed =
+    timeSorted.filter((s) => s.status === "confirmed")[0] || null;
+  const pending = timeSorted.filter((s) => s.status === "pending")[0] || null;
+  const rest = timeSorted.filter(
+    (s) => s.id !== confirmed?.id && s.id !== pending?.id,
+  );
+  return (
+    <section>
+      <div className="flex flex-row flex-wrap items-center">
+        <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-3xl flex-1">
+          Nadchádzajúce sedenia
+        </h2>
+      </div>
+      {timeSorted.length === 0 && (
+        <>
+          <SmallInfoText
+            content="Momentálne nemáte žiadne naplánované sedenia."
+            className="mb-2 md:mb-5"
+          />
+          <SmallInfoText
+            content="V prípade záujmu o sedenie, vyberte si preferovaný termín"
+            className="mb-2 md:mb-5"
+          />
+          <Link href="/booking">
+            <Button className="h-auto rounded-full bg-brand-700 px-4 py-2 text-xs text-white hover:bg-brand-800">
+              Zarezerovať termín →
+            </Button>
+          </Link>
+        </>
+      )}
+      {timeSorted.length > 0 && (
+        <div>
+          <div className="flex flex-wrap gap-x-5 gap-y-5 justify-center h-auto">
+            {confirmed && (
+              <div className="flex-2">
+                <ClosestConfirmedUpcommingBooking item={confirmed} />
+              </div>
             )}
-            {timeSorted.length > 0 && (
-                <div>
-                    <div className="flex flex-wrap gap-x-5 gap-y-5 justify-center h-auto">
-                        {confirmed && (
-                            <div className="flex-2">
-                                <ClosestConfirmedUpcommingBooking item={confirmed} />
-                            </div>
-                            
-                        )}
-                        {pending && (
-                            <div className="flex-1">
-                                <ClosestPendingUpcommingBooking item={pending} />
-
-                            </div>
-                        )}
-                    </div>
-                    {rest.length > 0 && (
-                        <div className="mt-5 flex flex-col gap-5">
-                            {rest.map(s => (
-                                <UpcomingUserBookingItem key={s.id} item={s} paymentSlot={
-                                    (
-                                        <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
-                                            <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
-                                                <span>Platba</span>
-                                            </Button>
-                                        </ClientPaymentInfo>
-                                    )
-                                } />
-                            ))}
-                        </div>
-                    )}
-                </div>
+            {pending && (
+              <div className="flex-1">
+                <ClosestPendingUpcommingBooking item={pending} />
+              </div>
             )}
-        </section>
-    );
-}
+          </div>
+          {rest.length > 0 && (
+            <div className="mt-5 flex flex-col gap-5">
+              {rest.map((s) => (
+                <UpcomingUserBookingItem
+                  key={s.id}
+                  item={s}
+                  paymentSlot={
+                    <ClientPaymentInfo
+                      centPrice={s.price || 0}
+                      vs={s.variableSymbol}
+                      note={s.bookingType?.name ?? ""}
+                    >
+                      <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
+                        <span>Platba</span>
+                      </Button>
+                    </ClientPaymentInfo>
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+};

@@ -39,10 +39,18 @@ export default function BlogLoading() {
                     <Skeleton className="h-3 w-64" />
                   </div>
                 </td>
-                <td className="px-4 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
-                <td className="px-4 py-4"><Skeleton className="h-5 w-16 rounded-full" /></td>
-                <td className="px-4 py-4"><Skeleton className="h-4 w-24" /></td>
-                <td className="px-4 py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-24" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-12 ml-auto" />
+                </td>
               </tr>
             ))}
           </tbody>

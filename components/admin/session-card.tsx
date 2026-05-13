@@ -1,19 +1,28 @@
 "use client";
 
-import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { useQueryClient } from "@tanstack/react-query"
-import Link from "next/link"
-import { Check, Video, Pencil, X, Clock, Hash, MessageSquare, MoreHorizontal } from "lucide-react"
-import type { Booking, BookingType } from "@/db/schema"
-import { formatTime, formatMonthShort } from "@/lib/date-utils"
-import { getInitials, formatPrice } from "@/lib/formatting"
-import { UNKNOWN_CLIENT } from "@/lib/constants"
-import { AdminCard } from "@/components/admin/admin-card"
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
-import { BookingDialog } from "@/components/admin/booking-dialog"
-import { BookingNoteDialog } from "@/components/admin/booking-note-dialog"
-import { LocationBadge } from "@/components/admin/location-badge"
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import {
+  Check,
+  Video,
+  Pencil,
+  X,
+  Clock,
+  Hash,
+  MessageSquare,
+  MoreHorizontal,
+} from "lucide-react";
+import type { Booking, BookingType } from "@/db/schema";
+import { formatTime, formatMonthShort } from "@/lib/date-utils";
+import { getInitials, formatPrice } from "@/lib/formatting";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
+import { AdminCard } from "@/components/admin/admin-card";
+import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card";
+import { BookingDialog } from "@/components/admin/booking-dialog";
+import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
+import { LocationBadge } from "@/components/admin/location-badge";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -34,7 +43,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { updateBookingFromDialog, updateBookingStatus } from "@/server/booking/mutations";
+import {
+  updateBookingFromDialog,
+  updateBookingStatus,
+} from "@/server/booking/mutations";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -79,7 +91,7 @@ export function SessionCard({
     null,
   );
   const [editOpen, setEditOpen] = useState(false);
-  const [noteOpen, setNoteOpen] = useState(false)
+  const [noteOpen, setNoteOpen] = useState(false);
 
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
@@ -212,7 +224,9 @@ export function SessionCard({
                   />
                   <span>{bookingType.name}</span>
                   {formatPrice(booking.price) && (
-                    <span className="text-neutral-400">· {formatPrice(booking.price)}</span>
+                    <span className="text-neutral-400">
+                      · {formatPrice(booking.price)}
+                    </span>
                   )}
                 </div>
               )}
@@ -276,7 +290,9 @@ export function SessionCard({
               />
               <span>{bookingType.name}</span>
               {formatPrice(booking.price) && (
-                <span className="text-neutral-400">· {formatPrice(booking.price)}</span>
+                <span className="text-neutral-400">
+                  · {formatPrice(booking.price)}
+                </span>
               )}
             </div>
           )}
@@ -346,7 +362,7 @@ export function SessionCard({
         onClose={() => setNoteOpen(false)}
       />
 
-        <Dialog
+      <Dialog
         open={confirmDialog !== null}
         onOpenChange={(open) => {
           if (!open) setConfirmDialog(null);

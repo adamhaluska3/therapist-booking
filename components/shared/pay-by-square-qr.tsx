@@ -64,7 +64,10 @@ export function PayBySquareQr({ payment, size = 300 }: Props) {
   const url = buildUrl(payment, size);
 
   return (
-    <div className="overflow-hidden relative" style={{ width: size, height: size }}>
+    <div
+      className="overflow-hidden relative"
+      style={{ width: size, height: size }}
+    >
       <img
         src={url}
         alt="Pay by Square QR"
@@ -74,6 +77,5 @@ export function PayBySquareQr({ payment, size = 300 }: Props) {
         className="absolute left-0 top-0 object-contain scale-111"
       />
     </div>
-    
   );
 }

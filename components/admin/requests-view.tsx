@@ -8,11 +8,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
- 
   Hash,
   MessageSquare,
 } from "lucide-react";
-import { LocationBadge } from "@/components/admin/location-badge"
+import { LocationBadge } from "@/components/admin/location-badge";
 import {
   useReactTable,
   getCoreRowModel,
@@ -43,7 +42,7 @@ import { BookingWithUser } from "@/server/booking/schema";
 import { BookingType } from "@/db/schema";
 import { BOOKING_TYPE_COLORS } from "./calendar-event-card";
 import { toast } from "sonner";
-import { BookingNoteDialog } from "@/components/admin/booking-note-dialog"
+import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
 
 interface Props {
   bookings: BookingWithUser[];
@@ -59,7 +58,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   const [cancelTarget, setCancelTarget] = useState<BookingWithUser | null>(
     null,
   );
-  const [noteTarget, setNoteTarget] = useState<BookingWithUser | null>(null)
+  const [noteTarget, setNoteTarget] = useState<BookingWithUser | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const totalPages = Math.max(1, Math.ceil(total / BOOKINGS_PAGE_SIZE));
@@ -94,8 +93,8 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
   }, []);
 
   const handleNoteOpen = useCallback((booking: BookingWithUser) => {
-    setNoteTarget(booking)
-  }, [])
+    setNoteTarget(booking);
+  }, []);
 
   function handleCancelConfirm() {
     if (!cancelTarget) return;
@@ -112,7 +111,13 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     });
   }
 
-  const columns = getRequestsColumns({ onConfirm: handleConfirm, onCancel: handleCancelOpen, onNote: handleNoteOpen, isPending, bookingTypes })
+  const columns = getRequestsColumns({
+    onConfirm: handleConfirm,
+    onCancel: handleCancelOpen,
+    onNote: handleNoteOpen,
+    isPending,
+    bookingTypes,
+  });
 
   const table = useReactTable({
     data: bookings,
@@ -213,7 +218,11 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                       <span>{bookingType.name}</span>
                     </div>
                   )}
-                  <LocationBadge locationType={b.locationType} size={11} className="text-xs text-neutral-500" />
+                  <LocationBadge
+                    locationType={b.locationType}
+                    size={11}
+                    className="text-xs text-neutral-500"
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-end gap-2">

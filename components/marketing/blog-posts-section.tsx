@@ -10,7 +10,12 @@ export type BlogPostsSectionProp = {
   activeCategory: string | null;
 };
 
-export function BlogPostsSection({ posts, page, totalPages, activeCategory }: BlogPostsSectionProp) {
+export function BlogPostsSection({
+  posts,
+  page,
+  totalPages,
+  activeCategory,
+}: BlogPostsSectionProp) {
   const [featured, ...rest] = posts;
 
   const buildHref = (p: number) => {
@@ -35,12 +40,16 @@ export function BlogPostsSection({ posts, page, totalPages, activeCategory }: Bl
           <div className="mb-12 grid grid-cols-1 items-center gap-8 md:mb-16 md:grid-cols-2 md:gap-12">
             <PostImage post={featured} priority />
             <div>
-              <p className="text-xs text-neutral-400">{featured.createdAt.toLocaleDateString("sk-SK", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}</p>
-              <p className="font-semibold text-sm mb-3 text-taupe-400">{featured.category?.name}</p>
+              <p className="text-xs text-neutral-400">
+                {featured.createdAt.toLocaleDateString("sk-SK", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </p>
+              <p className="font-semibold text-sm mb-3 text-taupe-400">
+                {featured.category?.name}
+              </p>
               <h2 className="mb-4 font-serif text-2xl font-semibold leading-tight text-brand-900 md:text-4xl">
                 {featured.title}
               </h2>
@@ -89,8 +98,12 @@ export function BlogPostsSection({ posts, page, totalPages, activeCategory }: Bl
                 <ChevronLeft className="h-3.5 w-3.5" />
                 Späť
               </Link>
-            ) : <span className="w-32" />}
-            <span className="text-xs text-neutral-400">{page} / {totalPages}</span>
+            ) : (
+              <span className="w-32" />
+            )}
+            <span className="text-xs text-neutral-400">
+              {page} / {totalPages}
+            </span>
             {page < totalPages ? (
               <Link
                 href={buildHref(page + 1)}
@@ -99,7 +112,9 @@ export function BlogPostsSection({ posts, page, totalPages, activeCategory }: Bl
                 Ďalej
                 <ChevronRight className="h-3.5 w-3.5" />
               </Link>
-            ) : <span className="w-32" />}
+            ) : (
+              <span className="w-32" />
+            )}
           </div>
         )}
       </div>
@@ -138,13 +153,16 @@ function PostImage({
 function PostBody({ post }: { post: PostPreview }) {
   return (
     <div>
-      <p className="text-xs text-neutral-400">{post.createdAt.toLocaleDateString("sk-SK", {
+      <p className="text-xs text-neutral-400">
+        {post.createdAt.toLocaleDateString("sk-SK", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
         })}
       </p>
-      <p className="font-semibold text-sm text-taupe-400 mb-3">{post.category?.name}</p>
+      <p className="font-semibold text-sm text-taupe-400 mb-3">
+        {post.category?.name}
+      </p>
       <h3 className="mb-3 font-serif text-xl font-semibold leading-tight text-brand-900 md:text-2xl">
         {post.title}
       </h3>

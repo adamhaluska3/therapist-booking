@@ -23,9 +23,15 @@ export default function AbsolvedLoading() {
             <tbody className="divide-y divide-surface-100">
               {Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i}>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-28" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-20" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-4 w-28" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-4 w-20" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </td>
                   <td className="px-4 py-4 text-right">
                     <Skeleton className="h-8 w-20 rounded-full ml-auto" />
                   </td>

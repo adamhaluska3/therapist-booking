@@ -18,7 +18,10 @@ export default function BlogPublicLoading() {
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-surface-200 bg-white">
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-surface-200 bg-white"
+              >
                 <Skeleton className="h-48 w-full rounded-none" />
                 <div className="p-5">
                   <Skeleton className="mb-2 h-5 w-20 rounded-full" />

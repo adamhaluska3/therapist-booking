@@ -22,7 +22,13 @@ export type PaymentInfoDialogProps = {
   children: React.ReactNode;
 };
 
-export function PaymentInfoDialog({ centPrice, vs, note, paymentSettings, children }: PaymentInfoDialogProps) {
+export function PaymentInfoDialog({
+  centPrice,
+  vs,
+  note,
+  paymentSettings,
+  children,
+}: PaymentInfoDialogProps) {
   if (!vs) {
     return <span>Nie je možné splatiť</span>;
   }
@@ -54,11 +60,15 @@ export function PaymentInfoDialog({ centPrice, vs, note, paymentSettings, childr
           </div>
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-400 text-xs uppercase">Číslo účtu</span>
+              <span className="text-gray-400 text-xs uppercase">
+                Číslo účtu
+              </span>
               <span>{paymentSettings?.iban}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-gray-400 text-xs uppercase">Variabilný symbol</span>
+              <span className="text-gray-400 text-xs uppercase">
+                Variabilný symbol
+              </span>
               <span>{vs}</span>
             </div>
             <div className="flex flex-col gap-1">

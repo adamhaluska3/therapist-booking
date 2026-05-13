@@ -14,10 +14,15 @@ import { NoteDialog } from "./note-dialog";
 import { getClientAbsolvedBookings } from "@/server/booking/queries";
 
 function formatPrice(cents: number) {
-  return (cents / 100).toLocaleString("sk-SK", { style: "currency", currency: "EUR" });
+  return (cents / 100).toLocaleString("sk-SK", {
+    style: "currency",
+    currency: "EUR",
+  });
 }
 
-type Row = Awaited<ReturnType<typeof getClientAbsolvedBookings>>["rows"][number];
+type Row = Awaited<
+  ReturnType<typeof getClientAbsolvedBookings>
+>["rows"][number];
 
 interface Props {
   initialRows: Row[];
@@ -27,7 +32,13 @@ interface Props {
   paymentSettings: PaymentSettings | null;
 }
 
-export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageSize, paymentSettings }: Props) {
+export function AbsolvedBookingsTable({
+  initialRows,
+  initialTotal,
+  userId,
+  pageSize,
+  paymentSettings,
+}: Props) {
   const [rows, setRows] = useState<Row[]>(initialRows);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
@@ -46,8 +57,12 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
         header: "Typ sedenia",
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <span className="font-medium text-brand-800">{row.original.bookingTypeName ?? "—"}</span>
-            <span className="text-xs font-semibold uppercase text-gray-400">{row.original.locationType === "online" ? "ONLINE" : "OSOBNE"}</span>
+            <span className="font-medium text-brand-800">
+              {row.original.bookingTypeName ?? "—"}
+            </span>
+            <span className="text-xs font-semibold uppercase text-gray-400">
+              {row.original.locationType === "online" ? "ONLINE" : "OSOBNE"}
+            </span>
           </div>
         ),
       },
@@ -69,7 +84,9 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
           if (!note) return <span className="text-neutral-400">—</span>;
           return (
             <>
-              <span className="hidden sm:block text-sm text-neutral-600 max-w-xs">{note}</span>
+              <span className="hidden sm:block text-sm text-neutral-600 max-w-xs">
+                {note}
+              </span>
               <NoteDialog note={note}>
                 <span className="sm:hidden text-xs font-semibold text-brand-600 hover:text-brand-800 underline">
                   Zobraziť
@@ -84,8 +101,10 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
         header: () => <span className="block text-right">Platba</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
-            <span className="hidden sm:block">{formatPrice(row.original.price as number)}</span>
-            
+            <span className="hidden sm:block">
+              {formatPrice(row.original.price as number)}
+            </span>
+
             <PaymentInfoDialog
               centPrice={row.original.price ?? 0}
               vs={row.original.variableSymbol}
@@ -135,7 +154,9 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-end">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-neutral-500 uppercase tracking-wide">Od</label>
+          <label className="text-xs text-neutral-500 uppercase tracking-wide">
+            Od
+          </label>
           <input
             type="date"
             value={from}
@@ -144,7 +165,9 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-neutral-500 uppercase tracking-wide">Do</label>
+          <label className="text-xs text-neutral-500 uppercase tracking-wide">
+            Do
+          </label>
           <input
             type="date"
             value={to}
@@ -169,15 +192,23 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
             <Loader2 size={22} className="animate-spin text-neutral-300" />
           </div>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-neutral-400 py-10 text-center">Žiadne záznamy</p>
+          <p className="text-sm text-neutral-400 py-10 text-center">
+            Žiadne záznamy
+          </p>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-surface-100">
               {table.getHeaderGroups().map((hg) => (
                 <tr key={hg.id}>
                   {hg.headers.map((header) => (
-                    <th key={header.id} className="px-4 py-3 text-left text-xs font-medium text-neutral-500">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-xs font-medium text-neutral-500"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -185,10 +216,16 @@ export function AbsolvedBookingsTable({ initialRows, initialTotal, userId, pageS
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-t border-surface-200 hover:bg-surface-50">
+                <tr
+                  key={row.id}
+                  className="border-t border-surface-200 hover:bg-surface-50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 text-neutral-600">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </td>
                   ))}
                 </tr>

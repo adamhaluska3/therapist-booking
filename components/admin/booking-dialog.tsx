@@ -153,7 +153,7 @@ export function BookingDialog({
       note: note.trim() || null,
       createdAt: booking?.createdAt ?? new Date(),
       variableSymbol: null,
-      meetLink: null
+      meetLink: null,
     });
   }
 

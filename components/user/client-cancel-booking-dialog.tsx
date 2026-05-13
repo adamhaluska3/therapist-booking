@@ -25,16 +25,23 @@ export const ClientCancelBookingDialog = ({
 }: ClientEditBookingDialogProps) => {
   const [open, setOpen] = useState(false);
 
-  const { mutate: confirmCancel, isPending, error: cancelError, isSuccess: cancelDone, reset } = useMutation({
+  const {
+    mutate: confirmCancel,
+    isPending,
+    error: cancelError,
+    isSuccess: cancelDone,
+    reset,
+  } = useMutation({
     mutationFn: () => cancelClientBooking(item.id),
     onSuccess: (result) => {
-      if (!result.ok) throw new Error(result.error ?? "Nepodarilo sa zrušiť rezerváciu.");
+      if (!result.ok)
+        throw new Error(result.error ?? "Nepodarilo sa zrušiť rezerváciu.");
       toast.success("Rezervácia zrušená");
     },
   });
 
   return (
-    <Dialog open={open} onOpenChange={() => setOpen(s => !s)}>
+    <Dialog open={open} onOpenChange={() => setOpen((s) => !s)}>
       <DialogTrigger nativeButton={false} render={<span>{children}</span>} />
       <DialogContent className="max-w-fit max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
@@ -59,7 +66,10 @@ export const ClientCancelBookingDialog = ({
                 </button>
                 <button
                   className="flex-1 py-2.5 bg-surface-100 text-neutral-700 rounded-xl text-sm font-medium hover:bg-surface-200 transition-colors disabled:opacity-50"
-                  onClick={() => { setOpen(false); reset(); }}
+                  onClick={() => {
+                    setOpen(false);
+                    reset();
+                  }}
                   disabled={isPending}
                 >
                   Späť
@@ -78,4 +88,3 @@ export const ClientCancelBookingDialog = ({
     </Dialog>
   );
 };
-

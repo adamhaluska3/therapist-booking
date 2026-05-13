@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Clock, Hash } from "lucide-react";
-import { LocationBadge } from "@/components/admin/location-badge"
+import { LocationBadge } from "@/components/admin/location-badge";
 import type { BookingWithUser } from "@/server/booking/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
@@ -53,9 +53,15 @@ export function ArchiveCard({
               </p>
               <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                 <Clock size={11} className="shrink-0" />
-                <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+                <span>
+                  {formatTime(booking.start)} – {formatTime(booking.end)}
+                </span>
               </div>
-              <LocationBadge locationType={booking.locationType} size={11} className="text-xs text-neutral-400 mt-0.5" />
+              <LocationBadge
+                locationType={booking.locationType}
+                size={11}
+                className="text-xs text-neutral-400 mt-0.5"
+              />
             </div>
           </div>
 
@@ -66,7 +72,10 @@ export function ArchiveCard({
                   <>
                     <span
                       className="inline-block w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c" }}
+                      style={{
+                        backgroundColor:
+                          BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                      }}
                     />
                     <span>{bookingType.name}</span>
                     {formatPrice(booking.price) && (
@@ -76,7 +85,7 @@ export function ArchiveCard({
                 )}
               </div>
               <div className="flex items-center gap-1 text-xs text-neutral-400">
-                <Hash size={11} className="shrink-0"/>
+                <Hash size={11} className="shrink-0" />
                 <span>{booking.variableSymbol}</span>
               </div>
             </div>
@@ -115,14 +124,18 @@ export function ArchiveCard({
                       BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
                   }}
                 />
-                <span className="truncate min-w-0 flex-1">{bookingType.name}</span>
+                <span className="truncate min-w-0 flex-1">
+                  {bookingType.name}
+                </span>
                 {formatPrice(booking.price) && (
-                  <span className="shrink-0">· {formatPrice(booking.price)}</span>
+                  <span className="shrink-0">
+                    · {formatPrice(booking.price)}
+                  </span>
                 )}
               </div>
             )}
             <div className="flex items-center gap-1 text-xs text-neutral-400">
-              <Hash size={11} className="shrink-0"/>
+              <Hash size={11} className="shrink-0" />
               <span>{booking.variableSymbol}</span>
             </div>
           </div>
@@ -131,9 +144,15 @@ export function ArchiveCard({
         <div className="flex flex-col gap-1 flex-1 min-w-0">
           <div className="flex items-center gap-1.5 text-sm text-neutral-600">
             <Clock size={11} className="shrink-0 text-neutral-400" />
-            <span>{formatTime(booking.start)} – {formatTime(booking.end)}</span>
+            <span>
+              {formatTime(booking.start)} – {formatTime(booking.end)}
+            </span>
           </div>
-          <LocationBadge locationType={booking.locationType} size={11} className="text-xs text-neutral-400" />
+          <LocationBadge
+            locationType={booking.locationType}
+            size={11}
+            className="text-xs text-neutral-400"
+          />
         </div>
 
         <div className="flex items-center gap-2 ml-auto">

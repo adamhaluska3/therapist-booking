@@ -17,7 +17,10 @@ export default function PricingLoading() {
         <div className="overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-sm">
           <div className="divide-y divide-surface-100">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between px-6 py-5">
+              <div
+                key={i}
+                className="flex items-center justify-between px-6 py-5"
+              >
                 <div className="flex flex-col gap-1.5">
                   <Skeleton className="h-5 w-40" />
                   <Skeleton className="h-3 w-56" />

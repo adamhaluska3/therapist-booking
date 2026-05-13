@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export function NoteDialog({ note, children }: { note: string; children: React.ReactNode }) {
+export function NoteDialog({
+  note,
+  children,
+}: {
+  note: string;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -23,7 +29,9 @@ export function NoteDialog({ note, children }: { note: string; children: React.R
             <DialogTitle>Poznámka</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-neutral-700 leading-relaxed">{note}</p>
-          <DialogClose render={<Button variant="outline" />}>Zavrieť</DialogClose>
+          <DialogClose render={<Button variant="outline" />}>
+            Zavrieť
+          </DialogClose>
         </DialogContent>
       </Dialog>
     </>

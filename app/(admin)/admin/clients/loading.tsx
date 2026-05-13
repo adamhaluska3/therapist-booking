@@ -15,13 +15,16 @@ export default function ClientsLoading() {
         <table className="w-full table-fixed text-left text-sm">
           <thead className="bg-surface-100">
             <tr>
-              {["Meno klienta", "Posledné sedenie", "Počet sedení", "Akcia"].map(
-                (col) => (
-                  <th key={col} className="px-4 py-3">
-                    <Skeleton className="h-3 w-24" />
-                  </th>
-                ),
-              )}
+              {[
+                "Meno klienta",
+                "Posledné sedenie",
+                "Počet sedení",
+                "Akcia",
+              ].map((col) => (
+                <th key={col} className="px-4 py-3">
+                  <Skeleton className="h-3 w-24" />
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>

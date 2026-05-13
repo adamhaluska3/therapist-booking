@@ -27,7 +27,10 @@ export default function SettingsLoading() {
           <Skeleton className="mb-4 h-6 w-44" />
           <div className="flex flex-col gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg border border-surface-200 p-4">
+              <div
+                key={i}
+                className="flex items-center justify-between rounded-lg border border-surface-200 p-4"
+              >
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-4 w-20" />
               </div>

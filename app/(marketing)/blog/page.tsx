@@ -28,7 +28,14 @@ const BlogPage = async ({ searchParams }: Props) => {
   const [totalResult, postsList, categories] = await Promise.all([
     db.select({ count: count() }).from(posts).where(whereCondition),
     db.query.posts.findMany({
-      columns: { id: true, slug: true, title: true, description: true, titleImage: true, createdAt: true },
+      columns: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        titleImage: true,
+        createdAt: true,
+      },
       with: { category: { columns: { id: true, name: true } } },
       where: (fields, { eq: eqF, and: andF }) => {
         const conditions = [eqF(fields.isPublic, true)];
@@ -46,8 +53,16 @@ const BlogPage = async ({ searchParams }: Props) => {
 
   return (
     <>
-      <BlogHeaderSection categories={categories} activeCategory={category ?? null} />
-      <BlogPostsSection posts={postsList} page={page} totalPages={totalPages} activeCategory={category ?? null} />
+      <BlogHeaderSection
+        categories={categories}
+        activeCategory={category ?? null}
+      />
+      <BlogPostsSection
+        posts={postsList}
+        page={page}
+        totalPages={totalPages}
+        activeCategory={category ?? null}
+      />
     </>
   );
 };

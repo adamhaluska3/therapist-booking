@@ -86,7 +86,9 @@ export function generateIcs({
     attendeeEmail ? `ATTENDEE;RSVP=TRUE:mailto:${attendeeEmail}` : null,
     meetLink ? `URL:${meetLink}` : null,
     meetLink ? `X-GOOGLE-CONFERENCE:${meetLink}` : null,
-    meetLink ? `CONFERENCE;FEATURE=VIDEO;LABEL=Google Meet;VALUE=URI:${meetLink}` : null,
+    meetLink
+      ? `CONFERENCE;FEATURE=VIDEO;LABEL=Google Meet;VALUE=URI:${meetLink}`
+      : null,
     "STATUS:CONFIRMED",
     "END:VEVENT",
     "END:VCALENDAR",

@@ -25,7 +25,9 @@ export default function PostCategoriesLoading() {
           <tbody className="divide-y divide-surface-100">
             {Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
-                <td className="px-4 py-4"><Skeleton className="h-4 w-36" /></td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-36" />
+                </td>
                 <td className="px-4 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Skeleton className="h-8 w-16 rounded-lg" />

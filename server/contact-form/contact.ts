@@ -15,6 +15,9 @@ export async function submitContactForm(
     await sendContactFormEmail(parsed.data);
     return { success: true };
   } catch {
-    return { success: false, error: "Nepodarilo sa odoslať správu. Skúste to prosím neskôr." };
+    return {
+      success: false,
+      error: "Nepodarilo sa odoslať správu. Skúste to prosím neskôr.",
+    };
   }
 }
