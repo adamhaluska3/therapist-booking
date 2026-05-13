@@ -33,10 +33,7 @@ export function SessionsArchiveView({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
-          Archív záznamov
-        </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Prehľad dokončených terapií
         </h1>
       </div>

@@ -39,13 +39,8 @@ export function CalendarToolbar({
   return (
     <div className="mb-6 select-none">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="hidden sm:block text-xl font-semibold text-gray-900">
-            Definujte svoje voľné hodiny
-          </h2>
-          <div className="text-sm font-medium text-gray-700 sm:text-gray-400 sm:font-normal sm:mt-0.5">
-            {dateLabel}
-          </div>
+        <div className="text-sm font-medium text-neutral-400">
+          {dateLabel}
         </div>
 
         <div className="flex items-center gap-2">

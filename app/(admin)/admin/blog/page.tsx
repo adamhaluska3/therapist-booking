@@ -40,12 +40,9 @@ const Page = async ({ searchParams }: Props) => {
 
     return (
         <article className='mx-auto max-w-5xl'>
-            <section className='w-full flex mb-6 items-center flex-wrap gap-4'>
+            <section className='w-full flex mb-8 items-center flex-wrap gap-4'>
                 <div className="flex-1">
-                    <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
-                        Administratíva
-                    </p>
-                    <h1 className="font-serif text-4xl font-bold text-neutral-800 mb-2">
+                    <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
                         Správa blogu
                     </h1>
                 </div>

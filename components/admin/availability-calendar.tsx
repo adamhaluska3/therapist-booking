@@ -515,6 +515,11 @@ export function AvailabilityCalendar({
   if (!mounted) {
     return (
       <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
+          <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
+            Definujte svoje voľné hodiny
+          </h1>
+        </div>
         <div className="h-10 mb-4 rounded-lg bg-surface-100" />
         <div
           style={{ height: "calc(100vh - 160px)" }}
@@ -526,6 +531,12 @@ export function AvailabilityCalendar({
 
   return (
     <div className="max-w-5xl mx-auto">
+      <div className="mb-6">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
+          Definujte svoje voľné hodiny
+        </h1>
+      </div>
+
       <CalendarToolbar
         date={date}
         onNavigate={handleNavigate}

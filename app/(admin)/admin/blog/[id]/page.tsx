@@ -37,7 +37,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         </Link>
         <div className='flex mb-4 items-center'>
             <h1
-              className="font-serif text-4xl font-bold text-neutral-800 mb-2 flex-1"
+              className="font-serif text-3xl font-semibold text-neutral-800 mb-2 flex-1"
             >
                 Upraviť článok
             </h1>

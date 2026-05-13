@@ -26,7 +26,7 @@ const Page = async () => {
             <p>Naspäť na správu blogu</p>
         </Link>
         <h1
-            className="font-serif text-4xl font-bold text-neutral-800 mb-2"
+            className="font-serif text-3xl font-semibold text-neutral-800 mb-2"
         >
             Pridať nový článok
         </h1>
