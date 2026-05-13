@@ -116,58 +116,59 @@ export function DashboardView({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-4">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Potvrdené sedenia
         </h1>
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="flex gap-3">
-            <div className="relative flex-1 sm:flex-none">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
-              />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Hľadať klienta..."
-                className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-1.5 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
-              />
-            </div>
-            <div className="relative">
-              <CalendarDays
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-              />
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className={cn(
-                  "rounded-full border bg-white pl-8 pr-4 py-1.5 text-sm outline-none transition-colors",
-                  selectedDate
-                    ? "border-brand-400 text-neutral-700"
-                    : "border-surface-200 text-neutral-400",
-                )}
-              />
-            </div>
+      </div>
+
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Hľadať klienta..."
+              className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
+            />
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {FILTERS.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => handleFilterClick(f.key)}
-                className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                  activeFilter === f.key && !selectedDate
-                    ? "bg-brand-600 text-white"
-                    : "bg-white border border-surface-200 text-neutral-600 hover:bg-surface-50",
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
+          <div className="relative">
+            <CalendarDays
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+            />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className={cn(
+                "rounded-full border bg-white pl-8 pr-4 py-2 text-sm outline-none transition-colors",
+                selectedDate
+                  ? "border-brand-400 text-neutral-700"
+                  : "border-surface-200 text-neutral-400",
+              )}
+            />
           </div>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => handleFilterClick(f.key)}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                activeFilter === f.key && !selectedDate
+                  ? "bg-brand-600 text-white"
+                  : "bg-white border border-surface-200 text-neutral-600 hover:bg-surface-50",
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 

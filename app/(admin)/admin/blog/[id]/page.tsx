@@ -3,7 +3,7 @@ import { PublicityToggle } from '@/components/admin/publicity-toggle';
 import { postCategories, posts } from '@/db/schema';
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm';
-import { ArrowLeft, MoveLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -31,14 +31,12 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <div className='mx-auto max-w-5xl'>
-        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center">
+        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center gap-1.5">
             <ArrowLeft/>
             <p>Naspäť na správu blogu</p>
         </Link>
         <div className='flex mb-4 items-center'>
-            <h1
-              className="font-serif text-3xl font-semibold text-neutral-800 mb-2 flex-1"
-            >
+            <h1 className="font-serif text-3xl font-semibold text-neutral-800 flex-1">
                 Upraviť článok
             </h1>
             <PublicityToggle id={post.id} isPublic={post.isPublic} />

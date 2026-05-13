@@ -21,7 +21,7 @@ const Page = async () => {
 
   return (
     <div className='mx-auto max-w-5xl'>
-        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center">
+        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center gap-1.5">
             <ArrowLeft/>
             <p>Naspäť na správu blogu</p>
         </Link>
