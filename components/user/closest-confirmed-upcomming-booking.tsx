@@ -1,4 +1,4 @@
-import { Booking, booking, BookingType } from "@/db/schema"
+import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
 import { Calendar, Clock5, MapPin, NotebookText, Play } from "lucide-react"
 import Image from "next/image"

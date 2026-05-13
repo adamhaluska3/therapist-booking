@@ -22,7 +22,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { EditCategoryResponse, editCategory } from "@/server/postCategory/mutations";
+import { editCategory } from "@/server/postCategory/mutations";
 import { editCategorySchema, EditCategoryFormData } from "@/lib/schemas/post-category";
 import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";

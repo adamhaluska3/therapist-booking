@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { booking, BookingType } from "@/db/schema";

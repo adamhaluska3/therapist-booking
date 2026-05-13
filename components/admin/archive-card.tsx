@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Hash, MapPin } from "lucide-react";
+import { Clock, Hash } from "lucide-react";
 import { LocationBadge } from "@/components/admin/location-badge"
 import type { BookingWithUser } from "@/server/booking/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";

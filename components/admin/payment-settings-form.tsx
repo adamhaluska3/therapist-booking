@@ -8,7 +8,6 @@ import type { PaymentSettings } from "@/db/schema";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

@@ -54,7 +54,7 @@ export const PostEditor = ({post, categories}: PostEditorProps) => {
     const [titleImageFile, setTitleImageFile] = useState<File | null>(null)
     const [titleImageRemoved, setTitleImageRemoved] = useState(false)
 
-    const { watch, register, handleSubmit, formState: { errors } } = useForm(
+    const { watch, register, handleSubmit } = useForm(
         {
             resolver: zodResolver(postSchema),
                 defaultValues: {

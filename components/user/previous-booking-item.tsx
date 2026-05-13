@@ -2,7 +2,7 @@ import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
 import { bookingStatusIcon } from "../booking/booking-status-icon"
 import React from "react"
-import { Dot, NotebookText } from "lucide-react"
+import { Dot } from "lucide-react"
 import { NoteDialog } from "./note-dialog"
 
 export type PreviousUserBookingItemProps = {

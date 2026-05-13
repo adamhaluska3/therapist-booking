@@ -1,9 +1,9 @@
 import { PostEditor, PostEditorProps } from "@/components/admin/post-editor";
 import { PublicityToggle } from "@/components/admin/publicity-toggle";
-import { postCategories, posts } from "@/db/schema";
+import { posts } from "@/db/schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { ArrowLeft, MoveLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

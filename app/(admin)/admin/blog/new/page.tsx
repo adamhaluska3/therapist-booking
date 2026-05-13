@@ -1,6 +1,6 @@
 import { PostEditor, PostEditorProps } from '@/components/admin/post-editor';
 import { db } from '@/lib/db'
-import { ArrowLeft, MoveLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {

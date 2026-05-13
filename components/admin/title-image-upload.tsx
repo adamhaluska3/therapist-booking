@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { FileUpload, FileUploadDropzone, FileUploadItem, FileUploadItemDelete, FileUploadItemMetadata, FileUploadItemPreview, FileUploadList, FileUploadTrigger } from '../ui/file-upload'
+import { FileUpload, FileUploadDropzone, FileUploadList, FileUploadTrigger } from '../ui/file-upload'
 import { Upload, X } from 'lucide-react'
 import { Button } from '../ui/button'
 
@@ -32,7 +32,7 @@ const TitleImageUpload = ({ onChange, existingUrl, className }: {
     return (
         <div className={className ?? ''}>
             {hasImage ? (
-                <div className="relative mb-4 w-full max-w-[400px] aspect-[4/3]">
+                <div className="relative mb-4 w-full max-w-100 aspect-4/3">
                     <img src={currentPreview!} className="w-full h-full rounded-xl object-cover" />
                     <button type="button" onClick={handleRemoveImage}
                         className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1">
