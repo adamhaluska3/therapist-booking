@@ -19,7 +19,7 @@ import { PaginationControls } from "@/components/admin/pagination-controls";
 import { formatTime } from "@/lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
 import { bookingStatusTranslate } from "@/lib/utils";
-import { BOOKING_STATE_COLORS } from "@/lib/constants";
+import { BOOKING_STATE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 
 type BookingItem = {
   id: string;
@@ -106,7 +106,8 @@ export default function ClientBookings({
                   className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                   style={{
                     backgroundColor:
-                      BOOKING_STATE_COLORS[row.original.status] ?? "#427a5c",
+                      BOOKING_STATE_COLORS[row.original.status] ??
+                      DEFAULT_THERAPY_COLOR,
                   }}
                 />
               )}

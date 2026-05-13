@@ -1,18 +1,21 @@
-import Link from "next/link"
-import { createColumnHelper } from "@tanstack/react-table"
-import type { BookingType } from "@/db/schema"
-import { formatTime, formatBookingDate } from "@/lib/date-utils"
-import { getInitials, formatPrice } from "@/lib/formatting"
-import { UNKNOWN_CLIENT } from "@/lib/constants"
-import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
-import { MessageSquare, Check, X } from "lucide-react"
-import { LocationBadge } from "@/components/booking/location-badge"
-import { BookingWithUser } from "@/server/booking/schema"
+import Link from "next/link";
+import { createColumnHelper } from "@tanstack/react-table";
+import type { BookingType } from "@/db/schema";
+import { formatTime, formatBookingDate } from "@/lib/date-utils";
+import { getInitials, formatPrice } from "@/lib/formatting";
+import {
+  BOOKING_TYPE_COLORS,
+  UNKNOWN_CLIENT,
+  DEFAULT_THERAPY_COLOR,
+} from "@/lib/constants";
+import { MessageSquare, Check, X } from "lucide-react";
+import { LocationBadge } from "@/components/booking/location-badge";
+import { BookingWithUser } from "@/server/booking/schema";
 
 interface ActionHandlers {
   onConfirm: (id: string) => void;
   onCancel: (booking: BookingWithUser) => void;
-  onNote: (booking: BookingWithUser) => void
+  onNote: (booking: BookingWithUser) => void;
   isPending: boolean;
   bookingTypes: BookingType[];
 }
@@ -21,7 +24,8 @@ const columnHelper = createColumnHelper<BookingWithUser>();
 
 export function getRequestsColumns({
   onConfirm,
-  onCancel, onNote,
+  onCancel,
+  onNote,
   isPending,
   bookingTypes,
 }: ActionHandlers) {
@@ -50,13 +54,18 @@ export function getRequestsColumns({
                     className="inline-block w-2 h-2 rounded-full shrink-0"
                     style={{
                       backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ?? "#427a5c",
+                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
+                        DEFAULT_THERAPY_COLOR,
                     }}
                   />
                   <span className="truncate">{bookingType.name}</span>
                 </div>
               )}
-              <LocationBadge locationType={booking.locationType} size={11} className="text-xs text-neutral-400" />
+              <LocationBadge
+                locationType={booking.locationType}
+                size={11}
+                className="text-xs text-neutral-400"
+              />
             </div>
           </div>
         );
@@ -88,13 +97,17 @@ export function getRequestsColumns({
       id: "variableSymbol",
       header: "Var. symbol",
       cell: (info) => {
-        const price = formatPrice(info.row.original.price)
+        const price = formatPrice(info.row.original.price);
         return (
           <>
-            <p className="text-sm text-neutral-600">{info.row.original.variableSymbol}</p>
-            {price && <p className="text-xs text-neutral-400 mt-0.5">{price}</p>}
+            <p className="text-sm text-neutral-600">
+              {info.row.original.variableSymbol}
+            </p>
+            {price && (
+              <p className="text-xs text-neutral-400 mt-0.5">{price}</p>
+            )}
           </>
-        )
+        );
       },
     }),
     columnHelper.display({

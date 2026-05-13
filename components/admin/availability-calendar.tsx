@@ -29,8 +29,6 @@ import "./calendar.css";
 
 import {
   CalendarEventCard,
-  BOOKING_TYPE_COLORS,
-  DEFAULT_THERAPY_COLOR,
   type TherapistEvent,
 } from "./calendar-event-card";
 import { CalendarToolbar, type CalendarView } from "./calendar-toolbar";
@@ -57,6 +55,7 @@ import {
 } from "@/server/booking/mutations";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 import { getBookingsWithUsers } from "@/server/booking/queries";
+import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 
 const locales = { sk };
 
