@@ -42,10 +42,12 @@ export function PostsTable({ data }: { data: Post[] }) {
                     )}
                     <div className="flex-1 min-w-0">
                         <p className="font-semibold text-neutral-800 truncate">{post.title}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{post.category?.name ?? '—'}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-xs text-neutral-400">{post.category?.name ?? '—'}</p>
+                            <PublicityToggle id={post.id} isPublic={post.isPublic} />
+                        </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                        <PublicityToggle id={post.id} isPublic={post.isPublic} />
                         <Link
                             href={`/admin/blog/${post.id}`}
                             className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-surface-50 transition-colors"
