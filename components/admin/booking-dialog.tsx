@@ -15,14 +15,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import type { Booking, BookingType } from "@/db/schema";
-import { BOOKING_TYPE_COLORS as _btColors } from "@/components/admin/calendar-event-card";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import { createNonOAuthUser } from "@/server/user/mutations";
 import { Textarea } from "../ui/textarea";
+import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 
 const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
-  Object.entries(_btColors).map(([id, v]) => [id, v.bg]),
+  Object.entries(BOOKING_TYPE_COLORS).map(([id, v]) => [id, v.bg]),
 );
 
 interface BookingDialogProps {
@@ -153,7 +153,7 @@ export function BookingDialog({
       note: note.trim() || null,
       createdAt: booking?.createdAt ?? new Date(),
       variableSymbol: null,
-      meetLink: null
+      meetLink: null,
     });
   }
 
@@ -345,7 +345,8 @@ export function BookingDialog({
                       selectedBookingTypeId === bt.id
                         ? {
                             backgroundColor:
-                              BOOKING_TYPE_PILL_COLORS[bt.id] ?? "#427a5c",
+                              BOOKING_TYPE_PILL_COLORS[bt.id] ??
+                              DEFAULT_THERAPY_COLOR,
                           }
                         : undefined
                     }
