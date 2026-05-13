@@ -73,7 +73,7 @@ export default function ClientsTable({
         header: "Posledné sedenie",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">
+          <div className="text-sm text-neutral-600 py-2">
             {(getValue() as string | null | undefined) ?? "-"}
           </div>
         ),
@@ -83,7 +83,7 @@ export default function ClientsTable({
         header: "Počet sedení",
         meta: { className: "hidden sm:table-cell" },
         cell: ({ getValue }) => (
-          <div className="text-sm text-neutral-600">
+          <div className="text-sm text-neutral-600 py-2">
             {(getValue() as number | undefined) ?? 0}
           </div>
         ),
