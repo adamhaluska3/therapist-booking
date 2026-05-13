@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { PostsFilter } from "./posts-filter";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { AddCategoryDialog } from "@/components/admin/add-category";
 
 export const metadata = {
   title: "Správa blogu",
@@ -45,18 +44,10 @@ const Page = async ({ searchParams }: Props) => {
                         Správa blogu
                     </h1>
                 </div>
-                <div className="flex gap-3 flex-col sm:flex-row">
-                    <Link href="/admin/blog/new" className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
-                        <Plus size={16} />
-                        <span>Nový článok</span>
-                    </Link>
-                    <AddCategoryDialog nativeButton={true}>
-                        <button className="inline-flex items-center gap-2 rounded-full border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-brand-600 hover:bg-surface-50 transition-colors">
-                            <Plus size={16} />
-                            <span>Nová kategória</span>
-                        </button>
-                    </AddCategoryDialog>
-                </div>
+                <Link href="/admin/blog/new" className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
+                    <Plus size={16} />
+                    <span>Nový článok</span>
+                </Link>
             </section>
             <section className="w-full mb-6">
                 <PostsFilter query={query} isPublic={isPublic}/>
