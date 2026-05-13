@@ -70,9 +70,6 @@ function SidebarContent({
         <p className="text-lg font-semibold text-neutral-800 leading-tight">
           Admin Portal
         </p>
-        <p className="text-xs tracking-widest uppercase text-neutral-400 mt-0.5">
-          Clinical Management
-        </p>
       </div>
 
       <nav className="flex flex-col gap-1 px-3">

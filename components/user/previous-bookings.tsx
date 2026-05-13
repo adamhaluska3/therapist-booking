@@ -12,7 +12,7 @@ export const PreviousUserBookings = async ({userId, limit}: {userId: string, lim
         return (
             <section>
                 <div className="flex flex-row flex-wrap items-center">
-                    <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-3xl flex-1">
+                    <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-2xl flex-1">
                         Minulé stretnutia
                     </h2>
                     <Link className="text-xs md:text-xs text-brand-600 uppercase flex gap-2 items-center" href="/client/absolved">

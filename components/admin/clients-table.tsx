@@ -145,7 +145,7 @@ export default function ClientsTable({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="relative flex-1 max-w-lg">
+        <div className="relative flex-1 sm:flex-none sm:w-56">
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"

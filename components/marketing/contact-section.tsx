@@ -13,7 +13,7 @@ export async function ContactSection({ content }: Props) {
   return (
     <section
       id="contact"
-      className="bg-linear-to-b from-surface-100 to-surface-50"
+      className=""
     >
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8 md:rounded-3xl md:p-12">

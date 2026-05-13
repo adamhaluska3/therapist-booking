@@ -18,7 +18,7 @@ export default async function PricingPage() {
   );
 
   return (
-    <section className="bg-linear-to-b from-white to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 py-12 md:px-8 md:py-20">
         <div className="relative mb-12 md:mb-16">
           <div className="max-w-xl">

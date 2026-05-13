@@ -28,27 +28,23 @@ export const PostsFilter = ({query, isPublic, category}: PostsFilterProp) => {
     }
 
     return (
-        <div className="flex flex-wrap gap-y-5 gap-x-5 justify-center">
-            <div className="flex-1 min-w-50">
-                <SearchText onChange={v => handleSearch("query", v)} oldSearch={query}/>
-            </div>
-            <div className="flex items-center">
-                <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1">
-                    {publicityTabs.map((tab) => (
-                        <button
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <SearchText onChange={v => handleSearch("query", v)} oldSearch={query}/>
+            <div className="flex gap-2 flex-wrap">
+                {publicityTabs.map((tab) => (
+                    <button
                         key={tab.title}
                         onClick={() => handleSearch("isPublic", tab.val)}
                         className={cn(
                             "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                             (isPublic === tab.val || (tab.val === "" && isPublic !== "true" && isPublic !== "false"))
-                            ? "bg-[#2d4a2d] text-white shadow-sm"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-brand-600 text-white"
+                            : "bg-white border border-surface-200 text-neutral-600 hover:bg-surface-50"
                         )}
-                        >
+                    >
                         {tab.title}
-                        </button>
-                    ))}
-                </div>
+                    </button>
+                ))}
             </div>
         </div>
     )

@@ -13,7 +13,7 @@ import { AdminCard } from "@/components/admin/admin-card"
 import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
 import { BookingDialog } from "@/components/admin/booking-dialog"
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog"
-import { LocationBadge } from "@/components/admin/location-badge"
+import { LocationBadge } from "@/components/booking/location-badge"
 import {
   DropdownMenu,
   DropdownMenuTrigger,

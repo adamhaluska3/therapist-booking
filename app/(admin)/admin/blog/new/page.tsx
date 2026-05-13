@@ -21,12 +21,12 @@ const Page = async () => {
 
   return (
     <div className='mx-auto max-w-5xl'>
-        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center">
+        <Link href="/admin/blog" className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600 flex items-center gap-1.5">
             <ArrowLeft/>
             <p>Naspäť na správu blogu</p>
         </Link>
         <h1
-            className="font-serif text-4xl font-bold text-neutral-800 mb-2"
+            className="font-serif text-3xl font-semibold text-neutral-800 mb-2"
         >
             Pridať nový článok
         </h1>

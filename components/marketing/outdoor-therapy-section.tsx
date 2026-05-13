@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageCarousel } from "@/components/marketing/image-carousel";
 import type { homeContent } from "../../app/(marketing)/_content/home";
@@ -10,7 +10,7 @@ type Props = {
 
 export function OutdoorTherapySection({ content }: Props) {
   return (
-    <section className="bg-linear-to-b from-surface-100 to-surface-50">
+    <section>
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center md:gap-16">
           <div>
@@ -36,7 +36,8 @@ export function OutdoorTherapySection({ content }: Props) {
             </ul>
             <Link href="/#contact">
               <Button className="w-full rounded-full bg-brand-700 px-6 text-white hover:bg-brand-800 sm:w-auto">
-                {content.cta} <ArrowRight className="ml-1.5 h-4 w-4" />
+                <Mail className="size-4" />
+                {content.cta}
               </Button>
             </Link>
           </div>

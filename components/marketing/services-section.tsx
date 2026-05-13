@@ -4,7 +4,9 @@ import {
   Users,
   GraduationCap,
   TrendingUp,
+  CalendarDays,
   ArrowRight,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { homeContent } from "../../app/(marketing)/_content/home";
@@ -46,7 +48,7 @@ const SERVICE_VISUALS = [
 
 export function ServicesSection({ content }: Props) {
   return (
-    <section className="bg-linear-to-b from-white to-surface-100">
+    <section>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 md:px-8 md:pb-24 md:pt-20">
         <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-600">
           {content.label}
@@ -88,7 +90,8 @@ export function ServicesSection({ content }: Props) {
                   {v.primary ? (
                     <Link href="/booking">
                       <Button className="h-auto rounded-full bg-brand-700 px-4 py-2 text-xs text-white hover:bg-brand-800">
-                        {item.cta} →
+                        <CalendarDays className="size-3.5" />
+                        {item.cta}
                       </Button>
                     </Link>
                   ) : (
@@ -97,6 +100,7 @@ export function ServicesSection({ content }: Props) {
                         variant="outline"
                         className="h-auto rounded-full border-neutral-300 px-4 py-2 text-xs"
                       >
+                        <Mail className="size-3.5" />
                         {item.cta}
                       </Button>
                     </Link>

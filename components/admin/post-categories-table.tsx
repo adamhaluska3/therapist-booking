@@ -22,9 +22,12 @@ export const PostCategoriesTable = ({categories}: {categories: PostCategory[]}) 
           {
             id: 'actions',
             cell: ({ row }) => (
-                <div className="flex gap-5 justify-end">
+                <div className="flex gap-2 justify-end">
                     <EditCategoryDialog category={row.original}>
-                        <Edit2/>
+                        <button className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-surface-50 transition-colors">
+                            <Edit2 size={12} />
+                            Upraviť
+                        </button>
                     </EditCategoryDialog>
                     <RemovePostCategoryDialog id={row.original.id} name={row.original.name} categories={categories}/>
                 </div>

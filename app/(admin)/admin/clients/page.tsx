@@ -21,9 +21,9 @@ export default async function ClientsPage() {
   }));
 
   return (
-    <section className="mx-auto max-w-6xl px-8 py-10">
-      <div className="mb-6">
-        <h1 className="font-serif text-3xl font-semibold italic text-brand-900">
+    <section className="mx-auto max-w-5xl">
+      <div className="mb-8">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Klienti
         </h1>
       </div>

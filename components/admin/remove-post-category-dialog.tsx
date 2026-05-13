@@ -37,7 +37,13 @@ export const RemovePostCategoryDialog = ({id, name, categories}: {id: string, na
 
     return (
         <>
-            <Trash2 className='text-red-900 hover:cursor-pointer' onClick={() => setOpen(true)}/>
+            <button
+                onClick={() => setOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+                <Trash2 size={12} />
+                Vymazať
+            </button>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-sm">
                     <DialogHeader>

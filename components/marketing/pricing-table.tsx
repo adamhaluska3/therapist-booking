@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { CalendarDays, Mail } from "lucide-react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -46,16 +47,18 @@ const columns = [
       const isBookable = service.name.toLowerCase() === "psychoterapia"
       return isBookable ? (
         <Link href="/booking">
-          <Button className="h-auto w-full rounded-full bg-brand-700 px-5 py-2 text-sm text-white hover:bg-brand-800 sm:w-auto">
-            Rezervovať →
+          <Button className="h-auto w-full rounded-full bg-brand-700 px-5 py-2 text-sm text-white hover:bg-brand-800 sm:w-36">
+            <CalendarDays className="size-4" />
+            Rezervovať
           </Button>
         </Link>
       ) : (
         <Link href="/#contact">
           <Button
             variant="outline"
-            className="h-auto w-full rounded-full border-neutral-300 px-5 py-2 text-sm text-neutral-700 sm:w-auto"
+            className="h-auto w-full rounded-full border-neutral-300 px-5 py-2 text-sm text-neutral-700 sm:w-36"
           >
+            <Mail className="size-4" />
             Mám záujem
           </Button>
         </Link>
@@ -105,7 +108,8 @@ export function PricingTable({ services }: { services: BookingType[] }) {
                 {isBookable ? (
                   <Link href="/booking">
                     <Button className="h-auto w-full rounded-full bg-brand-700 px-5 py-2 text-sm text-white hover:bg-brand-800">
-                      Rezervovať →
+                      <CalendarDays className="size-4" />
+                      Rezervovať
                     </Button>
                   </Link>
                 ) : (
@@ -114,6 +118,7 @@ export function PricingTable({ services }: { services: BookingType[] }) {
                       variant="outline"
                       className="h-auto w-full rounded-full border-neutral-300 px-5 py-2 text-sm text-neutral-700"
                     >
+                      <Mail className="size-4" />
                       Mám záujem
                     </Button>
                   </Link>

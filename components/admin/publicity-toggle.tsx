@@ -1,6 +1,8 @@
 "use client";
 
 import { setPublicity } from "@/server/blog/mutations";
+import { Badge } from "@/components/ui/badge";
+import { Check, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -22,15 +24,16 @@ export function PublicityToggle({ id, isPublic }: { id: string; isPublic: boolea
   });
 
   return (
-    <span
-      onClick={() => !isPending && mutate()}
+    <Badge
+      onClick={() => setPublicity(id, !isPublic)}
       className={cn(
-        "rounded-2xl hover:cursor-pointer p-2 text-xs font-semibold uppercase tracking-widest text-white",
-        isPublic ? "bg-brand-400" : "bg-gray-400",
-        isPending && "opacity-50 cursor-wait"
+        "cursor-pointer px-3 py-1 h-auto text-xs font-medium transition-colors",
+        isPublic
+          ? "bg-brand-100 text-brand-700 border-brand-200 hover:bg-brand-200"
+          : "bg-neutral-100 text-neutral-500 border-neutral-200 hover:bg-neutral-200"
       )}
     >
-      {isPublic ? "Publikovaný" : "Koncept"}
-    </span>
+      {isPublic ? <><Check size={11} />Publikovaný</> : <><Pencil size={11} />Koncept</>}
+    </Badge>
   );
 }

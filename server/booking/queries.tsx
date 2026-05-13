@@ -106,6 +106,41 @@ export async function getFinishedBookingsPaginated(
   };
 }
 
+export async function getFinishedBookingsFiltered(
+  offset: number,
+  search = "",
+  from?: Date,
+  to?: Date,
+): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
+  await requireAdmin();
+  const items = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .where(
+      and(
+        eq(booking.status, "finished"),
+        from ? gte(booking.start, from) : undefined,
+        to ? lt(booking.start, to) : undefined,
+        search
+          ? or(
+              like(user.name, `%${search}%`),
+              like(user.nickname, `%${search}%`),
+            )
+          : undefined,
+      ),
+    )
+    .orderBy(desc(booking.start))
+    .limit(SESSIONS_PAGE_SIZE + 1)
+    .offset(offset);
+
+  const hasMore = items.length > SESSIONS_PAGE_SIZE;
+  return {
+    bookings: items.slice(0, SESSIONS_PAGE_SIZE).map(toBookingWithUser),
+    nextOffset: hasMore ? offset + SESSIONS_PAGE_SIZE : undefined,
+  };
+}
+
 export async function getBookingsWithUsers(
   from: Date,
   to: Date,

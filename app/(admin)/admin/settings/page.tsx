@@ -24,15 +24,9 @@ export default async function SettingsPage() {
     : null;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-5xl">
       <div className="mb-8">
-        <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
-          Nastavenia
-        </p>
-        <h1
-          className="font-serif text-4xl font-bold text-neutral-800 mb-1"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Platobné údaje
         </h1>
         <p className="text-sm text-neutral-500">

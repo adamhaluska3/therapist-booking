@@ -23,7 +23,7 @@ export default async function BlogDetailPage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="bg-linear-to-b from-white to-surface-100">
+      <section>
         <div className="mx-auto max-w-3xl px-4 pb-10 pt-12 md:px-8 md:pb-12 md:pt-20">
           <Link
             href="/blog"
@@ -48,7 +48,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* Image */}
       {post.titleImage && (
-        <section className="bg-surface-100">
+        <section>
           <div className="mx-auto max-w-3xl px-4 md:px-8">
             <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-surface-200">
               <Image
@@ -65,7 +65,7 @@ export default async function BlogDetailPage({ params }: Props) {
       )}
 
       {/* Body */}
-      <section className="bg-linear-to-b from-surface-100 to-surface-50">
+      <section>
         <div className="mx-auto max-w-3xl px-4 pb-24 pt-12 md:px-8">
           <p className="mb-8 text-sm font-medium leading-relaxed text-neutral-600">
             {post.description}

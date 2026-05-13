@@ -1,18 +1,64 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, CalendarDays, Loader2 } from "lucide-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useDebounce } from "use-debounce";
+import { cn } from "@/lib/utils";
 import { groupByMonth } from "@/lib/date-utils";
-import { getFinishedBookingsPaginated } from "@/server/booking/queries";
+import { getFinishedBookingsFiltered } from "@/server/booking/queries";
 import { ArchiveCard } from "@/components/admin/archive-card";
 import { Button } from "@/components/ui/button";
 import type { BookingType } from "@/db/schema";
+
+type FilterKey = "all" | "month" | "last_month";
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "Všetky" },
+  { key: "month", label: "Tento mesiac" },
+  { key: "last_month", label: "Minulý mesiac" },
+];
+
+function getFilterRange(
+  filter: FilterKey,
+  selectedDate: string,
+): { from?: Date; to?: Date } {
+  const now = new Date();
+
+  if (selectedDate) {
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    const from = new Date(y, m - 1, d, 0, 0, 0, 0);
+    const to = new Date(y, m - 1, d + 1, 0, 0, 0, 0);
+    return { from, to };
+  }
+  if (filter === "month") {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return { from, to };
+  }
+  if (filter === "last_month") {
+    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const to = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { from, to };
+  }
+  return {};
+}
 
 export function SessionsArchiveView({
   bookingTypes,
 }: {
   bookingTypes: BookingType[];
 }) {
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+  const [selectedDate, setSelectedDate] = useState("");
+
+  const { from, to } = useMemo(
+    () => getFilterRange(activeFilter, selectedDate),
+    [activeFilter, selectedDate],
+  );
+
   const {
     data,
     fetchNextPage,
@@ -21,8 +67,9 @@ export function SessionsArchiveView({
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ["finished-bookings"],
-    queryFn: ({ pageParam }) => getFinishedBookingsPaginated(pageParam),
+    queryKey: ["finished-bookings", debouncedSearch, activeFilter, selectedDate],
+    queryFn: ({ pageParam }) =>
+      getFinishedBookingsFiltered(pageParam, debouncedSearch, from, to),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
   });
@@ -30,15 +77,73 @@ export function SessionsArchiveView({
   const allBookings = data?.pages.flatMap((p) => p.bookings) ?? [];
   const groups = groupByMonth(allBookings);
 
+  function handleDateChange(value: string) {
+    setSelectedDate(value);
+    if (value) setActiveFilter("all");
+  }
+
+  function handleFilterClick(key: FilterKey) {
+    setActiveFilter(key);
+    setSelectedDate("");
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 mb-1">
-          Archív záznamov
-        </p>
-        <h1 className="font-serif text-4xl font-bold text-neutral-800">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-800 mb-2">
           Prehľad dokončených terapií
         </h1>
+      </div>
+
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Hľadať klienta..."
+              className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
+            />
+          </div>
+          <div className="relative">
+            <CalendarDays
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+            />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className={cn(
+                "rounded-full border bg-white pl-8 pr-4 py-2 text-sm outline-none transition-colors",
+                selectedDate
+                  ? "border-brand-400 text-neutral-700"
+                  : "border-surface-200 text-neutral-400",
+              )}
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => handleFilterClick(f.key)}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                activeFilter === f.key && !selectedDate
+                  ? "bg-brand-600 text-white"
+                  : "bg-white border border-surface-200 text-neutral-600 hover:bg-surface-50",
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {isError ? (
@@ -51,13 +156,13 @@ export function SessionsArchiveView({
         </div>
       ) : groups.length === 0 ? (
         <p className="text-sm text-neutral-400 py-12 text-center">
-          Žiadne dokončené sedenia.
+          Žiadne dokončené sedenia pre zvolený filter.
         </p>
       ) : (
         <div className="flex flex-col gap-10">
           {groups.map(({ label, bookings: items }) => (
             <section key={label}>
-              <h2 className="text-xl font-serif font-semibold text-neutral-600 mb-4 capitalize">
+              <h2 className="text-base font-semibold text-neutral-700 mb-3 capitalize">
                 {label}
               </h2>
               <div className="flex flex-col gap-3">
