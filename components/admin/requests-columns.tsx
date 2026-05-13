@@ -6,7 +6,7 @@ import { getInitials, formatPrice } from "@/lib/formatting"
 import { UNKNOWN_CLIENT } from "@/lib/constants"
 import { BOOKING_TYPE_COLORS } from "@/components/admin/calendar-event-card"
 import { MessageSquare, Check, X } from "lucide-react"
-import { LocationBadge } from "@/components/admin/location-badge"
+import { LocationBadge } from "@/components/booking/location-badge"
 import { BookingWithUser } from "@/server/booking/schema"
 
 interface ActionHandlers {

@@ -5,6 +5,7 @@ import { ClosestPendingUpcommingBooking } from "./closest-pending-upcoming-booki
 import { UpcomingUserBookingItem } from "./upcoming-booking-item";
 import { ClientPaymentInfo } from "./client-payment-info";
 import { Button } from "../ui/button";
+import { CreditCard } from "lucide-react";
 import { getClientUpcomingSessions } from "@/server/client/queries";
 
 export const UpcomingUserBookings = async ({userId, limit}: {userId: string, limit?: number}) => {
@@ -17,7 +18,7 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
     return (
         <section>
             <div className="flex flex-row flex-wrap items-center">
-                    <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-3xl flex-1">
+                    <h2 className="my-3 font-serif text-xl font-semibold leading-tight text-brand-800 md:text-2xl flex-1">
                         Nadchádzajúce sedenia
                     </h2>
                 </div>
@@ -34,7 +35,7 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
             )}
             {timeSorted.length > 0 && (
                 <div>
-                    <div className="flex flex-wrap gap-x-5 gap-y-5 justify-center">
+                    <div className="flex flex-col gap-5">
                         {confirmed && (
                             <ClosestConfirmedUpcommingBooking item={confirmed} />
                         )}
@@ -48,9 +49,10 @@ export const UpcomingUserBookings = async ({userId, limit}: {userId: string, lim
                                 <UpcomingUserBookingItem key={s.id} item={s} paymentSlot={
                                     (
                                         <ClientPaymentInfo centPrice={s.price || 0} vs={s.variableSymbol} note={s.bookingType?.name ?? ""}>
-                                            <Button className="p-2 px-4 bg-white border border-gray-500 text-brand-400 text-sm rounded-2xl flex gap-2">
+                                            <button className="inline-flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-700">
+                                                <CreditCard size={12} />
                                                 <span>Platba</span>
-                                            </Button>
+                                            </button>
                                         </ClientPaymentInfo>
                                     )
                                 } />

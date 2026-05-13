@@ -13,7 +13,7 @@ import {
   Hash,
   MessageSquare,
 } from "lucide-react";
-import { LocationBadge } from "@/components/admin/location-badge"
+import { LocationBadge } from "@/components/booking/location-badge"
 import {
   useReactTable,
   getCoreRowModel,

@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -140,6 +141,7 @@ export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
           disabled={form.formState.isSubmitting}
           className="w-full rounded-lg bg-brand-700 py-3 text-white hover:bg-brand-800"
         >
+          <Mail className="size-4" />
           {form.formState.isSubmitting ? "Odosielam…" : "Odoslať správu"}
         </Button>
       </form>

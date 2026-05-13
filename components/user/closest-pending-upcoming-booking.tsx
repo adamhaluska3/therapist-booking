@@ -2,7 +2,8 @@ import { booking, BookingType } from "@/db/schema"
 import { InferSelectModel } from "drizzle-orm"
 import { Button } from "../ui/button"
 import { ClientPaymentInfo } from "./client-payment-info"
-import { Calendar, Clock5, MapPin, NotebookText, Play } from "lucide-react"
+import { Calendar, Clock5, MapPin, NotebookText, Play, Clock } from "lucide-react"
+import { Badge } from "../ui/badge"
 import { ClientCancelBookingDialog } from "./client-cancel-booking-dialog"
 import { ADDRESS_SHORT } from "../../app/(client)/client/_data/address"
 import { NoteDialog } from "./note-dialog"
@@ -12,11 +13,11 @@ export type ClosestPendingUpcommingBookingProps = {
 }
 
 export const ClosestPendingUpcommingBooking = ({item}: ClosestPendingUpcommingBookingProps) => (
-    <article className="flex flex-col bg-taupe-300 rounded-2xl overflow-hidden p-10 min-w-85">
+    <article className="flex flex-col w-full bg-taupe-300 rounded-2xl overflow-hidden p-10">
         <section className="flex flex-col gap-5">
             <div className="flex-1 flex flex-col gap-5">
                 <div className="flex justify-start gap-2 items-center">
-                    <span className="p-2 bg-taupe-400 text-taupe-700 rounded-2xl font-bold uppercase text-xs">Čaká na potvrdenie</span>
+                    <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 px-3 py-1 h-auto text-xs font-medium"><Clock size={11} />Čaká na potvrdenie</Badge>
                 </div>
                 <h1 className="text-xl">{item.bookingType?.name}</h1>
                 <div className="flex gap-2 text-sm text-taupe-700">
