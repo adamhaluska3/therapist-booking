@@ -152,6 +152,8 @@ export async function confirmBooking(id: string): Promise<void> {
     end: row.booking.end,
     clientName,
     clientEmail,
+    meetLink: meet?.meetLink,
+    locationType: row.booking.locationType,
   }).catch(() => undefined);
 }
 
@@ -198,6 +200,8 @@ export async function updateBookingTime(
       oldStart,
       newStart: start,
       newEnd: end,
+      meetLink: row.booking.meetLink ?? undefined,
+      locationType: row.booking.locationType,
     });
   }
 
@@ -268,6 +272,8 @@ export async function updateBookingFromDialog(
       oldStart: previousStart,
       newStart: updates.start,
       newEnd: updates.end,
+      meetLink: row.booking.meetLink ?? undefined,
+      locationType: updates.locationType,
     });
   }
 
@@ -379,6 +385,8 @@ export async function createAdminBooking(data: {
         end: data.end,
         clientName: clientUser.nickname ?? clientUser.name ?? "Klient",
         clientEmail: clientUser.email,
+        meetLink: data.status === "confirmed" ? meet?.meetLink : undefined,
+        locationType: data.locationType,
       });
     }
   }
