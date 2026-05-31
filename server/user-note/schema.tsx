@@ -7,4 +7,9 @@ export const UserNoteSchema = z.object({
   note: z.string(),
 });
 
+export const UserNoteIdSchema = z.object({
+  id: z.string(),
+});
+
 export type UserNotePayload = z.infer<typeof UserNoteSchema>;
+export type UserNoteIdPayload = z.infer<typeof UserNoteIdSchema>;
