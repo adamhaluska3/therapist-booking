@@ -1,13 +1,11 @@
-"use server";
+"server-only";
 import { db } from "@/lib/db";
-import { PaymentSettingsInput } from "./schema";
 import { paymentSettings } from "@/db/schema";
-import { requireAdmin } from "../auth";
+import { PaymentSettingsFormData } from "./schema";
 
 export async function savePaymentSettings(
-  data: PaymentSettingsInput,
+  data: PaymentSettingsFormData,
 ): Promise<void> {
-  await requireAdmin();
   await db
     .insert(paymentSettings)
     .values({
