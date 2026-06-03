@@ -1,6 +1,9 @@
-"use server";
-import "server-only";
-import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
+"server-only";
+
+import {
+  contactSchema,
+  type ContactFormValues,
+} from "@/server/contact-form/schema";
 import { sendContactFormEmail } from "@/lib/email";
 
 export async function submitContactForm(
@@ -15,6 +18,9 @@ export async function submitContactForm(
     await sendContactFormEmail(parsed.data);
     return { success: true };
   } catch {
-    return { success: false, error: "Nepodarilo sa odoslať správu. Skúste to prosím neskôr." };
+    return {
+      success: false,
+      error: "Nepodarilo sa odoslať správu. Skúste to prosím neskôr.",
+    };
   }
 }
