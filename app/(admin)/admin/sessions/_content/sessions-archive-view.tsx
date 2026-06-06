@@ -6,10 +6,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import { cn } from "@/lib/utils";
 import { groupByMonth } from "@/lib/date-utils";
-import { getFinishedBookingsFiltered } from "@/server/booking/queries";
 import { ArchiveCard } from "@/components/admin/archive-card";
 import { Button } from "@/components/ui/button";
 import type { BookingType } from "@/db/schema";
+import { getFinishedBookingsFilteredAction } from "@/server/booking/actions";
 
 type FilterKey = "all" | "month" | "last_month";
 
@@ -67,9 +67,19 @@ export function SessionsArchiveView({
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ["finished-bookings", debouncedSearch, activeFilter, selectedDate],
+    queryKey: [
+      "finished-bookings",
+      debouncedSearch,
+      activeFilter,
+      selectedDate,
+    ],
     queryFn: ({ pageParam }) =>
-      getFinishedBookingsFiltered(pageParam, debouncedSearch, from, to),
+      getFinishedBookingsFilteredAction({
+        pageParam,
+        debouncedSearch,
+        from,
+        to,
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
   });

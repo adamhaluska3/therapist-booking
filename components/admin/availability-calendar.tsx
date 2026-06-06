@@ -27,10 +27,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "./calendar.css";
 
-import {
-  CalendarEventCard,
-  type TherapistEvent,
-} from "./calendar-event-card";
+import { CalendarEventCard, type TherapistEvent } from "./calendar-event-card";
 import { CalendarToolbar, type CalendarView } from "./calendar-toolbar";
 import { SlotSettingsDialog } from "./slot-settings-dialog";
 import { BookingDialog } from "./booking-dialog";
@@ -54,8 +51,8 @@ import {
   updateBookingFromDialog,
 } from "@/server/booking/mutations";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
-import { getBookingsWithUsers } from "@/server/booking/queries";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import { getBookingsWithUsersAction } from "@/server/booking/actions";
 
 const locales = { sk };
 
@@ -470,7 +467,10 @@ export function AvailabilityCalendar({
 
       try {
         const newSlots = await getAvailabilitySlots(rangeFrom, rangeTo);
-        const newBookings = await getBookingsWithUsers(rangeFrom, rangeTo);
+        const newBookings = await getBookingsWithUsersAction({
+          from: rangeFrom,
+          to: rangeTo,
+        });
         setSlots(newSlots);
         setBookings(newBookings);
         persistedSlotIds.current = new Set(
