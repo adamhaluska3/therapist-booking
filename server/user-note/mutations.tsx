@@ -1,4 +1,4 @@
-"server-only";
+"use server";
 
 import { db } from "@/lib/db";
 import { UserNotePayload } from "./schema";

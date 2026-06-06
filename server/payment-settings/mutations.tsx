@@ -1,4 +1,5 @@
-"server-only";
+"use server";
+
 import { db } from "@/lib/db";
 import { paymentSettings } from "@/db/schema";
 import { PaymentSettingsFormData } from "./schema";

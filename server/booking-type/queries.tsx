@@ -1,4 +1,4 @@
-"server-only";
+"use server";
 
 import { eq } from "drizzle-orm";
 import { bookingType, BookingType } from "@/db/schema";

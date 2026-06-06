@@ -1,9 +1,9 @@
-"server-only";
+"use server";
+
 import { user } from "@/db/auth-schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { UserOption } from "./schema";
-import { requireAdmin } from "../auth";
 
 export async function updateUserNickname(
   userId: string,

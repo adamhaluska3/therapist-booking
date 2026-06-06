@@ -1,8 +1,9 @@
 import { Booking, locationTypeEnum } from "@/db/schema";
 
-export type LocationType = typeof locationTypeEnum[number];
+export type LocationType = (typeof locationTypeEnum)[number];
 import { BookingUser } from "../user/schema";
 import { user } from "@/db/auth-schema";
+import z from "zod";
 
 export type BookingWithUser = Booking & { user: BookingUser | null };
 
@@ -43,3 +44,29 @@ export type ClientAbsolvedBookingRow = {
   locationType: LocationType;
   note: string | null;
 };
+
+export const BookingsFilterSchema = z.object({
+  offset: z.number().min(0),
+  search: z.string().optional(),
+  from: z.date().optional(),
+  to: z.date().optional(),
+});
+
+export const BookingsDateFilterSchema = z.object({
+  from: z.date(),
+  to: z.date(),
+});
+
+export const ClientAbsolvedBookingsFilterSchema = z.object({
+  userId: z.string(),
+  page: z.number().min(1).default(1),
+  pageSize: z.number().min(1).max(100).default(10),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
+export type BookingsFilterType = z.infer<typeof BookingsFilterSchema>;
+export type BookingsDateFilterType = z.infer<typeof BookingsDateFilterSchema>;
+export type ClientAbsolvedBookingsFilterType = z.infer<
+  typeof ClientAbsolvedBookingsFilterSchema
+>;

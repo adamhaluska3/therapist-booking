@@ -1,4 +1,4 @@
-"server-only";
+"use server";
 
 import { postCategories, posts } from "@/db/schema";
 import { db } from "@/lib/db";
