@@ -47,9 +47,9 @@ import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import {
-  updateBookingFromDialog,
-  updateBookingStatus,
-} from "@/server/booking/mutations";
+  updateBookingFromDialogAction,
+  updateBookingStatusAction,
+} from "@/server/booking/actions";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -112,7 +112,7 @@ export function SessionCard({
     const action = confirmDialog;
     startTransition(async () => {
       try {
-        await updateBookingStatus(booking.id, action);
+        await updateBookingStatusAction({ id: booking.id, status: action });
         setConfirmDialog(null);
         invalidateAndRefresh();
         toast.success(
@@ -128,9 +128,9 @@ export function SessionCard({
   function handleSave(updated: Booking) {
     startTransition(async () => {
       try {
-        const result = await updateBookingFromDialog(
-          updated.id,
-          {
+        const result = await updateBookingFromDialogAction({
+          id: updated.id,
+          updates: {
             start: updated.start,
             end: updated.end,
             userId: updated.userId ?? null,
@@ -138,8 +138,9 @@ export function SessionCard({
             note: updated.note ?? null,
             locationType: updated.locationType,
           },
-          booking.start,
-        );
+          previousStart: booking.start,
+        });
+
         if (!result.ok) {
           toast.error(result.error ?? "Nepodarilo sa uložiť sedenie");
           return;

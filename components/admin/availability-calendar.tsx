@@ -45,14 +45,14 @@ import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import { saveAvailabilitySlots } from "@/server/availability-slots/mutations";
-import {
-  createAdminBooking,
-  deleteBookingWithNotification,
-  updateBookingFromDialog,
-} from "@/server/booking/mutations";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
-import { getBookingsWithUsersAction } from "@/server/booking/actions";
+import {
+  createAdminBookingAction,
+  deleteBookingWithNotificationAction,
+  getBookingsWithUsersAction,
+  updateBookingFromDialogAction,
+} from "@/server/booking/actions";
 
 const locales = { sk };
 
@@ -205,7 +205,7 @@ export function AvailabilityCalendar({
     startTransition(async () => {
       try {
         if (isNew) {
-          await createAdminBooking({
+          await createAdminBookingAction({
             id: b.id,
             start: b.start,
             end: b.end,
@@ -217,9 +217,9 @@ export function AvailabilityCalendar({
             locationType: b.locationType,
           });
         } else {
-          await updateBookingFromDialog(
-            b.id,
-            {
+          await updateBookingFromDialogAction({
+            id: b.id,
+            updates: {
               start: b.start,
               end: b.end,
               userId: b.userId ?? null,
@@ -227,8 +227,8 @@ export function AvailabilityCalendar({
               note: b.note ?? null,
               locationType: b.locationType,
             },
-            previousStart ?? b.start,
-          );
+            previousStart: previousStart ?? b.start,
+          });
         }
       } catch {
         toast.error("Nepodarilo sa uložiť rezerváciu");
@@ -240,7 +240,7 @@ export function AvailabilityCalendar({
     persistedBookingIds.current.delete(id);
     startTransition(async () => {
       try {
-        await deleteBookingWithNotification(id);
+        await deleteBookingWithNotificationAction({ id });
       } catch {
         toast.error("Nepodarilo sa vymazať rezerváciu");
       }

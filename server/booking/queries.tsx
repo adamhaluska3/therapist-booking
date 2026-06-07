@@ -9,7 +9,7 @@ import {
   BookingsDateFilterType,
   ClientAbsolvedBookingsFilterType,
 } from "./schema";
-import { availabilitySlot, Booking, booking, bookingType } from "@/db/schema";
+import { availabilitySlot, booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 
 import {
@@ -32,7 +32,6 @@ import {
 } from "@/lib/constants";
 import { SlotsByDate, toDateKey } from "@/lib/booking-types";
 import { cache } from "react";
-import { requireUser } from "../auth";
 
 export async function getDashboardBookingsFiltered({
   offset,

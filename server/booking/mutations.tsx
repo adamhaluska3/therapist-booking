@@ -1,9 +1,16 @@
 "use server";
 import { db } from "@/lib/db";
-import { BookingUpsert } from "./schema";
+import {
+  CancelClientBookingType,
+  CreateAdminBookingType,
+  CreateClientBookingType,
+  DeleteBookingType,
+  UpdateBookingFromDialogType,
+  UpdateBookingStatusType,
+} from "./schema";
 import { booking, bookingType } from "@/db/schema";
-import { eq, inArray, and, gt, lt, ne } from "drizzle-orm";
-import { account, user } from "@/db/auth-schema";
+import { eq, and, gt, lt, ne } from "drizzle-orm";
+import { account, user as userModel } from "@/db/auth-schema";
 import {
   sendBookingCancellationToClient,
   sendBookingCancellationToTherapist,
@@ -12,60 +19,21 @@ import {
   sendBookingRescheduledToClient,
 } from "@/lib/email";
 import { getUserById } from "../user/queries";
-import { requireAdmin, requireAuth, requireUser } from "../auth";
+import { requireAdmin, requireUser } from "../auth";
 import { fetchPriceForBookingType } from "../booking-type/queries";
 import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { createMeetLink } from "../utils/meet";
 import { generateVS } from "../utils/payment";
 import { revalidatePath } from "next/cache";
+import { useUser } from "@/lib/user-context";
 
-export async function saveBookings(
-  upserted: BookingUpsert[],
-  deletedIds: string[],
-): Promise<void> {
-  await requireAdmin();
-  await db.transaction(async (tx) => {
-    if (deletedIds.length > 0) {
-      await tx.delete(booking).where(inArray(booking.id, deletedIds));
-    }
-
-    for (const b of upserted) {
-      await tx
-        .insert(booking)
-        .values({
-          id: b.id,
-          start: b.start,
-          end: b.end,
-          status: b.status ?? "confirmed",
-          price: b.price ?? null,
-          userId: b.userId ?? null,
-          bookingTypeId: b.bookingTypeId ?? null,
-        })
-        .onConflictDoUpdate({
-          target: booking.id,
-          set: {
-            start: b.start,
-            end: b.end,
-            status: b.status ?? "confirmed",
-            userId: b.userId ?? null,
-            bookingTypeId: b.bookingTypeId ?? null,
-          },
-        });
-    }
-  });
-}
-
-export async function deleteBookingById(id: string): Promise<void> {
-  await requireAdmin();
-  await db.delete(booking).where(eq(booking.id, id));
-}
-
-export async function deleteBookingWithNotification(id: string): Promise<void> {
-  await requireAdmin();
+export async function deleteBookingWithNotification({
+  id,
+}: DeleteBookingType): Promise<void> {
   const rows = await db
     .select()
     .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(userModel, eq(booking.userId, userModel.id))
     .where(eq(booking.id, id))
     .limit(1);
 
@@ -84,16 +52,15 @@ export async function deleteBookingWithNotification(id: string): Promise<void> {
   }
 }
 
-export async function updateBookingStatus(
-  id: string,
-  status: "cancelled" | "finished",
-): Promise<void> {
-  await requireAdmin();
+export async function updateBookingStatus({
+  id,
+  status,
+}: UpdateBookingStatusType): Promise<void> {
   if (status === "cancelled") {
     const rows = await db
       .select()
       .from(booking)
-      .leftJoin(user, eq(booking.userId, user.id))
+      .leftJoin(userModel, eq(booking.userId, userModel.id))
       .where(eq(booking.id, id))
       .limit(1);
 
@@ -113,9 +80,12 @@ export async function updateBookingStatus(
 }
 
 export async function confirmBooking(id: string): Promise<void> {
-  const authUser = await requireAdmin();
+  const { user } = useUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
   const googleAccount = await db.query.account.findFirst({
-    where: eq(account.userId, authUser.id),
+    where: eq(account.userId, user.id),
   });
 
   const foundBooking = await db.query.booking.findFirst({
@@ -143,7 +113,7 @@ export async function confirmBooking(id: string): Promise<void> {
   const rows = await db
     .select()
     .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(userModel, eq(booking.userId, userModel.id))
     .where(eq(booking.id, id))
     .limit(1);
 
@@ -172,69 +142,11 @@ export async function confirmBooking(id: string): Promise<void> {
   );
 }
 
-export async function updateBookingTime(
-  id: string,
-  start: Date,
-  end: Date,
-): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin();
-  const conflicts = await db
-    .select({ id: booking.id })
-    .from(booking)
-    .where(
-      and(
-        lt(booking.start, end),
-        gt(booking.end, start),
-        eq(booking.status, "confirmed"),
-        ne(booking.id, id),
-      ),
-    );
-
-  if (conflicts.length > 0) {
-    return { ok: false, error: "V tomto čase už existuje potvrdené sedenie." };
-  }
-
-  const rows = await db
-    .select()
-    .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
-    .where(eq(booking.id, id))
-    .limit(1);
-
-  const row = rows[0];
-  const oldStart = row?.booking.start;
-
-  await db.update(booking).set({ start, end }).where(eq(booking.id, id));
-
-  if (row?.user?.email && oldStart) {
-    const clientName = row.user.nickname ?? row.user.name;
-    void sendBookingRescheduledToClient({
-      clientName,
-      clientEmail: row.user.email,
-      bookingId: id,
-      oldStart,
-      newStart: start,
-      newEnd: end,
-      meetLink: row.booking.meetLink ?? undefined,
-      locationType: row.booking.locationType,
-    });
-  }
-
-  return { ok: true };
-}
-
-export async function updateBookingFromDialog(
-  id: string,
-  updates: {
-    start: Date;
-    end: Date;
-    userId: string | null;
-    bookingTypeId: string | null;
-    note: string | null;
-    locationType: "onsite" | "online";
-  },
-  previousStart: Date,
-): Promise<{ ok: boolean; error?: string }> {
+export async function updateBookingFromDialog({
+  id,
+  updates,
+  previousStart,
+}: UpdateBookingFromDialogType): Promise<{ ok: boolean; error?: string }> {
   const timeChanged = updates.start.getTime() !== previousStart.getTime();
 
   await requireAdmin();
@@ -261,7 +173,7 @@ export async function updateBookingFromDialog(
   const rows = await db
     .select()
     .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(userModel, eq(booking.userId, userModel.id))
     .where(eq(booking.id, id))
     .limit(1);
   const row = rows[0];
@@ -295,15 +207,14 @@ export async function updateBookingFromDialog(
   return { ok: true };
 }
 
-export async function createClientBooking(
-  dateKey: string,
-  time: string,
-  userId?: string,
-  note?: string | null,
-  bookingTypeId?: string | null,
-  locationType: "onsite" | "online" = "onsite",
-): Promise<{ ok: boolean; error?: string }> {
-  await requireUser();
+export async function createClientBooking({
+  dateKey,
+  time,
+  userId,
+  note,
+  bookingTypeId,
+  locationType,
+}: CreateClientBookingType): Promise<{ ok: boolean; error?: string }> {
   const [y, m, d] = dateKey.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
   const start = new Date(y, m - 1, d, hh, mm, 0, 0);
@@ -328,7 +239,7 @@ export async function createClientBooking(
       start,
       end,
       status: "pending",
-      userId: userId ?? null,
+      userId: userId,
       bookingTypeId: await db
         .select({ id: bookingType.id })
         .from(bookingType)
@@ -344,7 +255,7 @@ export async function createClientBooking(
 
   const clientUserQuery = !userId
     ? null
-    : await db.select().from(user).where(eq(user.id, userId));
+    : await db.select().from(userModel).where(eq(userModel.id, userId));
   const clientUser = clientUserQuery?.[0];
   const clientName = clientUser?.nickname ?? clientUser?.name ?? "Klient";
   const clientEmail = clientUser?.email;
@@ -365,27 +276,22 @@ export async function createClientBooking(
   return { ok: true };
 }
 
-export async function createAdminBooking(data: {
-  id: string;
-  start: Date;
-  end: Date;
-  status: "pending" | "confirmed" | "cancelled" | "finished";
-  userId: string | null;
-  bookingTypeId: string | null;
-  price: number | null;
-  note: string | null;
-  locationType: "onsite" | "online";
-}): Promise<void> {
-  const authUser = await requireAdmin();
+export async function createAdminBooking(
+  data: CreateAdminBookingType,
+): Promise<void> {
+  const { user } = useUser();
   const priceSnapshot =
     data.price ??
     (data.bookingTypeId
       ? await fetchPriceForBookingType(data.bookingTypeId)
       : null);
 
-  const googleAccount = await db.query.account.findFirst({
-    where: eq(account.userId, authUser.id),
-  });
+  const googleAccount =
+    user === null
+      ? null
+      : await db.query.account.findFirst({
+          where: eq(account.userId, user.id),
+        });
 
   const clientUser = data.userId ? await getUserById(data.userId) : null;
   const meet = await createMeetLink(
@@ -424,16 +330,15 @@ export async function createAdminBooking(data: {
   }
 }
 
-export async function cancelClientBooking(
-  bookingId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const authUser = await requireUser();
-
+export async function cancelClientBooking({
+  bookingId,
+}: CancelClientBookingType): Promise<{ ok: boolean; error?: string }> {
+  const { user } = useUser();
   const row = await db.query.booking.findFirst({
     where: eq(booking.id, bookingId),
   });
   if (!row) return { ok: false, error: "Rezervácia sa nenašla." };
-  if (row.userId !== authUser.id)
+  if (user === null || row.userId !== user.id)
     return { ok: false, error: "Nemáte oprávnenie." };
   if (row.start.getTime() < Date.now() + 2 * 24 * 60 * 60 * 1000) {
     return {
@@ -447,10 +352,10 @@ export async function cancelClientBooking(
     .set({ status: "cancelled" })
     .where(eq(booking.id, bookingId));
 
-  if (authUser.email) {
+  if (user.email) {
     void sendBookingCancellationToTherapist({
-      clientName: authUser.name,
-      clientEmail: authUser.email,
+      clientName: user.name,
+      clientEmail: user.email,
       start: row.start,
       end: row.end,
     });
