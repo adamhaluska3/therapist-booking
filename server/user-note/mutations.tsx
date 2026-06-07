@@ -1,12 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { UserNotePayload } from "./schema";
+import { UserNoteType } from "./schema";
 import { userNote } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "../auth";
 
-export async function saveUserNote(payload: UserNotePayload) {
+export async function saveUserNote(payload: UserNoteType) {
   if (payload.id) {
     await db
       .update(userNote)

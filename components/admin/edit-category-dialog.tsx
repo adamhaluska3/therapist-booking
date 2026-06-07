@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   editCategorySchema,
-  EditCategoryFormData,
+  EditCategoryType,
 } from "@/server/post-category/schema";
 import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";
@@ -42,7 +42,7 @@ export const EditCategoryDialog = ({
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const form = useForm<EditCategoryFormData>({
+  const form = useForm<EditCategoryType>({
     resolver: zodResolver(editCategorySchema),
     defaultValues: {
       name: category.name,
@@ -50,7 +50,7 @@ export const EditCategoryDialog = ({
   });
 
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: async (data: EditCategoryFormData) => {
+    mutationFn: async (data: EditCategoryType) => {
       const res = await EditCategoryAction(data);
       if (!res.result) {
         throw new Error(res.error);

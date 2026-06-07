@@ -16,4 +16,4 @@ export const paymentSettingsSchema = z.object({
     .optional(),
 });
 
-export type PaymentSettingsFormData = z.infer<typeof paymentSettingsSchema>;
+export type PaymentSettingsType = z.infer<typeof paymentSettingsSchema>;

@@ -2,10 +2,10 @@
 
 import { db } from "@/lib/db";
 import { paymentSettings } from "@/db/schema";
-import { PaymentSettingsFormData } from "./schema";
+import { PaymentSettingsType } from "./schema";
 
 export async function savePaymentSettings(
-  data: PaymentSettingsFormData,
+  data: PaymentSettingsType,
 ): Promise<void> {
   await db
     .insert(paymentSettings)

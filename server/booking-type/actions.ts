@@ -1,9 +1,11 @@
 import { requireAdmin } from "../auth";
 import { saveBookingTypePrices } from "./mutations";
-import { bookingTypePricesSchema } from "./schema";
+import { bookingTypePriceSchema, BookingTypePriceType } from "./schema";
 
-export const saveBookingTypePricesAction = async (payload: any) => {
+export const saveBookingTypePricesAction = async (
+  payload: BookingTypePriceType[],
+) => {
   await requireAdmin();
-  bookingTypePricesSchema.array().parse(payload);
-  return await saveBookingTypePrices(payload);
+  const validatedPayload = bookingTypePriceSchema.array().parse(payload);
+  return await saveBookingTypePrices(validatedPayload);
 };

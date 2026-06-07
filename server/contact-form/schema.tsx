@@ -7,4 +7,4 @@ export const contactSchema = z.object({
   message: z.string().min(10, "Správa musí mať aspoň 10 znakov"),
 });
 
-export type ContactFormValues = z.infer<typeof contactSchema>;
+export type ContactFormType = z.infer<typeof contactSchema>;

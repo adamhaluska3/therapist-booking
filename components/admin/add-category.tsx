@@ -22,8 +22,10 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AddCategoryFormData } from "@/server/post-category/mutations";
-import { addCategorySchema } from "@/server/post-category/schema";
+import {
+  addCategorySchema,
+  AddCategoryType,
+} from "@/server/post-category/schema";
 import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";
 import { AddCategoryAction } from "@/server/post-category/actions";
@@ -40,7 +42,7 @@ export const AddCategoryDialog = ({
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const form = useForm<AddCategoryFormData>({
+  const form = useForm<AddCategoryType>({
     resolver: zodResolver(addCategorySchema),
     defaultValues: {
       name: "",
@@ -48,7 +50,7 @@ export const AddCategoryDialog = ({
   });
 
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: async (data: AddCategoryFormData) => {
+    mutationFn: async (data: AddCategoryType) => {
       const res = await AddCategoryAction(data);
       if (!res.result) {
         throw new Error(res.error);

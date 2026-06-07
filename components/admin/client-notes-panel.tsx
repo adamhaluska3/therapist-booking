@@ -132,7 +132,7 @@ export function ClientNotesPanel({
     setNotesState((s) => s.filter((x) => x.id !== id));
     setIsPending(true);
     try {
-      await deleteUserNoteAction(id);
+      await deleteUserNoteAction({ id });
       if (editing?.id === id) {
         setOpen(false);
         setEditing(null);

@@ -4,35 +4,33 @@ import { requireAdmin } from "../auth";
 import { addCategory, editCategory, removeCategory } from "./mutations";
 import {
   addCategorySchema,
+  AddCategoryType,
   editCategorySchema,
+  EditCategoryType,
   removeCategorySchema,
+  RemoveCategoryType,
 } from "./schema";
 
-export const AddCategoryAction = async (payload: any) => {
+export const AddCategoryAction = async (payload: AddCategoryType) => {
   await requireAdmin();
-  addCategorySchema.parse(payload);
-  const response = await addCategory(payload);
+  const validatedPayload = addCategorySchema.parse(payload);
+  const response = await addCategory(validatedPayload);
   revalidatePath("/admin/post-categories");
   return response;
 };
 
-export const EditCategoryAction = async (payload: any) => {
+export const EditCategoryAction = async (payload: EditCategoryType) => {
   await requireAdmin();
-  editCategorySchema.parse(payload);
-  const { id, ...data } = payload;
-  const response = await editCategory(id, data);
+  const validatedPayload = editCategorySchema.parse(payload);
+  const response = await editCategory(validatedPayload);
   revalidatePath("/admin/post-categories");
   return response;
 };
 
-export const RemoveCategoryAction = async (payload: any) => {
+export const RemoveCategoryAction = async (payload: RemoveCategoryType) => {
   await requireAdmin();
-  const { id } = payload;
-  if (!id) {
-    throw new Error("ID is required");
-  }
-  removeCategorySchema.parse(payload);
-  const response = await removeCategory(id, payload.newCategoryId);
+  const validatedPayload = removeCategorySchema.parse(payload);
+  const response = await removeCategory(validatedPayload);
   revalidatePath("/admin/post-categories");
   return response;
 };

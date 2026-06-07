@@ -3,11 +3,12 @@
 import { postCategories, posts } from "@/db/schema";
 import { db } from "@/lib/db";
 import { and, eq, ne } from "drizzle-orm";
-import { addCategorySchema, type AddCategoryFormData } from "./schema";
+import {
+  addCategorySchema,
+  EditCategoryType,
+  RemoveCategoryType,
+} from "./schema";
 import type { PostCategory } from "@/db/schema";
-import { requireAdmin } from "../auth";
-
-export type { AddCategoryFormData };
 
 export type AddCategoryResponse =
   | {
@@ -52,19 +53,12 @@ export type EditCategoryResponse =
       error: string;
     };
 
-export const editCategory = async (
-  id: string,
-  anyData: any,
-): Promise<EditCategoryResponse> => {
-  const data = addCategorySchema.safeParse(anyData);
-  if (data.error) {
-    return { result: false, error: data.error.message };
-  }
+export const editCategory = async ({
+  id,
+  name,
+}: EditCategoryType): Promise<EditCategoryResponse> => {
   const exists = await db.query.postCategories.findFirst({
-    where: and(
-      eq(postCategories.name, data.data.name),
-      ne(postCategories.id, id),
-    ),
+    where: and(eq(postCategories.name, name), ne(postCategories.id, id)),
   });
 
   if (exists) {
@@ -74,7 +68,7 @@ export const editCategory = async (
   const [category] = await db
     .update(postCategories)
     .set({
-      name: data.data.name,
+      name: name,
     })
     .where(eq(postCategories.id, id))
     .returning();
@@ -91,17 +85,17 @@ export type RemoveCategoryResponse =
       error: string;
     };
 
-export const removeCategory = async (
-  id: string,
-  newCategory: PostCategory | null,
-): Promise<RemoveCategoryResponse> => {
-  if (id === newCategory?.id) {
+export const removeCategory = async ({
+  id,
+  newCategoryId,
+}: RemoveCategoryType): Promise<RemoveCategoryResponse> => {
+  if (id === newCategoryId) {
     return { result: false, error: "Vyberte inú kategóriu" };
   }
 
-  if (newCategory !== null) {
+  if (newCategoryId !== null) {
     const verifyNewCategory = await db.query.postCategories.findFirst({
-      where: eq(postCategories.id, newCategory.id),
+      where: eq(postCategories.id, newCategoryId),
     });
     if (!verifyNewCategory) {
       return { result: false, error: "Vybraná kategória neexistuje" };
@@ -111,7 +105,7 @@ export const removeCategory = async (
     await tx
       .update(posts)
       .set({
-        categoryId: newCategory?.id ?? null,
+        categoryId: newCategoryId ?? null,
       })
       .where(eq(posts.categoryId, id));
 

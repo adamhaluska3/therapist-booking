@@ -31,9 +31,12 @@ export const RemovePostCategoryDialog = ({
 
   const router = useRouter();
 
-  const { mutate, isPending, isError, error } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const res = await RemoveCategoryAction({ id, newCategory });
+      const res = await RemoveCategoryAction({
+        id,
+        newCategoryId: newCategory?.id || null,
+      });
       if (!res.result) {
         throw new Error(res.error);
       }

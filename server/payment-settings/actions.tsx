@@ -2,10 +2,12 @@
 
 import { requireAdmin } from "../auth";
 import { savePaymentSettings } from "./mutations";
-import { paymentSettingsSchema } from "./schema";
+import { paymentSettingsSchema, PaymentSettingsType } from "./schema";
 
-export const SavePaymentSettingsAction = async (payload: any) => {
+export const SavePaymentSettingsAction = async (
+  payload: PaymentSettingsType,
+) => {
   await requireAdmin();
-  const data = paymentSettingsSchema.parse(payload);
-  return await savePaymentSettings(data);
+  const validatedPayload = paymentSettingsSchema.parse(payload);
+  return await savePaymentSettings(validatedPayload);
 };

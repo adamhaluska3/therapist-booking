@@ -2,18 +2,21 @@
 
 import { requireAdmin } from "../auth";
 import { deleteUserNote, saveUserNote } from "./mutations";
-import { UserNoteIdSchema, UserNoteSchema } from "./schema";
+import {
+  UserNoteIdSchema,
+  UserNoteIdType,
+  UserNoteSchema,
+  UserNoteType,
+} from "./schema";
 
-export const saveUserNoteAction = async (payload: any) => {
+export const saveUserNoteAction = async (payload: UserNoteType) => {
   requireAdmin();
-  UserNoteSchema.parse(payload);
-  return saveUserNote(payload);
+  const parsedPayload = UserNoteSchema.parse(payload);
+  return saveUserNote(parsedPayload);
 };
 
-export const deleteUserNoteAction = async (payload: any) => {
+export const deleteUserNoteAction = async (payload: UserNoteIdType) => {
   requireAdmin();
-  UserNoteIdSchema.parse(payload);
-  const { id } = payload;
-  if (!id) throw new Error("ID is required");
-  return deleteUserNote(id);
+  const parsedPayload = UserNoteIdSchema.parse(payload);
+  return deleteUserNote(parsedPayload.id);
 };

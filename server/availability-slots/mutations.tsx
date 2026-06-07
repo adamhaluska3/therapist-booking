@@ -1,15 +1,14 @@
 "use server";
+
 import { db } from "@/lib/db";
-import { SlotUpsert } from "./schema";
 import { availabilitySlot } from "@/db/schema";
 import { inArray } from "drizzle-orm";
-import { requireAdmin } from "../auth";
+import { SaveAvailabilitySlotsType } from "./schema";
 
-export async function saveAvailabilitySlots(
-  upserted: SlotUpsert[],
-  deletedIds: string[],
-): Promise<void> {
-  await requireAdmin();
+export async function saveAvailabilitySlots({
+  upserted,
+  deletedIds,
+}: SaveAvailabilitySlotsType): Promise<void> {
   await db.transaction(async (tx) => {
     if (deletedIds.length > 0) {
       await tx

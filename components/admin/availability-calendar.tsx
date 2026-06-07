@@ -44,7 +44,6 @@ import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { saveAvailabilitySlots } from "@/server/availability-slots/mutations";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import {
@@ -53,6 +52,7 @@ import {
   getBookingsWithUsersAction,
   updateBookingFromDialogAction,
 } from "@/server/booking/actions";
+import { saveAvailabilitySlotsAction } from "@/server/availability-slots/actions";
 
 const locales = { sk };
 
@@ -189,7 +189,10 @@ export function AvailabilityCalendar({
     toDelete.forEach((id) => persistedSlotIds.current.delete(id));
     startTransition(async () => {
       try {
-        await saveAvailabilitySlots(toUpsert, toDelete);
+        await saveAvailabilitySlotsAction({
+          upserted: toUpsert,
+          deletedIds: toDelete,
+        });
       } catch {
         toast.error("Nepodarilo sa uložiť dostupnosť");
       }

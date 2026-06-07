@@ -1,9 +1,9 @@
 "use server";
 
 import { submitContactForm } from "./service";
-import { contactSchema } from "./schema";
+import { ContactFormType, contactSchema } from "./schema";
 
-export const submitContactFormAction = async (payload: any) => {
-  contactSchema.parse(payload);
-  return submitContactForm(payload);
+export const submitContactFormAction = async (payload: ContactFormType) => {
+  const validatedPayload = contactSchema.parse(payload);
+  return submitContactForm(validatedPayload);
 };

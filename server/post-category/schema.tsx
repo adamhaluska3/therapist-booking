@@ -16,8 +16,8 @@ export const removeCategorySchema = z.object({
   newCategoryId: z.string().nullable(),
 });
 
-export type AddCategoryFormData = z.infer<typeof addCategorySchema>;
+export type AddCategoryType = z.infer<typeof addCategorySchema>;
 
-export type EditCategoryFormData = z.infer<typeof editCategorySchema>;
+export type EditCategoryType = z.infer<typeof editCategorySchema>;
 
-export type RemoveCategoryFormData = z.infer<typeof removeCategorySchema>;
+export type RemoveCategoryType = z.infer<typeof removeCategorySchema>;
