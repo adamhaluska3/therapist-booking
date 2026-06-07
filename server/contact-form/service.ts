@@ -1,13 +1,10 @@
 "use server";
 
-import {
-  contactSchema,
-  type ContactFormValues,
-} from "@/server/contact-form/schema";
+import { ContactFormType, contactSchema } from "@/server/contact-form/schema";
 import { sendContactFormEmail } from "@/lib/email";
 
 export async function submitContactForm(
-  data: ContactFormValues,
+  data: ContactFormType,
 ): Promise<{ success: boolean; error?: string }> {
   const parsed = contactSchema.safeParse(data);
   if (!parsed.success) {

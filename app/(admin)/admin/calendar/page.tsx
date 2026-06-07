@@ -4,8 +4,6 @@ import { getAllUsers } from "@/server/user/queries";
 import { getBookingTypes } from "@/server/booking-type/queries";
 import { getBookingsWithUsers } from "@/server/booking/queries";
 import { getAvailabilitySlots } from "@/server/availability-slots/queries";
-import { getBookingsWithUsersAction } from "@/server/booking/actions";
-
 export const metadata = {
   title: "Kalendár",
 };
@@ -27,8 +25,8 @@ export default async function CalendarPage({ searchParams }: Props) {
   const rangeTo = addDays(weekStart, 6);
 
   const [slots, bookings, users, bookingTypes] = await Promise.all([
-    getAvailabilitySlots(rangeFrom, rangeTo),
-    getBookingsWithUsersAction({ from: rangeFrom, to: rangeTo }),
+    getAvailabilitySlots({ from: rangeFrom, to: rangeTo }),
+    getBookingsWithUsers({ from: rangeFrom, to: rangeTo }),
     getAllUsers(),
     getBookingTypes(),
   ]);

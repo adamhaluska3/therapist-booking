@@ -44,7 +44,6 @@ import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { getAvailabilitySlots } from "@/server/availability-slots/queries";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import {
   createAdminBookingAction,
@@ -52,7 +51,10 @@ import {
   getBookingsWithUsersAction,
   updateBookingFromDialogAction,
 } from "@/server/booking/actions";
-import { saveAvailabilitySlotsAction } from "@/server/availability-slots/actions";
+import {
+  getAvailabilitySlotsAction,
+  saveAvailabilitySlotsAction,
+} from "@/server/availability-slots/actions";
 
 const locales = { sk };
 
@@ -469,7 +471,10 @@ export function AvailabilityCalendar({
       setDate(anchor);
 
       try {
-        const newSlots = await getAvailabilitySlots(rangeFrom, rangeTo);
+        const newSlots = await getAvailabilitySlotsAction({
+          from: rangeFrom,
+          to: rangeTo,
+        });
         const newBookings = await getBookingsWithUsersAction({
           from: rangeFrom,
           to: rangeTo,
