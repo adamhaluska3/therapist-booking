@@ -5,7 +5,6 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
-import { createClientBooking } from "@/server/booking/mutations";
 import {
   toDateKey,
   type SlotsByDate,
@@ -14,7 +13,6 @@ import {
 import { ADDRESS_SHORT } from "@/lib/constants";
 import { createClientBookingAction } from "@/server/booking/actions";
 import { authClient } from "@/lib/auth-client";
-import router from "next/router";
 
 function firstAvailableDate(slots: SlotsByDate): Date {
   const todayKey = toDateKey(new Date());

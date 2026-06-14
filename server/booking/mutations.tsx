@@ -19,13 +19,12 @@ import {
   sendBookingRescheduledToClient,
 } from "@/lib/email";
 import { getUserById } from "../user/queries";
-import { requireAdmin, requireUser } from "../auth";
+import { requireAuth } from "../auth";
 import { fetchPriceForBookingType } from "../booking-type/queries";
 import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { createMeetLink } from "../utils/meet";
 import { generateVS } from "../utils/payment";
 import { revalidatePath } from "next/cache";
-import { authClient } from "@/lib/auth-client";
 
 export async function deleteBookingWithNotification({
   id,
@@ -80,11 +79,7 @@ export async function updateBookingStatus({
 }
 
 export async function confirmBooking(id: string): Promise<void> {
-  const { data: session } = authClient.useSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  const user = session.user;
+  const user = await requireAuth();
   const googleAccount = await db.query.account.findFirst({
     where: eq(account.userId, user.id),
   });
@@ -150,7 +145,7 @@ export async function updateBookingFromDialog({
 }: UpdateBookingFromDialogType): Promise<{ ok: boolean; error?: string }> {
   const timeChanged = updates.start.getTime() !== previousStart.getTime();
 
-  await requireAdmin();
+  const user = await requireAuth();
   if (timeChanged) {
     const conflicts = await db
       .select({ id: booking.id })
@@ -280,11 +275,7 @@ export async function createClientBooking({
 export async function createAdminBooking(
   data: CreateAdminBookingType,
 ): Promise<void> {
-  const { data: session } = authClient.useSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  const user = session.user;
+  const user = await requireAuth();
   const priceSnapshot =
     data.price ??
     (data.bookingTypeId
@@ -338,11 +329,7 @@ export async function createAdminBooking(
 export async function cancelClientBooking({
   bookingId,
 }: CancelClientBookingType): Promise<{ ok: boolean; error?: string }> {
-  const { data: session } = authClient.useSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  const user = session.user;
+  const user = await requireAuth();
   const row = await db.query.booking.findFirst({
     where: eq(booking.id, bookingId),
   });
