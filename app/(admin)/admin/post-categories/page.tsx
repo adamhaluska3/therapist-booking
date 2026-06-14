@@ -1,15 +1,14 @@
 import { AddCategoryDialog } from "@/components/admin/add-category";
 import { PostCategoriesTable } from "@/components/admin/post-categories-table";
-import { db } from "@/lib/db";
-import { postCategories } from "@/db/schema";
 import { Plus } from "lucide-react";
+import { getPostCategories } from "@/server/post-category/queries";
 
 export const metadata = {
   title: "Správa kategórií príspevkov",
 };
 
 export default async function PostCategoriesPage() {
-  const categories = await db.select().from(postCategories);
+  const categories = await getPostCategories();
 
   return (
     <article className="mx-auto max-w-5xl">
