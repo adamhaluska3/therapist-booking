@@ -11,9 +11,10 @@ import {
   type SlotsByDate,
   type TimeSlot,
 } from "@/lib/booking-types";
-import { useUser } from "@/lib/user-context";
 import { ADDRESS_SHORT } from "@/lib/constants";
 import { createClientBookingAction } from "@/server/booking/actions";
+import { authClient } from "@/lib/auth-client";
+import router from "next/router";
 
 function firstAvailableDate(slots: SlotsByDate): Date {
   const todayKey = toDateKey(new Date());
@@ -37,7 +38,6 @@ export function BookingWidget({
   leftHeader?: React.ReactNode;
 }) {
   const today = new Date();
-  const { user } = useUser();
   const [selectedDate, setSelectedDate] = useState<Date | null>(() =>
     firstAvailableDate(slots),
   );
@@ -49,6 +49,9 @@ export function BookingWidget({
   const [pending, setPending] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const availableDates = useMemo(
     () =>

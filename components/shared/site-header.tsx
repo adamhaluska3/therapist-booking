@@ -4,13 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { AuthControls } from "@/components/marketing/auth-controls";
-import { useUser } from "@/lib/user-context";
 import { HeaderLink } from "./header-link";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 export function SiteHeader() {
-  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const navLinks = [
     { label: "Domov", href: "/" },

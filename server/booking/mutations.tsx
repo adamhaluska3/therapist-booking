@@ -25,7 +25,7 @@ import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { createMeetLink } from "../utils/meet";
 import { generateVS } from "../utils/payment";
 import { revalidatePath } from "next/cache";
-import { useUser } from "@/lib/user-context";
+import { authClient } from "@/lib/auth-client";
 
 export async function deleteBookingWithNotification({
   id,
@@ -80,10 +80,11 @@ export async function updateBookingStatus({
 }
 
 export async function confirmBooking(id: string): Promise<void> {
-  const { user } = useUser();
-  if (!user) {
+  const { data: session } = authClient.useSession();
+  if (!session) {
     throw new Error("Unauthorized");
   }
+  const user = session.user;
   const googleAccount = await db.query.account.findFirst({
     where: eq(account.userId, user.id),
   });
@@ -279,7 +280,11 @@ export async function createClientBooking({
 export async function createAdminBooking(
   data: CreateAdminBookingType,
 ): Promise<void> {
-  const { user } = useUser();
+  const { data: session } = authClient.useSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const user = session.user;
   const priceSnapshot =
     data.price ??
     (data.bookingTypeId
@@ -333,7 +338,11 @@ export async function createAdminBooking(
 export async function cancelClientBooking({
   bookingId,
 }: CancelClientBookingType): Promise<{ ok: boolean; error?: string }> {
-  const { user } = useUser();
+  const { data: session } = authClient.useSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const user = session.user;
   const row = await db.query.booking.findFirst({
     where: eq(booking.id, bookingId),
   });
