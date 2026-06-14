@@ -86,7 +86,7 @@ export function DashboardView({
     ],
     queryFn: ({ pageParam }) =>
       getDashboardBookingsFilteredAction({
-        pageParam,
+        offset: pageParam,
         debouncedSearch,
         from,
         to,

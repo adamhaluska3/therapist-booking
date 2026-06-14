@@ -75,7 +75,7 @@ export function SessionsArchiveView({
     ],
     queryFn: ({ pageParam }) =>
       getFinishedBookingsFilteredAction({
-        pageParam,
+        offset: pageParam,
         debouncedSearch,
         from,
         to,
