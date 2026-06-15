@@ -382,6 +382,7 @@ export function AvailabilityCalendar({
               email: userInfo.email,
             }
           : null,
+        bookingType: bookingTypes.find((t) => t.id === saved.bookingTypeId) ?? null,
       };
       const ok = applyAndPersistBookingChange(savedWithUser, bookings);
       if (ok) {

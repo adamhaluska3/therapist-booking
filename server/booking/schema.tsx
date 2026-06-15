@@ -1,10 +1,13 @@
-import { Booking, locationTypeEnum } from "@/db/schema";
+import { Booking, BookingType, locationTypeEnum } from "@/db/schema";
 
 export type LocationType = typeof locationTypeEnum[number];
 import { BookingUser } from "../user/schema";
 import { user } from "@/db/auth-schema";
 
-export type BookingWithUser = Booking & { user: BookingUser | null };
+export type BookingWithUser = Booking & {
+  user: BookingUser | null;
+  bookingType: BookingType | null;
+};
 
 export type BookingUpsert = {
   id: string;
@@ -19,6 +22,7 @@ export type BookingUpsert = {
 export function toBookingWithUser(row: {
   booking: Booking;
   user: typeof user.$inferSelect | null;
+  booking_type: BookingType | null;
 }): BookingWithUser {
   return {
     ...row.booking,
@@ -30,6 +34,7 @@ export function toBookingWithUser(row: {
           email: row.user.email,
         }
       : null,
+    bookingType: row.booking_type ?? null,
   };
 }
 
