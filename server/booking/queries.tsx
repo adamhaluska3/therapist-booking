@@ -49,6 +49,7 @@ export async function getDashboardBookingsFiltered({
     .select()
     .from(booking)
     .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
     .where(
       and(
         gte(booking.start, from ?? startOfToday),
@@ -86,6 +87,7 @@ export async function getFinishedBookingsFiltered({
     .select()
     .from(booking)
     .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
     .where(
       and(
         eq(booking.status, "finished"),
@@ -114,10 +116,11 @@ export async function getBookingsWithUsers({
   from,
   to,
 }: BookingsDateFilterType): Promise<BookingWithUser[]> {
-  const bookigs = await db
+  const rows = await db
     .select()
     .from(booking)
     .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
     .where(
       and(
         lte(booking.start, to),
@@ -125,18 +128,7 @@ export async function getBookingsWithUsers({
         not(eq(booking.status, "cancelled")),
       ),
     );
-  const bookingsWithUser = bookigs.map((row) => ({
-    ...row.booking,
-    user: row.user
-      ? {
-          id: row.user.id,
-          name: row.user.name,
-          nickname: row.user.nickname,
-          email: row.user.email,
-        }
-      : null,
-  }));
-  return bookingsWithUser;
+  return rows.map(toBookingWithUser);
 }
 
 export async function getBookingSlots(
@@ -208,6 +200,7 @@ export async function getPendingBookings(page = 1): Promise<{
       .select()
       .from(booking)
       .leftJoin(user, eq(booking.userId, user.id))
+      .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
       .where(eq(booking.status, "pending"))
       .orderBy(booking.start)
       .limit(BOOKINGS_PAGE_SIZE)

@@ -12,20 +12,12 @@ import {
 import { AdminCard } from "@/components/admin/admin-card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { BookingType } from "@/db/schema";
 
-export function ArchiveCard({
-  booking,
-  bookingTypes,
-}: {
-  booking: BookingWithUser;
-  bookingTypes: BookingType[];
-}) {
+export function ArchiveCard({ booking }: { booking: BookingWithUser }) {
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
   const isLinked = Boolean(booking.userId);
-  const bookingType =
-    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+  const bookingType = booking.bookingType;
 
   const inner = (
     <AdminCard
