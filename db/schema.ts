@@ -2,15 +2,9 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth-schema";
 import { BookingUser } from "@/server/user/schema";
+import { statusEnum, locationTypeEnum } from "@/lib/booking-enums";
 
-export const statusEnum = [
-  "pending",
-  "confirmed",
-  "cancelled",
-  "finished",
-] as const;
-
-export const locationTypeEnum = ["onsite", "online"] as const;
+export { statusEnum, locationTypeEnum };
 
 export const bookingType = sqliteTable("booking_type", {
   id: text("id")
@@ -18,6 +12,8 @@ export const bookingType = sqliteTable("booking_type", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull().unique(),
   price: integer("price"), // price in EUR cents, e.g. 5000 = €50.00
+  color: text("color").notNull().default("#427a5c"),
+  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
 });
 
 export const availabilitySlot = sqliteTable("availability_slot", {

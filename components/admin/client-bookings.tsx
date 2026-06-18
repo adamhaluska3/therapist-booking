@@ -20,12 +20,13 @@ import { formatTime } from "@/lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
 import { bookingStatusTranslate } from "@/lib/utils";
 import { BOOKING_STATE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import type { statusEnum } from "@/lib/booking-enums";
 
 type BookingItem = {
   id: string;
   start: string | number | Date;
   end: string | number | Date;
-  status?: string;
+  status?: (typeof statusEnum)[number];
   notes?: string | null;
 };
 

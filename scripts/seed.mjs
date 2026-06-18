@@ -60,11 +60,11 @@ const getRandomWeekday = () => {
 };
 
 const BOOKING_TYPES = [
-  { id: "bt-psychoterapia", name: "Psychoterapia", price: 6000 },  // €60
-  { id: "bt-supervizia",   name: "Supervízia",    price: 7000 },  // €70
-  { id: "bt-seminare",     name: "Semináre",      price: 4000 },  // €40
-  { id: "bt-koucing",      name: "Koučing",       price: 5500 },  // €55
-  { id: "bt-outdoor",      name: "Outdoor terapia", price: 6500 }, // €65
+  { id: "bt-psychoterapia", name: "Psychoterapia",   price: 6000, color: "#427a5c", isDefault: 1 }, // €60
+  { id: "bt-supervizia",   name: "Supervízia",      price: 7000, color: "#5a6abf", isDefault: 0 }, // €70
+  { id: "bt-seminare",     name: "Semináre",        price: 4000, color: "#d96c4f", isDefault: 0 }, // €40
+  { id: "bt-koucing",      name: "Koučing",         price: 5500, color: "#bf8a2e", isDefault: 0 }, // €55
+  { id: "bt-outdoor",      name: "Outdoor terapia", price: 6500, color: "#3d9e8a", isDefault: 0 }, // €65
 ];
 
 async function main() {
@@ -86,8 +86,8 @@ async function main() {
   // 0. Seed Booking Types
   for (const bt of BOOKING_TYPES) {
     statements.push({
-      sql: `INSERT INTO booking_type (id, name, price) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, price=excluded.price`,
-      args: [bt.id, bt.name, bt.price],
+      sql: `INSERT INTO booking_type (id, name, price, color, is_default) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, price=excluded.price, color=excluded.color, is_default=excluded.is_default`,
+      args: [bt.id, bt.name, bt.price, bt.color, bt.isDefault],
     });
   }
 

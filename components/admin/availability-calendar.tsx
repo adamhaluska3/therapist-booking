@@ -44,7 +44,7 @@ import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import { DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import {
   createAdminBookingAction,
   deleteBookingWithNotificationAction,
@@ -79,11 +79,7 @@ function getEventStyle(event: TherapistEvent): React.CSSProperties {
   };
   switch (event.type) {
     case "therapy": {
-      const color = event.bookingTypeId
-        ? (BOOKING_TYPE_COLORS[event.bookingTypeId]?.bg ??
-          DEFAULT_THERAPY_COLOR)
-        : DEFAULT_THERAPY_COLOR;
-      return { ...base, backgroundColor: color };
+      return { ...base, backgroundColor: event.bookingTypeColor ?? DEFAULT_THERAPY_COLOR };
     }
     case "empty":
       return {
@@ -179,8 +175,8 @@ export function AvailabilityCalendar({
     : undefined;
 
   const displayEvents = useMemo(
-    () => buildDisplayEvents(slots, bookings),
-    [slots, bookings],
+    () => buildDisplayEvents(slots, bookings, bookingTypes),
+    [slots, bookings, bookingTypes],
   );
 
   const [, startTransition] = useTransition();
