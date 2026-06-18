@@ -1,45 +1,40 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Clock,
-  Check,
-  NotebookText,
-} from "lucide-react";
+import { useTransition } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight, Loader2, Clock, Check, NotebookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PaymentSettings } from "@/db/schema";
 import { PaymentInfoDialog } from "./payment-info-dialog";
 import { NoteDialog } from "./note-dialog";
 import { AdminCard } from "@/components/admin/admin-card";
+import { ClientAbsolvedBookingRow } from "@/server/booking/schema";
 import { Badge } from "@/components/ui/badge";
 import { LocationBadge } from "@/components/booking/location-badge";
 import { groupByMonth, formatTime, formatMonthShort } from "@/lib/date-utils";
 import { getClientAbsolvedBookingsAction } from "@/server/booking/actions";
 
-type FilterKey = "all" | "month" | "last_month";
+export type ClientAbsolvedBookingMonthFilter = "all" | "month" | "last_month";
 
-const FILTERS: { key: FilterKey; label: string }[] = [
+const FILTERS: { key: ClientAbsolvedBookingMonthFilter; label: string }[] = [
   { key: "all", label: "Všetky" },
   { key: "month", label: "Tento mesiac" },
   { key: "last_month", label: "Minulý mesiac" },
 ];
 
 function toDateStr(d: Date) {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function getFilterRange(filter: FilterKey): { from: string; to: string } {
+function getFilterRange(key: ClientAbsolvedBookingMonthFilter): { from: string; to: string } {
   const now = new Date();
-  if (filter === "month") {
+  if (key === "month") {
     return {
       from: toDateStr(new Date(now.getFullYear(), now.getMonth(), 1)),
       to: toDateStr(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
     };
   }
-  if (filter === "last_month") {
+  if (key === "last_month") {
     return {
       from: toDateStr(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
       to: toDateStr(new Date(now.getFullYear(), now.getMonth(), 0)),
@@ -56,64 +51,42 @@ function formatPrice(cents: number | null) {
   });
 }
 
-type Row = Awaited<
-  ReturnType<typeof getClientAbsolvedBookingsAction>
->["rows"][number];
+type Row = ClientAbsolvedBookingRow;
 
 interface Props {
-  initialRows: Row[];
-  initialTotal: number;
-  userId: string;
+  rows: Row[];
+  total: number;
+  from: string;
+  to: string;
+  filter: ClientAbsolvedBookingMonthFilter;
+  page: number;
   pageSize: number;
   paymentSettings: PaymentSettings | null;
 }
 
-export function AbsolvedBookingsTable({
-  initialRows,
-  initialTotal,
-  userId,
-  pageSize,
-  paymentSettings,
-}: Props) {
-  const [rows, setRows] = useState<Row[]>(initialRows);
-  const [total, setTotal] = useState(initialTotal);
-  const [page, setPage] = useState(1);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterKey | null>("all");
+export function AbsolvedBookingsTable({ rows, total, from, to, filter, page, pageSize, paymentSettings }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = Math.min(page * pageSize, total);
 
-  const navigate = (nextPage: number, nextFrom = from, nextTo = to) => {
-    startTransition(async () => {
-      const result = await getClientAbsolvedBookingsAction({
-        userId,
-        page: nextPage,
-        pageSize,
-        from: nextFrom || undefined,
-        to: nextTo || undefined,
-      });
-      setRows(result.rows);
-      setTotal(result.total);
-      setPage(nextPage);
+  const navigate = (next: { from?: string; to?: string; filter?: ClientAbsolvedBookingMonthFilter | null; page?: number }) => {
+    const sp = new URLSearchParams();
+    const nextFrom = next.from ?? from;
+    const nextTo = next.to ?? to;
+    const nextFilter = "filter" in next ? next.filter : filter;
+    const nextPage = next.page ?? 1;
+    if (nextFrom) sp.set("from", nextFrom);
+    if (nextTo) sp.set("to", nextTo);
+    if (nextFilter && nextFilter !== "all") sp.set("filter", nextFilter);
+    if (nextPage > 1) sp.set("page", String(nextPage));
+    const qs = sp.toString();
+    startTransition(() => {
+      router.push(qs ? `${pathname}?${qs}` : pathname);
     });
-  };
-
-  const handleFilterChange = (nextFrom: string, nextTo: string) => {
-    setFrom(nextFrom);
-    setTo(nextTo);
-    navigate(1, nextFrom, nextTo);
-  };
-
-  const handleChipClick = (key: FilterKey) => {
-    setActiveFilter(key);
-    const { from: f, to: t } = getFilterRange(key);
-    setFrom(f);
-    setTo(t);
-    navigate(1, f, t);
   };
 
   const groups = groupByMonth(rows);
@@ -122,23 +95,16 @@ export function AbsolvedBookingsTable({
     <div className="flex flex-col gap-6">
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex gap-3 items-center">
-          <label
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border bg-white px-3 py-2 text-sm transition-colors",
-              from ? "border-brand-400" : "border-surface-200",
-            )}
-          >
-            <span className="text-neutral-400 text-xs font-medium shrink-0">
-              Od
-            </span>
+        <div className="flex gap-3 sm:items-center sm:flex-row flex-col items-start">
+          <label className={cn(
+            "inline-flex items-center gap-2 rounded-full border bg-white px-3 py-2 text-sm transition-colors",
+            from ? "border-brand-400" : "border-surface-200",
+          )}>
+            <span className="text-neutral-400 text-xs font-medium shrink-0">Od</span>
             <input
               type="date"
               value={from}
-              onChange={(e) => {
-                setActiveFilter(null);
-                handleFilterChange(e.target.value, to);
-              }}
+              onChange={(e) => navigate({ from: e.target.value, to, filter: "all" })}
               className="outline-none text-neutral-700 bg-transparent"
             />
           </label>
@@ -154,19 +120,13 @@ export function AbsolvedBookingsTable({
             <input
               type="date"
               value={to}
-              onChange={(e) => {
-                setActiveFilter(null);
-                handleFilterChange(from, e.target.value);
-              }}
+              onChange={(e) => navigate({ from, to: e.target.value, filter: "all" })}
               className="outline-none text-neutral-700 bg-transparent"
             />
           </label>
-          {(from || to) && activeFilter === null && (
+          {(from || to) && filter === "all" && (
             <button
-              onClick={() => {
-                setActiveFilter("all");
-                handleFilterChange("", "");
-              }}
+              onClick={() => navigate({ from: "", to: "", filter: "all" })}
               className="text-xs text-brand-600 underline"
             >
               Zrušiť
@@ -177,10 +137,10 @@ export function AbsolvedBookingsTable({
           {FILTERS.map((f) => (
             <button
               key={f.key}
-              onClick={() => handleChipClick(f.key)}
+              onClick={() => { const r = getFilterRange(f.key); navigate({ from: r.from, to: r.to, filter: f.key }); }}
               className={cn(
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                activeFilter === f.key
+                filter === f.key
                   ? "bg-brand-600 text-white"
                   : "bg-white border border-surface-200 text-neutral-600 hover:bg-surface-50",
               )}
@@ -346,14 +306,14 @@ export function AbsolvedBookingsTable({
         </p>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => navigate(page - 1)}
+            onClick={() => navigate({ page: page - 1 })}
             disabled={page <= 1 || isPending}
             className="rounded-md border border-surface-200 p-1.5 text-neutral-500 transition-colors hover:bg-surface-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft size={14} />
           </button>
           <button
-            onClick={() => navigate(page + 1)}
+            onClick={() => navigate({ page: page + 1 })}
             disabled={page >= totalPages || isPending}
             className="rounded-md border border-surface-200 p-1.5 text-neutral-500 transition-colors hover:bg-surface-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
