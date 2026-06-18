@@ -1,8 +1,8 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth-schema";
-import { BookingUser } from "@/server/user/schema";
 import { statusEnum, locationTypeEnum } from "@/lib/booking-enums";
+import { DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 
 export { statusEnum, locationTypeEnum };
 
@@ -12,7 +12,7 @@ export const bookingType = sqliteTable("booking_type", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull().unique(),
   price: integer("price"), // price in EUR cents, e.g. 5000 = €50.00
-  color: text("color").notNull().default("#427a5c"),
+  color: text("color").notNull().default(DEFAULT_THERAPY_COLOR),
   isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
 });
 
@@ -125,7 +125,6 @@ export type AvailabilitySlot = typeof availabilitySlot.$inferSelect;
 export type UserNote = typeof userNote.$inferSelect;
 export type PaymentSettings = typeof paymentSettings.$inferSelect;
 export type BookingType = typeof bookingType.$inferSelect;
-export type BookingWithUser = Booking & { user: BookingUser | null };
 export type PostCategory = typeof postCategories.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type PostPreview = {

@@ -354,12 +354,6 @@ export function SessionCard({
         onClose={() => setNoteOpen(false)}
       />
 
-      <BookingNoteDialog
-        open={noteOpen}
-        booking={booking}
-        onClose={() => setNoteOpen(false)}
-      />
-
       <Dialog
         open={confirmDialog !== null}
         onOpenChange={(open) => {

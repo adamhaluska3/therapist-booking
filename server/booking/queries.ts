@@ -214,6 +214,18 @@ export async function getPendingBookings(page = 1): Promise<{
   return { bookings: items.map(toBookingWithUser), total: Number(total) };
 }
 
+export async function getFinishedBookings(): Promise<BookingWithUser[]> {
+  await requireAdmin();
+  const rows = await db
+    .select()
+    .from(booking)
+    .leftJoin(user, eq(booking.userId, user.id))
+    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
+    .where(eq(booking.status, "finished"))
+    .orderBy(desc(booking.start));
+  return rows.map(toBookingWithUser);
+}
+
 export async function getClientAbsolvedBookings({
   userId,
   page,

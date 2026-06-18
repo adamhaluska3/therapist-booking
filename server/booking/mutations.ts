@@ -224,8 +224,17 @@ export async function createClientBooking({
     return { ok: false, error: "Tento termín je už obsadený." };
   }
 
-  const priceSnapshot = bookingTypeId
-    ? await fetchPriceForBookingType(bookingTypeId)
+  const resolvedBookingTypeId = bookingTypeId ?? (
+    await db
+      .select({ id: bookingType.id })
+      .from(bookingType)
+      .where(eq(bookingType.isDefault, true))
+      .limit(1)
+      .then((rows) => rows[0]?.id ?? null)
+  );
+
+  const priceSnapshot = resolvedBookingTypeId
+    ? await fetchPriceForBookingType(resolvedBookingTypeId)
     : null;
 
   const [inserted] = await db
@@ -235,7 +244,7 @@ export async function createClientBooking({
       end,
       status: "pending",
       userId: userId,
-      bookingTypeId: bookingTypeId ?? null,
+      bookingTypeId: resolvedBookingTypeId,
       note: note?.trim() || null,
       locationType,
       variableSymbol: generateVS(),

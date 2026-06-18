@@ -1,13 +1,9 @@
-import type { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
+import type { AvailabilitySlot, Booking } from "@/db/schema";
 import type { TherapistEvent } from "@/components/admin/calendar-event-card";
-import { BookingWithUser } from "@/server/booking/schema";
+import type { BookingWithUser } from "@/server/booking/schema";
 
-function bookingToEvent(
-  b: BookingWithUser,
-  typeMap: Map<string, BookingType>,
-): TherapistEvent {
+function bookingToEvent(b: BookingWithUser): TherapistEvent {
   const displayName = b.user?.nickname ?? b.user?.name ?? undefined;
-  const bookingType = b.bookingTypeId ? typeMap.get(b.bookingTypeId) : undefined;
   return {
     id: `booking_${b.id}`,
     title: displayName ?? "Terapia",
@@ -18,8 +14,8 @@ function bookingToEvent(
     bookingId: b.id,
     clientName: displayName,
     bookingTypeId: b.bookingTypeId ?? null,
-    bookingTypeColor: bookingType?.color ?? null,
-    bookingTypeName: bookingType?.name ?? null,
+    bookingTypeColor: b.bookingType?.color || null,
+    bookingTypeName: b.bookingType?.name ?? null,
     status: b.status,
   };
 }
@@ -27,9 +23,7 @@ function bookingToEvent(
 export function buildDisplayEvents(
   slots: AvailabilitySlot[],
   bookings: BookingWithUser[],
-  bookingTypes: BookingType[],
 ): TherapistEvent[] {
-  const typeMap = new Map(bookingTypes.map((bt) => [bt.id, bt]));
   const events: TherapistEvent[] = [];
   const handledBookingIds = new Set<string>();
 
@@ -76,7 +70,7 @@ export function buildDisplayEvents(
         });
       }
 
-      events.push(bookingToEvent({ ...b, start: bStart, end: bEnd }, typeMap));
+      events.push(bookingToEvent({ ...b, start: bStart, end: bEnd }));
       cursor = bEnd;
     }
 
@@ -96,7 +90,7 @@ export function buildDisplayEvents(
 
   for (const b of bookings) {
     if (!handledBookingIds.has(b.id)) {
-      events.push(bookingToEvent(b, typeMap));
+      events.push(bookingToEvent(b));
     }
   }
 

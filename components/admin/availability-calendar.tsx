@@ -79,7 +79,7 @@ function getEventStyle(event: TherapistEvent): React.CSSProperties {
   };
   switch (event.type) {
     case "therapy": {
-      return { ...base, backgroundColor: event.bookingTypeColor ?? DEFAULT_THERAPY_COLOR };
+      return { ...base, backgroundColor: event.bookingTypeColor || DEFAULT_THERAPY_COLOR };
     }
     case "empty":
       return {
@@ -175,8 +175,8 @@ export function AvailabilityCalendar({
     : undefined;
 
   const displayEvents = useMemo(
-    () => buildDisplayEvents(slots, bookings, bookingTypes),
-    [slots, bookings, bookingTypes],
+    () => buildDisplayEvents(slots, bookings),
+    [slots, bookings],
   );
 
   const [, startTransition] = useTransition();
@@ -301,7 +301,9 @@ export function AvailabilityCalendar({
           end as Date,
         );
         const target = moved.find((b) => b.id === event.bookingId)!;
-        applyAndPersistBookingChange(target, bookings);
+        const ok = applyAndPersistBookingChange(target, bookings);
+        if (ok) toast.success("Zmena uložená");
+        return;
       }
       toast.success("Zmena uložená");
     },
@@ -390,7 +392,7 @@ export function AvailabilityCalendar({
         );
       }
     },
-    [bookings, users],
+    [bookings, users, bookingTypes],
   );
 
   const handleBookingDelete = useCallback(
