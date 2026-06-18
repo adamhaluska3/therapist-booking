@@ -9,7 +9,6 @@ import { groupByMonth } from "@/lib/date-utils";
 import { getFinishedBookingsFiltered } from "@/server/booking/queries";
 import { ArchiveCard } from "@/components/admin/archive-card";
 import { Button } from "@/components/ui/button";
-import type { BookingType } from "@/db/schema";
 
 type FilterKey = "all" | "month" | "last_month";
 
@@ -44,11 +43,7 @@ function getFilterRange(
   return {};
 }
 
-export function SessionsArchiveView({
-  bookingTypes,
-}: {
-  bookingTypes: BookingType[];
-}) {
+export function SessionsArchiveView() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
@@ -167,11 +162,7 @@ export function SessionsArchiveView({
               </h2>
               <div className="flex flex-col gap-3">
                 {items.map((b) => (
-                  <ArchiveCard
-                    key={b.id}
-                    booking={b}
-                    bookingTypes={bookingTypes}
-                  />
+                  <ArchiveCard key={b.id} booking={b} />
                 ))}
               </div>
             </section>

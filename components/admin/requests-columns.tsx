@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
-import type { BookingType } from "@/db/schema";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
 import {
@@ -17,7 +16,6 @@ interface ActionHandlers {
   onCancel: (booking: BookingWithUser) => void;
   onNote: (booking: BookingWithUser) => void;
   isPending: boolean;
-  bookingTypes: BookingType[];
 }
 
 const columnHelper = createColumnHelper<BookingWithUser>();
@@ -27,7 +25,6 @@ export function getRequestsColumns({
   onCancel,
   onNote,
   isPending,
-  bookingTypes,
 }: ActionHandlers) {
   return [
     columnHelper.display({
@@ -37,8 +34,7 @@ export function getRequestsColumns({
         const booking = info.row.original;
         const clientName =
           booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
-        const bookingType =
-          bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+        const bookingType = booking.bookingType;
         const inner = (
           <div className="flex items-center gap-3 group">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">

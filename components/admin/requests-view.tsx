@@ -46,7 +46,6 @@ import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
-import { BookingType } from "@/db/schema";
 import { toast } from "sonner";
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
 
@@ -54,10 +53,9 @@ interface Props {
   bookings: BookingWithUser[];
   total: number;
   page: number;
-  bookingTypes: BookingType[];
 }
 
-export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
+export function RequestsView({ bookings, total, page }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -122,7 +120,6 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     onCancel: handleCancelOpen,
     onNote: handleNoteOpen,
     isPending,
-    bookingTypes,
   });
 
   const table = useReactTable({
@@ -166,8 +163,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         )}
         {bookings.map((b) => {
           const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT;
-          const bookingType =
-            bookingTypes.find((t) => t.id === b.bookingTypeId) ?? null;
+          const bookingType = b.bookingType;
           const clientBlock = (
             <div className="flex items-center gap-3 flex-1 min-w-0 group">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">

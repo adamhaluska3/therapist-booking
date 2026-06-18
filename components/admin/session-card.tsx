@@ -98,8 +98,7 @@ export function SessionCard({
 
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
-  const bookingType =
-    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+  const bookingType = booking.bookingType;
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null;
 
   function invalidateAndRefresh() {
