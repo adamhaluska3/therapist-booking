@@ -1,5 +1,6 @@
 "use client"
 
+import { useTransition } from "react"
 import { SearchText } from "@/components/shared/search-text"
 import { cn } from "@/lib/utils"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
@@ -19,22 +20,25 @@ export const PostsFilter = ({query, isPublic, category}: PostsFilterProp) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const [, startTransition] = useTransition()
 
-    const handleSearch = (key: string, value: string) => {
+    const navigate = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString())
         if (value) params.set(key, value)
         else params.delete(key)
-        router.push(`${pathname}?${params.toString()}`)
+        startTransition(() => {
+            router.replace(`${pathname}?${params.toString()}`)
+        })
     }
 
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <SearchText onChange={v => handleSearch("query", v)} oldSearch={query}/>
+            <SearchText onChange={v => navigate("query", v)} oldSearch={query}/>
             <div className="flex gap-2 flex-wrap">
                 {publicityTabs.map((tab) => (
                     <button
                         key={tab.title}
-                        onClick={() => handleSearch("isPublic", tab.val)}
+                        onClick={() => navigate("isPublic", tab.val)}
                         className={cn(
                             "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                             (isPublic === tab.val || (tab.val === "" && isPublic !== "true" && isPublic !== "false"))
