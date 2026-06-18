@@ -7,8 +7,9 @@ export const metadata = {
   title: "Klienti",
 };
 
-export default async function ClientsPage() {
-  const rows = await getClientsTableRows();
+export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ query?: string }> }) {
+  const { query = "" } = await searchParams;
+  const rows = await getClientsTableRows(query || undefined);
 
   const items = rows.map((row) => ({
     id: row.id,
@@ -28,7 +29,7 @@ export default async function ClientsPage() {
         </h1>
       </div>
 
-      <ClientsTable items={items} />
+      <ClientsTable items={items} query={query} />
     </section>
   );
 }
