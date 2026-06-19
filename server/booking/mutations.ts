@@ -21,7 +21,6 @@ import {
 import { getUserById } from "../user/queries";
 import { requireAuth } from "../auth";
 import { fetchPriceForBookingType } from "../booking-type/queries";
-import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { createMeetLink } from "../utils/meet";
 import { generateVS } from "../utils/payment";
 import { revalidatePath } from "next/cache";
@@ -225,8 +224,21 @@ export async function createClientBooking({
     return { ok: false, error: "Tento termín je už obsadený." };
   }
 
-  const priceSnapshot = bookingTypeId
-    ? await fetchPriceForBookingType(bookingTypeId)
+  const resolvedBookingTypeId = bookingTypeId ?? (
+    await db
+      .select({ id: bookingType.id })
+      .from(bookingType)
+      .where(eq(bookingType.isDefault, true))
+      .limit(1)
+      .then((rows) => rows[0]?.id ?? null)
+  );
+
+  if (!resolvedBookingTypeId) {
+    return { ok: false, error: "Termín nemá priradený typ." };
+  }
+
+  const priceSnapshot = resolvedBookingTypeId
+    ? await fetchPriceForBookingType(resolvedBookingTypeId)
     : null;
 
   const [inserted] = await db
@@ -236,12 +248,7 @@ export async function createClientBooking({
       end,
       status: "pending",
       userId: userId,
-      bookingTypeId: await db
-        .select({ id: bookingType.id })
-        .from(bookingType)
-        .where(eq(bookingType.name, DEFAULT_BOOKABLE_TYPE_NAME))
-        .limit(1)
-        .then((rows) => rows[0]?.id ?? null),
+      bookingTypeId: resolvedBookingTypeId,
       note: note?.trim() || null,
       locationType,
       variableSymbol: generateVS(),

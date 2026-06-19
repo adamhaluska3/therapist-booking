@@ -44,7 +44,7 @@ import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import { DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import {
   createAdminBookingAction,
   deleteBookingWithNotificationAction,
@@ -79,11 +79,7 @@ function getEventStyle(event: TherapistEvent): React.CSSProperties {
   };
   switch (event.type) {
     case "therapy": {
-      const color = event.bookingTypeId
-        ? (BOOKING_TYPE_COLORS[event.bookingTypeId]?.bg ??
-          DEFAULT_THERAPY_COLOR)
-        : DEFAULT_THERAPY_COLOR;
-      return { ...base, backgroundColor: color };
+      return { ...base, backgroundColor: event.bookingTypeColor || DEFAULT_THERAPY_COLOR };
     }
     case "empty":
       return {
@@ -297,6 +293,7 @@ export function AvailabilityCalendar({
           applySlotMove(slots, event.slotId, start as Date, end as Date),
           event.slotId,
         );
+        toast.success("Zmena uložená");
       } else if (event.source === "booking" && event.bookingId) {
         const moved = applyBookingMove(
           bookings,
@@ -305,9 +302,9 @@ export function AvailabilityCalendar({
           end as Date,
         );
         const target = moved.find((b) => b.id === event.bookingId)!;
-        applyAndPersistBookingChange(target, bookings);
+        const ok = applyAndPersistBookingChange(target, bookings);
+        if (ok) toast.success("Zmena uložená");
       }
-      toast.success("Zmena uložená");
     },
     [slots, bookings],
   );
@@ -394,7 +391,7 @@ export function AvailabilityCalendar({
         );
       }
     },
-    [bookings, users],
+    [bookings, users, bookingTypes],
   );
 
   const handleBookingDelete = useCallback(

@@ -18,31 +18,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import type { Booking, BookingType } from "@/db/schema";
-import { BookingWithUser } from "@/server/booking/schema";
+import type { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import { Textarea } from "../ui/textarea";
-import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import { createNonOAuthUserAction } from "@/server/user/actions";
+import { locationTypeEnum } from "@/lib/booking-enums";
 
-const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
-  Object.entries(BOOKING_TYPE_COLORS).map(([id, v]) => [id, v.bg]),
-);
+function timeToMinutes(hhmm: string): number {
+  const [hh, mm] = hhmm.split(":").map(Number);
+  return (hh ?? 0) * 60 + (mm ?? 0);
+}
+
+const TIME_REGEX = /^\d{2}:\d{2}$/;
 
 const bookingSchema = z
   .object({
     userId: z.string().nullable(),
     bookingTypeId: z.string().nullable(),
-    startStr: z.string(),
-    endStr: z.string(),
+    startStr: z.string().regex(TIME_REGEX, "Neplatný čas"),
+    endStr: z.string().regex(TIME_REGEX, "Neplatný čas"),
     note: z.string(),
-    locationType: z.enum(["onsite", "online"]),
+    locationType: z.enum(locationTypeEnum),
   })
   .refine(
-    (d) => {
-      const [sh, sm] = d.startStr.split(":").map(Number);
-      const [eh, em] = d.endStr.split(":").map(Number);
-      return (eh ?? 0) * 60 + (em ?? 0) > (sh ?? 0) * 60 + (sm ?? 0);
-    },
+    (d) => timeToMinutes(d.endStr) > timeToMinutes(d.startStr),
     { message: "Koniec musí byť po začiatku", path: ["endStr"] },
   );
 
@@ -83,6 +82,17 @@ export function BookingDialog({
 }: BookingDialogProps) {
   const base = booking?.start ?? defaultStart ?? new Date();
 
+  function buildFormValues() {
+    return {
+      userId: booking?.userId ?? null,
+      bookingTypeId: booking ? (booking.bookingTypeId ?? null) : (bookingTypes[0]?.id ?? null),
+      startStr: format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"),
+      endStr: format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"),
+      note: booking?.note ?? "",
+      locationType: booking?.locationType ?? ("onsite" as const),
+    };
+  }
+
   const {
     control,
     register,
@@ -93,20 +103,14 @@ export function BookingDialog({
     formState: { errors },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: {
-      userId: booking?.userId ?? null,
-      bookingTypeId: booking?.bookingTypeId ?? bookingTypes[0]?.id ?? null,
-      startStr: format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"),
-      endStr: format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"),
-      note: booking?.note ?? "",
-      locationType: booking?.locationType ?? "onsite",
-    },
+    defaultValues: buildFormValues(),
   });
 
   const {
     register: registerUser,
     handleSubmit: handleSubmitUser,
     reset: resetUser,
+    watch: watchUser,
     formState: { errors: userErrors, isSubmitting: createUserLoading },
   } = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
@@ -114,18 +118,9 @@ export function BookingDialog({
   });
 
   useEffect(() => {
-    if (open) {
-      reset({
-        userId: booking?.userId ?? null,
-        bookingTypeId: booking?.bookingTypeId ?? bookingTypes[0]?.id ?? null,
-        startStr: format(booking?.start ?? defaultStart ?? new Date(), "HH:mm"),
-        endStr: format(booking?.end ?? defaultEnd ?? new Date(), "HH:mm"),
-        note: booking?.note ?? "",
-        locationType: booking?.locationType ?? "onsite",
-      });
-    }
+    if (open) reset(buildFormValues());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, booking, defaultStart, defaultEnd]);
 
   const selectedUserId = watch("userId");
 
@@ -180,9 +175,9 @@ export function BookingDialog({
   }, [comboboxOpen]);
 
   function parseTime(hhmm: string): Date {
-    const [hh, mm] = hhmm.split(":").map(Number);
+    const mins = timeToMinutes(hhmm);
     const d = new Date(base);
-    d.setHours(hh ?? 0, mm ?? 0, 0, 0);
+    d.setHours(Math.floor(mins / 60), mins % 60, 0, 0);
     return d;
   }
 
@@ -271,7 +266,6 @@ export function BookingDialog({
 
           <form id="booking-form" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-2">
-              {/* User select combobox */}
               <div className="grid gap-1.5">
                 <Label>Klient</Label>
                 <Controller
@@ -367,7 +361,6 @@ export function BookingDialog({
                 )}
               </div>
 
-              {/* Booking type select */}
               <Controller
                 control={control}
                 name="bookingTypeId"
@@ -390,9 +383,7 @@ export function BookingDialog({
                           style={
                             field.value === bt.id
                               ? {
-                                  backgroundColor:
-                                    BOOKING_TYPE_PILL_COLORS[bt.id] ??
-                                    DEFAULT_THERAPY_COLOR,
+                                  backgroundColor: bt.color,
                                 }
                               : undefined
                           }
@@ -405,7 +396,6 @@ export function BookingDialog({
                 )}
               />
 
-              {/* Location type */}
               <Controller
                 control={control}
                 name="locationType"
@@ -413,7 +403,7 @@ export function BookingDialog({
                   <div className="grid gap-1.5">
                     <Label>Forma stretnutia</Label>
                     <div className="flex gap-2">
-                      {(["onsite", "online"] as const).map((type) => (
+                      {locationTypeEnum.map((type) => (
                         <button
                           key={type}
                           type="button"
@@ -436,6 +426,11 @@ export function BookingDialog({
                 <div className="grid gap-1.5">
                   <Label>Začiatok</Label>
                   <Input type="time" {...register("startStr")} />
+                  {errors.startStr && (
+                    <p className="text-xs text-red-500">
+                      {errors.startStr.message}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Koniec</Label>
@@ -488,7 +483,6 @@ export function BookingDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Create new client dialog */}
       <Dialog
         open={createUserOpen}
         onOpenChange={(v) => {
@@ -567,7 +561,7 @@ export function BookingDialog({
             <Button
               type="submit"
               form="create-user-form"
-              disabled={createUserLoading}
+              disabled={createUserLoading || !watchUser("name").trim() || !watchUser("email").trim()}
             >
               {createUserLoading ? "Vytváram..." : "Vytvoriť"}
             </Button>

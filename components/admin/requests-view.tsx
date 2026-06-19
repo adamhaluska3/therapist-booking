@@ -24,10 +24,8 @@ import {
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
 import {
-  BOOKING_TYPE_COLORS,
   BOOKINGS_PAGE_SIZE,
   UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
 } from "@/lib/constants";
 import {
   Dialog,
@@ -212,9 +210,7 @@ export function RequestsView({ bookings, total, page }: Props) {
                       <span
                         className="inline-block w-2 h-2 rounded-full shrink-0"
                         style={{
-                          backgroundColor:
-                            BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                            DEFAULT_THERAPY_COLOR,
+                          backgroundColor: bookingType.color,
                         }}
                       />
                       <span>{bookingType.name}</span>

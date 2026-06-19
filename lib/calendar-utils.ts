@@ -1,6 +1,6 @@
 import type { AvailabilitySlot, Booking } from "@/db/schema";
 import type { TherapistEvent } from "@/components/admin/calendar-event-card";
-import { BookingWithUser } from "@/server/booking/schema";
+import type { BookingWithUser } from "@/server/booking/schema";
 
 function bookingToEvent(b: BookingWithUser): TherapistEvent {
   const displayName = b.user?.nickname ?? b.user?.name ?? undefined;
@@ -14,6 +14,8 @@ function bookingToEvent(b: BookingWithUser): TherapistEvent {
     bookingId: b.id,
     clientName: displayName,
     bookingTypeId: b.bookingTypeId ?? null,
+    bookingTypeColor: b.bookingType?.color || null,
+    bookingTypeName: b.bookingType?.name ?? null,
     status: b.status,
   };
 }

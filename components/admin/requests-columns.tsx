@@ -2,11 +2,7 @@ import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
-import {
-  BOOKING_TYPE_COLORS,
-  UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
-} from "@/lib/constants";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import { MessageSquare, Check, X } from "lucide-react";
 import { LocationBadge } from "@/components/booking/location-badge";
 import { BookingWithUser } from "@/server/booking/schema";
@@ -49,9 +45,7 @@ export function getRequestsColumns({
                   <span
                     className="inline-block w-2 h-2 rounded-full shrink-0"
                     style={{
-                      backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                        DEFAULT_THERAPY_COLOR,
+                      backgroundColor: bookingType.color,
                     }}
                   />
                   <span className="truncate">{bookingType.name}</span>

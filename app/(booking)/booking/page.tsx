@@ -2,7 +2,6 @@ import { addDays } from "date-fns";
 import { bookingContent } from "./_content/booking";
 import { BookingWidget } from "@/components/booking/booking-widget";
 import { getBookingSlots } from "@/server/booking/queries";
-import { DEFAULT_BOOKABLE_TYPE_NAME } from "@/lib/constants";
 import { getBookingTypes } from "@/server/booking-type/queries";
 import { Metadata } from "next";
 
@@ -19,7 +18,7 @@ export default async function BookingPage() {
     getBookingTypes(),
   ]);
   const defaultBookingTypeId =
-    bookingTypes.find((t) => t.name === DEFAULT_BOOKABLE_TYPE_NAME)?.id ??
+    bookingTypes.find((t) => t.isDefault)?.id ??
     bookingTypes[0]?.id ??
     null;
   return (

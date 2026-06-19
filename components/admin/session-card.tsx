@@ -17,11 +17,7 @@ import {
 import type { Booking, BookingType } from "@/db/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
-import {
-  BOOKING_TYPE_COLORS,
-  UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
-} from "@/lib/constants";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import { AdminCard } from "@/components/admin/admin-card";
 import { BookingDialog } from "@/components/admin/booking-dialog";
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
@@ -222,8 +218,7 @@ export function SessionCard({
                     className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                     style={{
                       backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                        DEFAULT_THERAPY_COLOR,
+                        bookingType.color,
                     }}
                   />
                   <span>{bookingType.name}</span>
@@ -288,9 +283,7 @@ export function SessionCard({
               <span
                 className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                 style={{
-                  backgroundColor:
-                    BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                    DEFAULT_THERAPY_COLOR,
+                  backgroundColor: bookingType.color,
                 }}
               />
               <span>{bookingType.name}</span>
@@ -320,7 +313,7 @@ export function SessionCard({
                 Absolvované
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setNoteOpen(true)}>
                 <MessageSquare size={13} />
                 Poznámka
               </DropdownMenuItem>
@@ -353,12 +346,6 @@ export function SessionCard({
         }}
         onClose={() => setEditOpen(false)}
         onUserCreated={() => {}}
-      />
-
-      <BookingNoteDialog
-        open={noteOpen}
-        booking={booking}
-        onClose={() => setNoteOpen(false)}
       />
 
       <BookingNoteDialog
