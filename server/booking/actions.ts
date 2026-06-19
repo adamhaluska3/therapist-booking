@@ -56,7 +56,7 @@ export const getBookingsWithUsersAction = async (payload: any) => {
 };
 
 export const getClientAbsolvedBookingsAction = async (payload: any) => {
-  await requireAdmin();
+  await requireUser();
   const parsedPayload = ClientAbsolvedBookingsFilterSchema.parse(payload);
   return await getClientAbsolvedBookings(parsedPayload);
 };
