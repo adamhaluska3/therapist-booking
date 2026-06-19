@@ -10,13 +10,13 @@ import {
 } from "./schema";
 
 export const saveUserNoteAction = async (payload: UserNoteType) => {
-  requireAdmin();
+  await requireAdmin();
   const parsedPayload = UserNoteSchema.parse(payload);
   return saveUserNote(parsedPayload);
 };
 
 export const deleteUserNoteAction = async (payload: UserNoteIdType) => {
-  requireAdmin();
+  await requireAdmin();
   const parsedPayload = UserNoteIdSchema.parse(payload);
   return deleteUserNote(parsedPayload.id);
 };
