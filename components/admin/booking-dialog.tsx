@@ -20,9 +20,9 @@ import { Separator } from "@/components/ui/separator";
 import type { Booking, BookingType } from "@/db/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { createNonOAuthUser } from "@/server/user/mutations";
 import { Textarea } from "../ui/textarea";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import { createNonOAuthUserAction } from "@/server/user/actions";
 
 const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(BOOKING_TYPE_COLORS).map(([id, v]) => [id, v.bg]),
@@ -210,11 +210,11 @@ export function BookingDialog({
 
   async function onCreateUser(values: CreateUserFormValues) {
     setCreateUserError("");
-    const result = await createNonOAuthUser(
-      values.name,
-      values.email,
-      values.phone || undefined,
-    );
+    const result = await createNonOAuthUserAction({
+      name: values.name,
+      email: values.email,
+      phone: values.phone || undefined,
+    });
 
     if (!result.ok || !result.user) {
       setCreateUserError(result.error ?? "Chyba pri vytváraní klienta.");

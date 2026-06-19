@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { Lora } from "next/font/google";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminSidebarLoader } from "@/components/admin/admin-sidebar-loader";
-import { QueryProvider } from "@/components/providers/query-provider";
 import { Metadata } from "next";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
@@ -29,9 +28,7 @@ export default async function AdminLayout({
       <Suspense fallback={<AdminSidebar />}>
         <AdminSidebarLoader />
       </Suspense>
-      <main className="flex-1 p-4 md:p-6">
-        <QueryProvider>{children}</QueryProvider>
-      </main>
+      <main className="flex-1 p-4 md:p-6">{children}</main>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
   Hash,
   MessageSquare,
 } from "lucide-react";
-import { LocationBadge } from "@/components/booking/location-badge"
+import { LocationBadge } from "@/components/booking/location-badge";
 import {
   useReactTable,
   getCoreRowModel,
@@ -30,10 +30,6 @@ import {
   DEFAULT_THERAPY_COLOR,
 } from "@/lib/constants";
 import {
-  confirmBooking,
-  updateBookingStatus,
-} from "@/server/booking/mutations";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -48,6 +44,10 @@ import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
 import { toast } from "sonner";
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
+import {
+  confirmBookingAction,
+  updateBookingStatusAction,
+} from "@/server/booking/actions";
 
 interface Props {
   bookings: BookingWithUser[];
@@ -80,7 +80,7 @@ export function RequestsView({ bookings, total, page }: Props) {
     (id: string) => {
       startTransition(async () => {
         try {
-          await confirmBooking(id);
+          await confirmBookingAction({ id });
           router.refresh();
           toast.success("Žiadosť potvrdená");
         } catch (e) {
@@ -104,7 +104,10 @@ export function RequestsView({ bookings, total, page }: Props) {
     if (!cancelTarget) return;
     startTransition(async () => {
       try {
-        await updateBookingStatus(cancelTarget.id, "cancelled");
+        await updateBookingStatusAction({
+          id: cancelTarget.id,
+          status: "cancelled",
+        });
         setCancelTarget(null);
         router.refresh();
         toast.success("Žiadosť zrušená");

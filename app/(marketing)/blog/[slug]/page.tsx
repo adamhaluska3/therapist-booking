@@ -2,21 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { db } from "@/lib/db";
-import { and } from "drizzle-orm";
+import { getPostBySlug } from "@/server/blog/queries";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateStaticParams() {
-  return (await db.query.posts.findMany()).map(post => ({ slug: post.slug }));
-}
-
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
-  const post = await db.query.posts.findFirst({
-    where: (fields, { eq }) => and(eq(fields.slug, slug), eq(fields.isPublic, true)),
-    with: { category: true }
-  })
+  const post = await getPostBySlug(slug);
 
   if (!post) notFound();
 
@@ -33,13 +25,16 @@ export default async function BlogDetailPage({ params }: Props) {
             Späť na blog
           </Link>
 
-          <p className="mb-4 text-xs text-neutral-400">{post.createdAt.toLocaleDateString("sk-SK", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
+          <p className="mb-4 text-xs text-neutral-400">
+            {post.createdAt.toLocaleDateString("sk-SK", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
           </p>
-          <p className="font-semibold text-sm mb-3 text-taupe-400">{post.category?.name}</p>
+          <p className="font-semibold text-sm mb-3 text-taupe-400">
+            {post.category?.name}
+          </p>
           <h1 className="font-serif text-3xl font-semibold leading-tight text-brand-900 md:text-5xl">
             {post.title}
           </h1>
@@ -72,11 +67,12 @@ export default async function BlogDetailPage({ params }: Props) {
           </p>
           <div
             className="w-full space-y-5 prose prose-neutral max-w-none prose-p:mb-0 prose-li:my-0.5"
-            dangerouslySetInnerHTML={{ __html: post.content
-              .replace(/&nbsp;([—–])/g, "\u00A0$1")
-              .replace(/([—–])&nbsp;/g, "$1\u00A0")
-              .replace(/&nbsp;/g, " ")
-              .replace(/ - /g, "\u00A0\u2011\u00A0")
+            dangerouslySetInnerHTML={{
+              __html: post.content
+                .replace(/&nbsp;([—–])/g, "\u00A0$1")
+                .replace(/([—–])&nbsp;/g, "$1\u00A0")
+                .replace(/&nbsp;/g, " ")
+                .replace(/ - /g, "\u00A0\u2011\u00A0"),
             }}
           />
         </div>

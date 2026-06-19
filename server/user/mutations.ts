@@ -1,27 +1,29 @@
 "use server";
+
 import { user } from "@/db/auth-schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { UserOption } from "./schema";
-import { requireAdmin } from "../auth";
+import { NonOAuthUserType, UserNicknameType, UserOption } from "./schema";
 
-export async function updateUserNickname(
-  userId: string,
-  nickname: string,
-): Promise<void> {
-  await requireAdmin();
+export async function updateUserNickname({
+  userId,
+  nickname,
+}: UserNicknameType): Promise<void> {
   await db
     .update(user)
     .set({ nickname: nickname || null })
     .where(eq(user.id, userId));
 }
 
-export async function createNonOAuthUser(
-  name: string,
-  email: string,
-  phone?: string,
-): Promise<{ ok: boolean; user?: UserOption; error?: string }> {
-  await requireAdmin();
+export async function createNonOAuthUser({
+  name,
+  email,
+  phone,
+}: NonOAuthUserType): Promise<{
+  ok: boolean;
+  user?: UserOption;
+  error?: string;
+}> {
   const trimmedEmail = email.trim();
   const trimmedName = name.trim();
 

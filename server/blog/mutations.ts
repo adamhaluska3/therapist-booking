@@ -1,40 +1,24 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { postCategories, posts } from "@/db/schema";
+import { posts } from "@/db/schema";
 import { writeFile, unlink } from "fs/promises";
 import path from "path";
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "../auth";
+import { generateSlug } from "./utils";
+import {
+  CreatePostType,
+  DeletePostType,
+  SetPublicityType,
+  UpdatePostType,
+} from "./schema";
 
-const toSlug = (title: string) => {
-  return title
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]/g, "");
-};
-
-const generateSlug = (title: string, isPublic: boolean) => {
-  if (!isPublic || !title.trim()) {
-    return randomBytes(16).toString("hex");
-  }
-  return toSlug(title);
-};
-
-export async function createPost(data: {
-  title: string;
-  description: string;
-  content: string;
-  categoryId: string | null;
-  isPublic: boolean;
-  titleImage?: File | null;
-}): Promise<{ success: false; error: string } | { success: true }> {
-  await requireAdmin();
-
+export async function createPost(
+  data: CreatePostType,
+): Promise<{ success: false; error: string } | { success: true }> {
   const slug = generateSlug(data.title, data.isPublic);
   const existing = await db.query.posts.findFirst({
     where: eq(posts.slug, slug),
@@ -73,60 +57,50 @@ export async function createPost(data: {
 }
 
 export async function updatePost(
-  id: string,
-  data: {
-    title: string;
-    description?: string;
-    content: string;
-    categoryId: string | null;
-    isPublic: boolean;
-    titleImage?: File | null;
-    existingTitleImage?: string | null;
-    removeTitleImage?: boolean;
-  },
+  post: UpdatePostType,
 ): Promise<{ success: false; error: string } | { success: true }> {
   await requireAdmin();
 
-  const slug = generateSlug(data.title, data.isPublic);
+  const slug = generateSlug(post.title, post.isPublic);
   const conflict = await db.query.posts.findFirst({
     where: eq(posts.slug, slug),
   });
-  if (conflict && conflict.id !== id) {
+  if (conflict && conflict.id !== post.id) {
     return {
       success: false,
       error: "Príspevok s podobným názvom už je zverejnený.",
     };
   }
 
-  let titleImage = data.existingTitleImage ?? null;
+  let titleImage = post.existingTitleImage ?? null;
 
-  if (data.removeTitleImage && data.existingTitleImage) {
+  if (post.removeTitleImage && post.existingTitleImage) {
     await unlink(
-      path.join(process.cwd(), "public", data.existingTitleImage),
+      path.join(process.cwd(), "public", post.existingTitleImage),
     ).catch(() => {
       console.log(
         "Error deleting existing title image:",
-        data.existingTitleImage,
+        post.existingTitleImage,
       );
     });
     titleImage = null;
   }
 
-  if (data.titleImage && data.titleImage.size > 0) {
-    if (data.existingTitleImage) {
+  if (post.titleImage && post.titleImage.size > 0) {
+    if (post.existingTitleImage) {
       await unlink(
-        path.join(process.cwd(), "public", data.existingTitleImage),
+        path.join(process.cwd(), "public", post.existingTitleImage),
       ).catch(() => {
         console.log(
           "Error deleting existing title image:",
-          data.existingTitleImage,
+          post.existingTitleImage,
         );
       });
     }
 
-    const bytes = await data.titleImage.arrayBuffer();
+    const bytes = await post.titleImage.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filename = `${Date.now()}-${data.titleImage.name.replace(/\s/g, "_")}`;
+    const filename = `${Date.now()}-${post.titleImage.name.replace(/\s/g, "_")}`;
     await writeFile(
       path.join(process.cwd(), "public/uploads", filename),
       buffer,
@@ -137,30 +111,30 @@ export async function updatePost(
   await db
     .update(posts)
     .set({
-      title: data.title,
-      description: data.description,
-      content: data.content,
-      categoryId: data.categoryId,
-      isPublic: data.isPublic,
+      title: post.title,
+      description: post.description,
+      content: post.content,
+      categoryId: post.categoryId,
+      isPublic: post.isPublic,
       slug: slug,
       titleImage,
     })
-    .where(eq(posts.id, id));
+    .where(eq(posts.id, post.id));
 
   return { success: true };
 }
 
-export const deletePost = async (id: string) => {
-  await requireAdmin();
+export const deletePost = async ({ id }: DeletePostType) => {
   await db.delete(posts).where(eq(posts.id, id));
   revalidatePath("/admin/blog");
 };
 
-export const setPublicity = async (
-  id: string,
-  isPublic: boolean,
-): Promise<{ success: false; error: string } | { success: true }> => {
-  await requireAdmin();
+export const setPostPublicity = async ({
+  id,
+  isPublic,
+}: SetPublicityType): Promise<
+  { success: false; error: string } | { success: true }
+> => {
   const post = await db.query.posts.findFirst({ where: eq(posts.id, id) });
   if (!post) return { success: false, error: "Príspevok nebol nájdený" };
   const slug = generateSlug(post.title, isPublic);

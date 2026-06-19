@@ -27,10 +27,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "./calendar.css";
 
-import {
-  CalendarEventCard,
-  type TherapistEvent,
-} from "./calendar-event-card";
+import { CalendarEventCard, type TherapistEvent } from "./calendar-event-card";
 import { CalendarToolbar, type CalendarView } from "./calendar-toolbar";
 import { SlotSettingsDialog } from "./slot-settings-dialog";
 import { BookingDialog } from "./booking-dialog";
@@ -47,15 +44,17 @@ import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
-import { saveAvailabilitySlots } from "@/server/availability-slots/mutations";
-import {
-  createAdminBooking,
-  deleteBookingWithNotification,
-  updateBookingFromDialog,
-} from "@/server/booking/mutations";
-import { getAvailabilitySlots } from "@/server/availability-slots/queries";
-import { getBookingsWithUsers } from "@/server/booking/queries";
 import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import {
+  createAdminBookingAction,
+  deleteBookingWithNotificationAction,
+  getBookingsWithUsersAction,
+  updateBookingFromDialogAction,
+} from "@/server/booking/actions";
+import {
+  getAvailabilitySlotsAction,
+  saveAvailabilitySlotsAction,
+} from "@/server/availability-slots/actions";
 
 const locales = { sk };
 
@@ -192,7 +191,10 @@ export function AvailabilityCalendar({
     toDelete.forEach((id) => persistedSlotIds.current.delete(id));
     startTransition(async () => {
       try {
-        await saveAvailabilitySlots(toUpsert, toDelete);
+        await saveAvailabilitySlotsAction({
+          upserted: toUpsert,
+          deletedIds: toDelete,
+        });
       } catch {
         toast.error("Nepodarilo sa uložiť dostupnosť");
       }
@@ -208,7 +210,7 @@ export function AvailabilityCalendar({
     startTransition(async () => {
       try {
         if (isNew) {
-          await createAdminBooking({
+          await createAdminBookingAction({
             id: b.id,
             start: b.start,
             end: b.end,
@@ -220,9 +222,9 @@ export function AvailabilityCalendar({
             locationType: b.locationType,
           });
         } else {
-          await updateBookingFromDialog(
-            b.id,
-            {
+          await updateBookingFromDialogAction({
+            id: b.id,
+            updates: {
               start: b.start,
               end: b.end,
               userId: b.userId ?? null,
@@ -230,8 +232,8 @@ export function AvailabilityCalendar({
               note: b.note ?? null,
               locationType: b.locationType,
             },
-            previousStart ?? b.start,
-          );
+            previousStart: previousStart ?? b.start,
+          });
         }
       } catch {
         toast.error("Nepodarilo sa uložiť rezerváciu");
@@ -243,7 +245,7 @@ export function AvailabilityCalendar({
     persistedBookingIds.current.delete(id);
     startTransition(async () => {
       try {
-        await deleteBookingWithNotification(id);
+        await deleteBookingWithNotificationAction({ id });
       } catch {
         toast.error("Nepodarilo sa vymazať rezerváciu");
       }
@@ -470,8 +472,14 @@ export function AvailabilityCalendar({
       setDate(anchor);
 
       try {
-        const newSlots = await getAvailabilitySlots(rangeFrom, rangeTo);
-        const newBookings = await getBookingsWithUsers(rangeFrom, rangeTo);
+        const newSlots = await getAvailabilitySlotsAction({
+          from: rangeFrom,
+          to: rangeTo,
+        });
+        const newBookings = await getBookingsWithUsersAction({
+          from: rangeFrom,
+          to: rangeTo,
+        });
         setSlots(newSlots);
         setBookings(newBookings);
         persistedSlotIds.current = new Set(

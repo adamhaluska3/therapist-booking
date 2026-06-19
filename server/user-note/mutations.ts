@@ -1,12 +1,12 @@
 "use server";
+
 import { db } from "@/lib/db";
-import { UserNotePayload } from "./schema";
+import { UserNoteType } from "./schema";
 import { userNote } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdmin } from "../auth";
 
-export async function saveUserNote(payload: UserNotePayload) {
-  await requireAdmin();
+export async function saveUserNote(payload: UserNoteType) {
   if (payload.id) {
     await db
       .update(userNote)
@@ -27,7 +27,15 @@ export async function saveUserNote(payload: UserNotePayload) {
 }
 
 export async function deleteUserNote(id: string) {
-  await requireAdmin();
+  const existing = await db
+    .select()
+    .from(userNote)
+    .where(eq(userNote.id, id))
+    .limit(1);
+  if (!existing || existing.length === 0) {
+    return false;
+  }
+
   await db.delete(userNote).where(eq(userNote.id, id));
   return true;
 }

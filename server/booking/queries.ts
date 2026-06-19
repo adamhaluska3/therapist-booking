@@ -1,11 +1,15 @@
 "use server";
+
 import { db } from "@/lib/db";
 import {
   BookingWithUser,
   ClientAbsolvedBookingRow,
+  BookingsFilterType,
   toBookingWithUser,
+  BookingsDateFilterType,
+  ClientAbsolvedBookingsFilterType,
 } from "./schema";
-import { availabilitySlot, Booking, booking, bookingType } from "@/db/schema";
+import { availabilitySlot, booking, bookingType } from "@/db/schema";
 import { user } from "@/db/auth-schema";
 
 import {
@@ -28,34 +32,16 @@ import {
 } from "@/lib/constants";
 import { SlotsByDate, toDateKey } from "@/lib/booking-types";
 import { cache } from "react";
-import { getAvailabilitySlots } from "../availability-slots/queries";
-import { requireAdmin, requireUser } from "../auth";
 
-export async function getDashboardBookings(): Promise<BookingWithUser[]> {
-  await requireAdmin();
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
-  const rows = await db
-    .select()
-    .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
-    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
-    .where(
-      and(gte(booking.start, startOfToday), eq(booking.status, "confirmed")),
-    )
-    .orderBy(booking.start);
-
-  return rows.map(toBookingWithUser);
-}
-
-export async function getDashboardBookingsFiltered(
-  offset: number,
+export async function getDashboardBookingsFiltered({
+  offset,
   search = "",
-  from?: Date,
-  to?: Date,
-): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
-  await requireAdmin();
+  from,
+  to,
+}: BookingsFilterType): Promise<{
+  bookings: BookingWithUser[];
+  nextOffset: number | undefined;
+}> {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -88,34 +74,15 @@ export async function getDashboardBookingsFiltered(
   };
 }
 
-export async function getFinishedBookingsPaginated(
-  offset: number,
-): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
-  await requireAdmin();
-  const items = await db
-    .select()
-    .from(booking)
-    .leftJoin(user, eq(booking.userId, user.id))
-    .leftJoin(bookingType, eq(booking.bookingTypeId, bookingType.id))
-    .where(eq(booking.status, "finished"))
-    .orderBy(desc(booking.start))
-    .limit(SESSIONS_PAGE_SIZE + 1)
-    .offset(offset);
-
-  const hasMore = items.length > SESSIONS_PAGE_SIZE;
-  return {
-    bookings: items.slice(0, SESSIONS_PAGE_SIZE).map(toBookingWithUser),
-    nextOffset: hasMore ? offset + SESSIONS_PAGE_SIZE : undefined,
-  };
-}
-
-export async function getFinishedBookingsFiltered(
-  offset: number,
+export async function getFinishedBookingsFiltered({
+  offset,
   search = "",
-  from?: Date,
-  to?: Date,
-): Promise<{ bookings: BookingWithUser[]; nextOffset: number | undefined }> {
-  await requireAdmin();
+  from,
+  to,
+}: BookingsFilterType): Promise<{
+  bookings: BookingWithUser[];
+  nextOffset: number | undefined;
+}> {
   const items = await db
     .select()
     .from(booking)
@@ -145,11 +112,10 @@ export async function getFinishedBookingsFiltered(
   };
 }
 
-export async function getBookingsWithUsers(
-  from: Date,
-  to: Date,
-): Promise<BookingWithUser[]> {
-  await requireAdmin();
+export async function getBookingsWithUsers({
+  from,
+  to,
+}: BookingsDateFilterType): Promise<BookingWithUser[]> {
   const rows = await db
     .select()
     .from(booking)
@@ -216,7 +182,6 @@ export async function getBookingSlots(
 }
 
 export const getPendingCount = cache(async (): Promise<number> => {
-  await requireAdmin();
   const [{ total }] = await db
     .select({ total: sql<number>`count(*)` })
     .from(booking)
@@ -228,7 +193,6 @@ export async function getPendingBookings(page = 1): Promise<{
   bookings: BookingWithUser[];
   total: number;
 }> {
-  await requireAdmin();
   const offset = (page - 1) * BOOKINGS_PAGE_SIZE;
 
   const [items, [{ total }]] = await Promise.all([
@@ -250,29 +214,16 @@ export async function getPendingBookings(page = 1): Promise<{
   return { bookings: items.map(toBookingWithUser), total: Number(total) };
 }
 
-export async function getFinishedBookings(): Promise<Booking[]> {
-  await requireAdmin();
-  return db
-    .select()
-    .from(booking)
-    .where(eq(booking.status, "finished"))
-    .orderBy(desc(booking.start));
-}
-
 export async function getClientAbsolvedBookings({
   userId,
-  page = 1,
-  pageSize = 10,
+  page,
+  pageSize,
   from,
   to,
-}: {
-  userId: string;
-  page?: number;
-  pageSize?: number;
-  from?: string;
-  to?: string;
-}): Promise<{ rows: ClientAbsolvedBookingRow[]; total: number }> {
-  await requireUser();
+}: ClientAbsolvedBookingsFilterType): Promise<{
+  rows: ClientAbsolvedBookingRow[];
+  total: number;
+}> {
   const fromDate = from ? new Date(from) : undefined;
   const toDate = to
     ? (() => {

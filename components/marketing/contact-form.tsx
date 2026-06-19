@@ -21,13 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
-import { submitContactForm } from "@/server/contact-form/contact";
+import { ContactFormType, contactSchema } from "@/server/contact-form/schema";
 import type { BookingType } from "@/db/schema";
 import { toast } from "sonner";
+import { submitContactFormAction } from "@/server/contact-form/actions";
 
 export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
-  const form = useForm<ContactFormValues>({
+  const form = useForm<ContactFormType>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
@@ -37,8 +37,8 @@ export function ContactForm({ bookingTypes }: { bookingTypes: BookingType[] }) {
     },
   });
 
-  async function onSubmit(values: ContactFormValues) {
-    const result = await submitContactForm(values);
+  async function onSubmit(values: ContactFormType) {
+    const result = await submitContactFormAction(values);
     if (result.success) {
       form.reset();
       toast.success("Správa bola úspešne odoslaná!");

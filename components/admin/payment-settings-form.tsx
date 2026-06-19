@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { savePaymentSettings } from "@/server/payment-settings/mutations";
+import { SavePaymentSettingsAction } from "@/server/payment-settings/actions";
 
 const IBAN_RE = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/;
 
@@ -54,7 +54,7 @@ export function PaymentSettingsForm({ settings }: Props) {
 
   async function onSubmit(values: FormValues) {
     try {
-      await savePaymentSettings({
+      await SavePaymentSettingsAction({
         iban: values.iban.replace(/\s+/g, "").toUpperCase(),
         bic: values.bic?.replace(/\s+/g, "").toUpperCase() || undefined,
         beneficiaryName: values.beneficiaryName,

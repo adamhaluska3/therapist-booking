@@ -8,14 +8,14 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
-import { createClientBooking } from "@/server/booking/mutations";
 import {
   toDateKey,
   type SlotsByDate,
   type TimeSlot,
 } from "@/lib/booking-types";
-import { useUser } from "@/lib/user-context";
 import { ADDRESS_SHORT } from "@/lib/constants";
+import { createClientBookingAction } from "@/server/booking/actions";
+import { authClient } from "@/lib/auth-client";
 
 const bookingSchema = z.object({
   selectedDate: z.date(),
@@ -48,7 +48,6 @@ export function BookingWidget({
   leftHeader?: React.ReactNode;
 }) {
   const today = new Date();
-  const { user } = useUser();
   const [confirmed, setConfirmed] = useState(false);
 
   const {
@@ -73,6 +72,9 @@ export function BookingWidget({
   const locationType = watch("locationType");
   const note = watch("note");
 
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
   const availableDates = useMemo(
     () =>
       new Set(
@@ -94,14 +96,14 @@ export function BookingWidget({
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    const result = await createClientBooking(
-      toDateKey(data.selectedDate),
-      data.selectedTime,
-      user?.id,
-      data.note,
+    const result = await createClientBookingAction({
+      dateKey: toDateKey(data.selectedDate),
+      time: data.selectedTime,
+      userId: user?.id ?? null,
+      note: data.note,
       bookingTypeId,
-      data.locationType,
-    );
+      locationType: data.locationType,
+    });
     if (result.ok) {
       setConfirmed(true);
     } else {
