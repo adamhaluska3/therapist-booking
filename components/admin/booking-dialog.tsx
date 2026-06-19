@@ -21,12 +21,7 @@ import type { Booking, BookingType } from "@/db/schema";
 import type { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import { Textarea } from "../ui/textarea";
-import { BOOKING_TYPE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 import { createNonOAuthUserAction } from "@/server/user/actions";
-
-const BOOKING_TYPE_PILL_COLORS: Record<string, string> = Object.fromEntries(
-  Object.entries(BOOKING_TYPE_COLORS).map(([id, v]) => [id, v.bg]),
-);
 import { locationTypeEnum } from "@/lib/booking-enums";
 
 function timeToMinutes(hhmm: string): number {
@@ -125,7 +120,7 @@ export function BookingDialog({
   useEffect(() => {
     if (open) reset(buildFormValues());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, booking, defaultStart, defaultEnd, bookingTypes]);
+  }, [open, booking, defaultStart, defaultEnd]);
 
   const selectedUserId = watch("userId");
 

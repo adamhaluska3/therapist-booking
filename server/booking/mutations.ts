@@ -233,6 +233,10 @@ export async function createClientBooking({
       .then((rows) => rows[0]?.id ?? null)
   );
 
+  if (!resolvedBookingTypeId) {
+    return { ok: false, error: "Termín nemá priradený typ." };
+  }
+
   const priceSnapshot = resolvedBookingTypeId
     ? await fetchPriceForBookingType(resolvedBookingTypeId)
     : null;

@@ -313,7 +313,7 @@ export function SessionCard({
                 Absolvované
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setNoteOpen(true)}>
                 <MessageSquare size={13} />
                 Poznámka
               </DropdownMenuItem>

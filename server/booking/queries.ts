@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/server/auth";
 import {
   BookingWithUser,
   ClientAbsolvedBookingRow,

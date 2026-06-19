@@ -293,6 +293,7 @@ export function AvailabilityCalendar({
           applySlotMove(slots, event.slotId, start as Date, end as Date),
           event.slotId,
         );
+        toast.success("Zmena uložená");
       } else if (event.source === "booking" && event.bookingId) {
         const moved = applyBookingMove(
           bookings,
@@ -303,9 +304,7 @@ export function AvailabilityCalendar({
         const target = moved.find((b) => b.id === event.bookingId)!;
         const ok = applyAndPersistBookingChange(target, bookings);
         if (ok) toast.success("Zmena uložená");
-        return;
       }
-      toast.success("Zmena uložená");
     },
     [slots, bookings],
   );
