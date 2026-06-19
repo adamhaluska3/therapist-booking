@@ -103,6 +103,7 @@ export const updateBookingFromDialogAction = async (
 export const createClientBookingAction = async (
   payload: CreateClientBookingType,
 ) => {
+  await requireUser();
   const parsedPayload = createClientBookingSchema.parse(payload);
   return await createClientBooking(parsedPayload);
 };
