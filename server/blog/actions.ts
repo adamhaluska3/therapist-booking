@@ -1,3 +1,5 @@
+"use server";
+
 import { requireAdmin } from "../auth";
 import {
   createPost,

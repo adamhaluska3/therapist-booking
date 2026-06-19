@@ -1,3 +1,5 @@
+"use server";
+
 import { requireAdmin, requireUser } from "../auth";
 import {
   cancelClientBooking,

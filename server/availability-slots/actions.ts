@@ -1,3 +1,5 @@
+"use server";
+
 import { requireAdmin } from "../auth";
 import { saveAvailabilitySlots } from "./mutations";
 import { getAvailabilitySlots } from "./queries";
