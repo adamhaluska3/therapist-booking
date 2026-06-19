@@ -46,6 +46,7 @@ export const EditCategoryDialog = ({
     resolver: zodResolver(editCategorySchema),
     defaultValues: {
       name: category.name,
+      id: category.id,
     },
   });
 

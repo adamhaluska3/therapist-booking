@@ -1,5 +1,5 @@
 "use server";
-import { revalidatePath } from "next/dist/server/web/spec-extension/revalidate";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "../auth";
 import { addCategory, editCategory, removeCategory } from "./mutations";
 import {
