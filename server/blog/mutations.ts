@@ -2,9 +2,7 @@
 
 import { db } from "@/lib/db";
 import { posts } from "@/db/schema";
-import { writeFile, unlink } from "fs/promises";
-import path from "path";
-import { randomBytes } from "crypto";
+import { put, del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "../auth";
@@ -33,14 +31,12 @@ export async function createPost(
   let titleImage: string | null = null;
 
   if (data.titleImage && data.titleImage.size > 0) {
-    const bytes = await data.titleImage.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `${randomBytes(16).toString("hex")}${path.extname(data.titleImage.name)}`;
-    await writeFile(
-      path.join(process.cwd(), "public/uploads", filename),
-      buffer,
-    );
-    titleImage = `/uploads/${filename}`;
+    const blob = await put(data.titleImage.name, data.titleImage, {
+      access: "public",
+      addRandomSuffix: true,
+      token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN,
+    });
+    titleImage = blob.url;
   }
 
   await db.insert(posts).values({
@@ -74,10 +70,10 @@ export async function updatePost(
 
   let titleImage = post.existingTitleImage ?? null;
 
+  const blobToken = process.env.VERCEL_BLOB_READ_WRITE_TOKEN;
+
   if (post.removeTitleImage && post.existingTitleImage) {
-    await unlink(
-      path.join(process.cwd(), "public", post.existingTitleImage),
-    ).catch(() => {
+    await del(post.existingTitleImage, { token: blobToken }).catch(() => {
       console.log(
         "Error deleting existing title image:",
         post.existingTitleImage,
@@ -88,9 +84,7 @@ export async function updatePost(
 
   if (post.titleImage && post.titleImage.size > 0) {
     if (post.existingTitleImage) {
-      await unlink(
-        path.join(process.cwd(), "public", post.existingTitleImage),
-      ).catch(() => {
+      await del(post.existingTitleImage, { token: blobToken }).catch(() => {
         console.log(
           "Error deleting existing title image:",
           post.existingTitleImage,
@@ -98,14 +92,12 @@ export async function updatePost(
       });
     }
 
-    const bytes = await post.titleImage.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `${Date.now()}-${post.titleImage.name.replace(/\s/g, "_")}`;
-    await writeFile(
-      path.join(process.cwd(), "public/uploads", filename),
-      buffer,
-    );
-    titleImage = `/uploads/${filename}`;
+    const blob = await put(post.titleImage.name, post.titleImage, {
+      access: "public",
+      addRandomSuffix: true,
+      token: blobToken,
+    });
+    titleImage = blob.url;
   }
 
   await db
