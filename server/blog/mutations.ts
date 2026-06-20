@@ -34,7 +34,6 @@ export async function createPost(
     const blob = await put(data.titleImage.name, data.titleImage, {
       access: "public",
       addRandomSuffix: true,
-      token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN,
     });
     titleImage = blob.url;
   }
@@ -70,10 +69,8 @@ export async function updatePost(
 
   let titleImage = post.existingTitleImage ?? null;
 
-  const blobToken = process.env.VERCEL_BLOB_READ_WRITE_TOKEN;
-
   if (post.removeTitleImage && post.existingTitleImage) {
-    await del(post.existingTitleImage, { token: blobToken }).catch(() => {
+    await del(post.existingTitleImage).catch(() => {
       console.log(
         "Error deleting existing title image:",
         post.existingTitleImage,
@@ -84,7 +81,7 @@ export async function updatePost(
 
   if (post.titleImage && post.titleImage.size > 0) {
     if (post.existingTitleImage) {
-      await del(post.existingTitleImage, { token: blobToken }).catch(() => {
+      await del(post.existingTitleImage).catch(() => {
         console.log(
           "Error deleting existing title image:",
           post.existingTitleImage,
@@ -95,7 +92,6 @@ export async function updatePost(
     const blob = await put(post.titleImage.name, post.titleImage, {
       access: "public",
       addRandomSuffix: true,
-      token: blobToken,
     });
     titleImage = blob.url;
   }
