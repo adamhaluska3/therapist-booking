@@ -22,7 +22,7 @@ import type { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import { Textarea } from "../ui/textarea";
 import { createNonOAuthUserAction } from "@/server/user/actions";
-import { locationTypeEnum } from "@/lib/booking-enums";
+import { locationTypeEnum } from "@/lib/booking-types";
 
 function timeToMinutes(hhmm: string): number {
   const [hh, mm] = hhmm.split(":").map(Number);

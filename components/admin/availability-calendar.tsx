@@ -39,7 +39,7 @@ import {
   applyBookingMove,
   mergeAdjacentSlots,
   bookingOverlapsOthers,
-} from "@/lib/calendar-utils";
+} from "./calendar-utils";
 import { AvailabilitySlot, Booking, BookingType } from "@/db/schema";
 import { SlotUpsert } from "@/server/availability-slots/schema";
 import { BookingWithUser } from "@/server/booking/schema";

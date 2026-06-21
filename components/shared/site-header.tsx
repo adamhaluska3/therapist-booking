@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import { AuthControls } from "@/components/marketing/auth-controls";
 import { HeaderLink } from "./header-link";
 import { cn } from "@/lib/utils";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/client";
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);

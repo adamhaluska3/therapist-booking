@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { Suspense } from "react";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { UpcomingUserBookings } from "@/components/user/upcoming-bookings";
 import { PreviousUserBookings } from "@/components/user/previous-bookings";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";

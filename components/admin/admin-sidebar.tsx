@@ -18,7 +18,7 @@ import {
   LucideBookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/client";
 import { toast } from "sonner";
 
 const navItems = [

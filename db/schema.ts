@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth-schema";
-import { statusEnum, locationTypeEnum } from "@/lib/booking-enums";
+import { statusEnum, locationTypeEnum } from "@/lib/booking-types";
 import { DEFAULT_THERAPY_COLOR } from "@/lib/constants";
 
 export { statusEnum, locationTypeEnum };

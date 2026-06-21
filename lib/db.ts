@@ -1,7 +1,6 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import * as authSchema from "@/db/auth-schema";
-
 import * as bookingSchema from "@/db/schema";
 
 const databaseUrl = process.env.TURSO_DATABASE_URL ?? "file:./sqlite.db";
