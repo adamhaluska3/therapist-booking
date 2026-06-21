@@ -1,4 +1,4 @@
-import { statusEnum } from "@/lib/booking-enums";
+import { statusEnum } from "@/lib/booking-types";
 
 export const BOOKINGS_PAGE_SIZE = 5;
 export const SESSIONS_PAGE_SIZE = 10;

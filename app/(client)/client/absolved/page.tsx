@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/server";
 import { AbsolvedBookingsTable } from "@/components/user/absolved-bookings-table";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
 import { getClientAbsolvedBookings } from "@/server/booking/queries";

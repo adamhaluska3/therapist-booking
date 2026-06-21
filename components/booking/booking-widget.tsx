@@ -15,7 +15,7 @@ import {
 } from "@/lib/booking-types";
 import { ADDRESS_SHORT } from "@/lib/constants";
 import { createClientBookingAction } from "@/server/booking/actions";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/client";
 
 const bookingSchema = z.object({
   selectedDate: z.date(),

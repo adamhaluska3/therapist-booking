@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { bookingContent } from "../../app/(booking)/booking/_content/booking";
 import type { TimeSlot } from "@/lib/booking-types";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/client";
 
 const { slots: sc } = bookingContent;
 
