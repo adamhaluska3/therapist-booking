@@ -3,11 +3,11 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth/server";
 import { AbsolvedBookingsTable, ClientAbsolvedBookingMonthFilter } from "@/components/user/absolved-bookings-table";
 import { SmallInfoText } from "@/components/ui/brand-text-ui/small-info-text";
-import { getClientAbsolvedBookings } from "@/server/booking/queries";
 import { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getPaymentSettings } from "@/server/payment-settings/queries";
+import { getClientAbsolvedBookingsAction } from "@/server/booking/actions";
 
 const PAGE_SIZE = 10;
 
@@ -31,7 +31,7 @@ const Page = async ({ searchParams }: { searchParams: SearchParams }) => {
   const page = Math.max(1, Number(str(params.page)) || 1);
 
   const [{ rows, total }, paymentSettings] = await Promise.all([
-    getClientAbsolvedBookings({
+    getClientAbsolvedBookingsAction({
       userId: userSession.user.id,
       page,
       pageSize: PAGE_SIZE,

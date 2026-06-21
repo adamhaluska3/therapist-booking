@@ -47,7 +47,7 @@ export function PaymentInfoDialog({ centPrice, vs, note, paymentSettings, childr
 
   return (
     <Dialog>
-      <DialogTrigger nativeButton={true} render={<span>{children}</span>} />
+      <DialogTrigger nativeButton={false} render={<span>{children}</span>} />
       <DialogContent className="max-w-fit">
         <DialogHeader>
           <DialogTitle>Platobné údaje</DialogTitle>
