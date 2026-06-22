@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { Search, CalendarDays, Loader2 } from "lucide-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { groupByMonth } from "@/lib/date-utils";
 import { ArchiveCard } from "@/components/admin/archive-card";
@@ -44,15 +44,28 @@ function getFilterRange(
 }
 
 export function SessionsArchiveView() {
-  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
-  const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 300);
-  const [selectedDate, setSelectedDate] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const { from, to } = useMemo(
-    () => getFilterRange(activeFilter, selectedDate),
-    [activeFilter, selectedDate],
-  );
+  const activeFilter = (searchParams.get("filter") as FilterKey) ?? "all";
+  const selectedDate = searchParams.get("date") ?? "";
+  const q = searchParams.get("q") ?? "";
+
+  const updateUrl = (next: { filter?: FilterKey; date?: string; q?: string }) => {
+    const sp = new URLSearchParams(searchParams.toString());
+    if ("filter" in next) { if (next.filter && next.filter !== "all") sp.set("filter", next.filter); else sp.delete("filter"); }
+    if ("date" in next) { if (next.date) sp.set("date", next.date); else sp.delete("date"); }
+    if ("q" in next) { if (next.q) sp.set("q", next.q); else sp.delete("q"); }
+    const qs = sp.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    updateUrl({ q: value });
+  }, 300);
+
+  const { from, to } = getFilterRange(activeFilter, selectedDate);
 
   const {
     data,
@@ -62,19 +75,9 @@ export function SessionsArchiveView() {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: [
-      "finished-bookings",
-      debouncedSearch,
-      activeFilter,
-      selectedDate,
-    ],
+    queryKey: ["finished-bookings", q, activeFilter, selectedDate],
     queryFn: ({ pageParam }) =>
-      getFinishedBookingsFilteredAction({
-        offset: pageParam,
-        debouncedSearch,
-        from,
-        to,
-      }),
+      getFinishedBookingsFilteredAction({pageParam, q, from, to}),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
   });
@@ -83,13 +86,11 @@ export function SessionsArchiveView() {
   const groups = groupByMonth(allBookings);
 
   function handleDateChange(value: string) {
-    setSelectedDate(value);
-    if (value) setActiveFilter("all");
+    updateUrl({ date: value, filter: "all" });
   }
 
   function handleFilterClick(key: FilterKey) {
-    setActiveFilter(key);
-    setSelectedDate("");
+    updateUrl({ filter: key, date: "" });
   }
 
   return (
@@ -109,8 +110,8 @@ export function SessionsArchiveView() {
             />
             <input
               type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              defaultValue={q}
+              onChange={(e) => debouncedSearch(e.target.value)}
               placeholder="Hľadať klienta..."
               className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
             />

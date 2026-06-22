@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { SessionsArchiveView } from "./_content/sessions-archive-view";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default async function SessionsPage() {
-  return <SessionsArchiveView />;
+  return (
+    <Suspense>
+      <SessionsArchiveView />
+    </Suspense>
+  );
 }

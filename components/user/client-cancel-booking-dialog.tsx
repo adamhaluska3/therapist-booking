@@ -41,8 +41,8 @@ export const ClientCancelBookingDialog = ({
   });
 
   return (
-    <Dialog open={open} onOpenChange={() => setOpen((s) => !s)}>
-      <DialogTrigger nativeButton={false} render={<span>{children}</span>} />
+    <Dialog open={open} onOpenChange={() => setOpen(s => !s)}>
+      <DialogTrigger nativeButton={true} render={<span>{children}</span>} />
       <DialogContent className="max-w-fit max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle>Zrušenie rezervácie</DialogTitle>

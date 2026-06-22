@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   ColumnDef,
   SortingState,
@@ -15,11 +15,10 @@ import {
 import Link from "next/link";
 import { ChevronRight, Search } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
+import { useRouter, usePathname } from "next/navigation";
 
 import { getInitials } from "@/lib/formatting";
 import { PaginationControls } from "@/components/admin/pagination-controls";
-import { getClientsTableRows } from "@/server/user/queries";
-import { toast } from "sonner";
 
 type ClientItem = {
   id: string | number;
@@ -34,32 +33,25 @@ type ColumnClassMeta = {
 };
 
 export default function ClientsTable({
-  items: initialItems,
+  items,
+  query,
 }: {
   items: ClientItem[];
+  query: string;
 }) {
-  const [search, setSearch] = useState("");
-  const [data, setData] = useState<ClientItem[]>(initialItems ?? []);
+  const router = useRouter();
+  const pathname = usePathname();
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const fetchClients = useDebouncedCallback(async (value: string) => {
-    if (value === "") {
-      setData(initialItems ?? []);
-      return;
-    }
-    setIsFetching(true);
-    try {
-      const items = await getClientsTableRows(value);
-      setData(items ?? []);
-    } catch {
-      toast.error("Nepodarilo sa načítať klientov");
-    } finally {
-      setIsFetching(false);
-    }
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    const sp = new URLSearchParams();
+    if (value) sp.set("query", value);
+    const qs = sp.toString();
+    startTransition(() => {
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+    });
   }, 300);
-
-  const isPending = fetchClients.isPending() || isFetching;
 
   const columns = useMemo<ColumnDef<ClientItem, unknown>[]>(
     () => [
@@ -127,7 +119,7 @@ export default function ClientsTable({
   );
 
   const table = useReactTable({
-    data: data ?? [],
+    data: items ?? [],
     columns,
     state: {
       sorting,
@@ -151,11 +143,8 @@ export default function ClientsTable({
             className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
           />
           <input
-            value={search ?? ""}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              fetchClients(e.target.value);
-            }}
+            defaultValue={query}
+            onChange={(e) => debouncedSearch(e.target.value)}
             placeholder="Vyhľadať podľa mena"
             className="w-full rounded-full border border-surface-200 bg-white pl-8 pr-4 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-brand-400 transition-colors"
           />
@@ -210,7 +199,7 @@ export default function ClientsTable({
           page={table.getState().pagination.pageIndex + 1}
           totalPages={table.getPageCount()}
           rangeStart={
-            data.length === 0
+            items.length === 0
               ? 0
               : table.getState().pagination.pageIndex *
                   table.getState().pagination.pageSize +
@@ -219,9 +208,9 @@ export default function ClientsTable({
           rangeEnd={Math.min(
             (table.getState().pagination.pageIndex + 1) *
               table.getState().pagination.pageSize,
-            data.length,
+            items.length,
           )}
-          total={data.length}
+          total={items.length}
           isPending={isPending}
           onNavigate={(page) => {
             table.setPageIndex(page - 1);

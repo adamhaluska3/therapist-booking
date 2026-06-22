@@ -29,6 +29,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { PostCategory } from "@/db/schema";
 import { EditCategoryAction } from "@/server/post-category/actions";
+import { TruckElectric } from "lucide-react";
 
 export const EditCategoryDialog = ({
   category,
@@ -69,7 +70,7 @@ export const EditCategoryDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        nativeButton={false}
+        nativeButton={true}
         render={children as React.ReactElement}
       />
       <DialogContent className="sm:max-w-sm">
