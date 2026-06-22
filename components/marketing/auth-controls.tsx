@@ -14,15 +14,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { useUser } from "@/lib/user-context";
+import { authClient } from "@/lib/auth/client";
 import { getInitials } from "@/lib/formatting";
 import { toast } from "sonner";
 
 export function AuthControls() {
   const router = useRouter();
-  const { user } = useUser();
   const [isPending, setIsPending] = useState(false);
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const handleGoogleLogin = async () => {
     await authClient.signIn.social({
@@ -59,6 +59,7 @@ export function AuthControls() {
     );
   }
 
+  //TODO user image check
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -66,7 +67,7 @@ export function AuthControls() {
         aria-label={`Používateľské menu pre ${user.name}`}
       >
         <Avatar>
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
+          <AvatarImage src={user.image ?? ""} alt={user.name} />
           <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

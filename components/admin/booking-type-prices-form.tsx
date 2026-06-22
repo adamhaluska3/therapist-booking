@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { saveBookingTypePrices } from "@/server/booking-type/mutations";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { BookingType } from "@/db/schema";
+import { saveBookingTypePricesAction } from "@/server/booking-type/actions";
 
 type Props = {
   bookingTypes: BookingType[];
@@ -27,7 +27,7 @@ export function BookingTypePricesForm({ bookingTypes }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
-      await saveBookingTypePrices(
+      await saveBookingTypePricesAction(
         bookingTypes.map((bt) => {
           const raw = prices[bt.id]?.trim();
           const euros = raw ? parseFloat(raw) : null;

@@ -1,18 +1,30 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { BookingCalendar } from "./booking-calendar";
 import { TimeSlotPanel } from "./time-slot-panel";
-import { createClientBooking } from "@/server/booking/mutations";
 import {
   toDateKey,
   type SlotsByDate,
   type TimeSlot,
 } from "@/lib/booking-types";
-import { useUser } from "@/lib/user-context";
 import { ADDRESS_SHORT } from "@/lib/constants";
+import { createClientBookingAction } from "@/server/booking/actions";
+import { authClient } from "@/lib/auth/client";
+
+const bookingSchema = z.object({
+  selectedDate: z.date(),
+  selectedTime: z.string().min(1),
+  locationType: z.enum(["onsite", "online"]),
+  note: z.string(),
+});
+
+type BookingFormValues = z.infer<typeof bookingSchema>;
 
 function firstAvailableDate(slots: SlotsByDate): Date {
   const todayKey = toDateKey(new Date());
@@ -27,25 +39,41 @@ function firstAvailableDate(slots: SlotsByDate): Date {
 }
 
 export function BookingWidget({
-  slots, bookingTypeId,
+  slots,
+  bookingTypeId,
   leftHeader,
 }: {
-  slots: SlotsByDate; bookingTypeId: string | null;
+  slots: SlotsByDate;
+  bookingTypeId: string | null;
   leftHeader?: React.ReactNode;
 }) {
   const today = new Date();
-  const { user } = useUser();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(() =>
-    firstAvailableDate(slots),
-  );
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [locationType, setLocationType] = useState<"onsite" | "online">(
-    "onsite",
-  );
-  const [note, setNote] = useState("");
-  const [pending, setPending] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const {
+    watch,
+    setValue,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { isSubmitting, errors },
+  } = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      selectedDate: firstAvailableDate(slots),
+      selectedTime: "",
+      locationType: "onsite",
+      note: "",
+    },
+  });
+
+  const selectedDate = watch("selectedDate");
+  const selectedTime = watch("selectedTime");
+  const locationType = watch("locationType");
+  const note = watch("note");
+
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const availableDates = useMemo(
     () =>
@@ -61,31 +89,29 @@ export function BookingWidget({
     ? (slots[toDateKey(selectedDate)] ?? [])
     : [];
 
-  const handleSelectDate = useCallback((d: Date) => {
-    setSelectedDate(d);
-    setSelectedTime(null);
-    setError(null);
-  }, []);
+  const handleSelectDate = (d: Date) => {
+    setValue("selectedDate", d);
+    setValue("selectedTime", "");
+    clearErrors("root");
+  };
 
-  const handleConfirm = useCallback(async () => {
-    if (!selectedDate || !selectedTime) return;
-    setPending(true);
-    setError(null);
-    const result = await createClientBooking(
-      toDateKey(selectedDate),
-      selectedTime,
-      user?.id,
-      note,
+  const onSubmit = handleSubmit(async (data) => {
+    const result = await createClientBookingAction({
+      dateKey: toDateKey(data.selectedDate),
+      time: data.selectedTime,
+      userId: user?.id ?? null,
+      note: data.note,
       bookingTypeId,
-      locationType,
-    );
-    setPending(false);
+      locationType: data.locationType,
+    });
     if (result.ok) {
       setConfirmed(true);
     } else {
-      setError(result.error ?? "Nepodarilo sa vytvoriť rezerváciu.");
+      setError("root", {
+        message: result.error ?? "Nepodarilo sa vytvoriť rezerváciu.",
+      });
     }
-  }, [selectedDate, selectedTime, user?.id, note, locationType, bookingTypeId]);
+  });
 
   if (confirmed) {
     return (
@@ -116,7 +142,8 @@ export function BookingWidget({
           <div className="mb-6 flex items-center justify-center gap-1.5">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-600" />
             <p className="text-sm text-brand-700">
-              Adresa stretnutia: <span className="font-semibold">{ADDRESS_SHORT}</span>
+              Adresa stretnutia:{" "}
+              <span className="font-semibold">{ADDRESS_SHORT}</span>
             </p>
           </div>
         )}
@@ -143,15 +170,18 @@ export function BookingWidget({
       </div>
       <TimeSlotPanel
         slots={dateSlots}
-        selectedTime={selectedTime}
-        onSelectTime={setSelectedTime}
+        selectedTime={selectedTime || null}
+        onSelectTime={(t) => {
+          setValue("selectedTime", t);
+          clearErrors("root");
+        }}
         locationType={locationType}
-        onLocationTypeChange={setLocationType}
+        onLocationTypeChange={(v) => setValue("locationType", v)}
         note={note}
-        onNoteChange={setNote}
-        onConfirm={handleConfirm}
-        pending={pending}
-        error={error}
+        onNoteChange={(v) => setValue("note", v)}
+        onConfirm={() => onSubmit()}
+        pending={isSubmitting}
+        error={errors.root?.message ?? null}
         disableConfirm={!user}
       />
     </div>

@@ -10,7 +10,7 @@ import { SessionCard } from "@/components/admin/session-card";
 import { Button } from "@/components/ui/button";
 import type { BookingType } from "@/db/schema";
 import { UserOption } from "@/server/user/schema";
-import { getDashboardBookingsFiltered } from "@/server/booking/queries";
+import { getDashboardBookingsFilteredAction } from "@/server/booking/actions";
 
 type FilterKey = "all" | "today" | "week";
 
@@ -85,7 +85,12 @@ export function DashboardView({
       selectedDate,
     ],
     queryFn: ({ pageParam }) =>
-      getDashboardBookingsFiltered(pageParam, debouncedSearch, from, to),
+      getDashboardBookingsFilteredAction({
+        offset: pageParam,
+        debouncedSearch,
+        from,
+        to,
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
   });

@@ -18,8 +18,7 @@ import {
   LucideBookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUser } from "@/lib/user-context";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/client";
 import { toast } from "sonner";
 
 const navItems = [
@@ -34,7 +33,11 @@ const navItems = [
   { label: "História sedení", href: "/admin/sessions", icon: History },
   { label: "Klienti", href: "/admin/clients", icon: Users },
   { label: "Blog", href: "/admin/blog", icon: FileText },
-  { label: "Kategórie príspevkov", href: "/admin/post-categories", icon: LucideBookmark },
+  {
+    label: "Kategórie príspevkov",
+    href: "/admin/post-categories",
+    icon: LucideBookmark,
+  },
   { label: "Nastavenia", href: "/admin/settings", icon: Settings },
 ];
 
@@ -47,8 +50,9 @@ function SidebarContent({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
   const [isPending, startTransition] = useTransition();
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const handleLogout = () => {
     startTransition(async () => {

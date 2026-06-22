@@ -2,7 +2,6 @@
 
 import { AlignJustify, Check, Clock, Plus, User } from "lucide-react";
 import type { statusEnum } from "@/db/schema";
-import { BOOKING_TYPE_COLORS } from "@/lib/constants";
 
 export type BookingStatus = (typeof statusEnum)[number];
 
@@ -20,6 +19,8 @@ export interface TherapistEvent {
   isDraggable?: boolean;
   clientName?: string;
   bookingTypeId?: string | null;
+  bookingTypeColor?: string | null;
+  bookingTypeName?: string | null;
   status?: BookingStatus | null;
 }
 
@@ -74,9 +75,6 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
   if (event.type === "therapy") {
     const durationMin = (event.end.getTime() - event.start.getTime()) / 60000;
     const isPending = event.status === "pending";
-    const typeInfo = event.bookingTypeId
-      ? BOOKING_TYPE_COLORS[event.bookingTypeId]
-      : null;
 
     return (
       <div className="relative h-full flex flex-col justify-center p-2 overflow-hidden">
@@ -87,7 +85,7 @@ export function CalendarEventCard({ event, compact }: CalendarEventCardProps) {
         )}
         {durationMin > 30 && (
           <div className="text-[11px] font-bold tracking-wide text-white/60 truncate">
-            {typeInfo?.label ?? "Terapia"}
+            {event.bookingTypeName ?? "Terapia"}
           </div>
         )}
         <div className="flex items-center gap-1 overflow-hidden">

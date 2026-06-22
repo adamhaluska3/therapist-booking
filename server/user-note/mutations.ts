@@ -1,0 +1,41 @@
+"use server";
+
+import { db } from "@/lib/db";
+import { UserNoteType } from "./schema";
+import { userNote } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { requireAdmin } from "../auth";
+
+export async function saveUserNote(payload: UserNoteType) {
+  if (payload.id) {
+    await db
+      .update(userNote)
+      .set({ note: payload.note, date: payload.date })
+      .where(eq(userNote.id, payload.id));
+    return payload.id;
+  }
+
+  const id = crypto.randomUUID();
+  await db.insert(userNote).values({
+    id,
+    userId: payload.userId,
+    date: payload.date,
+    note: payload.note,
+  });
+
+  return id;
+}
+
+export async function deleteUserNote(id: string) {
+  const existing = await db
+    .select()
+    .from(userNote)
+    .where(eq(userNote.id, id))
+    .limit(1);
+  if (!existing || existing.length === 0) {
+    return false;
+  }
+
+  await db.delete(userNote).where(eq(userNote.id, id));
+  return true;
+}

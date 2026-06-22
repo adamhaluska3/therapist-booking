@@ -13,7 +13,7 @@ import {
   Hash,
   MessageSquare,
 } from "lucide-react";
-import { LocationBadge } from "@/components/booking/location-badge"
+import { LocationBadge } from "@/components/booking/location-badge";
 import {
   useReactTable,
   getCoreRowModel,
@@ -24,15 +24,9 @@ import {
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
 import {
-  BOOKING_TYPE_COLORS,
   BOOKINGS_PAGE_SIZE,
   UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
 } from "@/lib/constants";
-import {
-  confirmBooking,
-  updateBookingStatus,
-} from "@/server/booking/mutations";
 import {
   Dialog,
   DialogContent,
@@ -46,18 +40,20 @@ import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { getRequestsColumns } from "@/components/admin/requests-columns";
 import { BookingWithUser } from "@/server/booking/schema";
-import { BookingType } from "@/db/schema";
 import { toast } from "sonner";
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
+import {
+  confirmBookingAction,
+  updateBookingStatusAction,
+} from "@/server/booking/actions";
 
 interface Props {
   bookings: BookingWithUser[];
   total: number;
   page: number;
-  bookingTypes: BookingType[];
 }
 
-export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
+export function RequestsView({ bookings, total, page }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -82,7 +78,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     (id: string) => {
       startTransition(async () => {
         try {
-          await confirmBooking(id);
+          await confirmBookingAction({ id });
           router.refresh();
           toast.success("Žiadosť potvrdená");
         } catch (e) {
@@ -106,7 +102,10 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     if (!cancelTarget) return;
     startTransition(async () => {
       try {
-        await updateBookingStatus(cancelTarget.id, "cancelled");
+        await updateBookingStatusAction({
+          id: cancelTarget.id,
+          status: "cancelled",
+        });
         setCancelTarget(null);
         router.refresh();
         toast.success("Žiadosť zrušená");
@@ -122,7 +121,6 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
     onCancel: handleCancelOpen,
     onNote: handleNoteOpen,
     isPending,
-    bookingTypes,
   });
 
   const table = useReactTable({
@@ -166,8 +164,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
         )}
         {bookings.map((b) => {
           const clientName = b.user?.nickname ?? b.user?.name ?? UNKNOWN_CLIENT;
-          const bookingType =
-            bookingTypes.find((t) => t.id === b.bookingTypeId) ?? null;
+          const bookingType = b.bookingType;
           const clientBlock = (
             <div className="flex items-center gap-3 flex-1 min-w-0 group">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
@@ -213,9 +210,7 @@ export function RequestsView({ bookings, total, page, bookingTypes }: Props) {
                       <span
                         className="inline-block w-2 h-2 rounded-full shrink-0"
                         style={{
-                          backgroundColor:
-                            BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                            DEFAULT_THERAPY_COLOR,
+                          backgroundColor: bookingType.color,
                         }}
                       />
                       <span>{bookingType.name}</span>

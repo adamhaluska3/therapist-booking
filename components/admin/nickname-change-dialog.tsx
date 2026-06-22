@@ -6,7 +6,6 @@ import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { updateUserNickname } from "@/server/user/mutations";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { updateUserNicknameAction } from "@/server/user/actions";
 
 const nicknameSchema = z.object({
   nickname: z.string().max(100, "Prezývka nesmie byť dlhšia ako 100 znakov"),
@@ -57,7 +57,7 @@ export function NicknameChangeDialog({
   async function onSubmit(data: NicknameFormData) {
     startTransition(async () => {
       try {
-        await updateUserNickname(userId, data.nickname);
+        await updateUserNicknameAction({ userId, nickname: data.nickname });
         setOpen(false);
         router.refresh();
         toast.success("Prezývka aktualizovaná");

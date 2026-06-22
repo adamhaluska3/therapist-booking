@@ -21,7 +21,10 @@ import {
 } from "@/components/ui/dialog";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import NoteEditorOverlay from "@/components/admin/note-editor-overlay";
-import { deleteUserNote, saveUserNote } from "@/server/user-note/mutations";
+import {
+  deleteUserNoteAction,
+  saveUserNoteAction,
+} from "@/server/user-note/actions";
 
 type NoteItem = {
   id: string;
@@ -129,7 +132,7 @@ export function ClientNotesPanel({
     setNotesState((s) => s.filter((x) => x.id !== id));
     setIsPending(true);
     try {
-      await deleteUserNote(id);
+      await deleteUserNoteAction({ id });
       if (editing?.id === id) {
         setOpen(false);
         setEditing(null);
@@ -159,7 +162,7 @@ export function ClientNotesPanel({
       );
       setIsPending(true);
       try {
-        await saveUserNote({ id: editing.id, userId, date, note: text });
+        await saveUserNoteAction({ id: editing.id, userId, date, note: text });
         toast.success("Poznámka aktualizována");
       } catch (e) {
         console.error(e);
@@ -178,7 +181,7 @@ export function ClientNotesPanel({
       setNotesState((s) => [{ id: tempId, date, note: text }, ...s]);
       setIsPending(true);
       try {
-        const newId = await saveUserNote({ userId, date, note: text });
+        const newId = await saveUserNoteAction({ userId, date, note: text });
         setNotesState((s) =>
           s.map((it) => (it.id === tempId ? { ...it, id: newId } : it)),
         );

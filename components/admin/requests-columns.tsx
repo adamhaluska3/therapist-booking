@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
-import type { BookingType } from "@/db/schema";
 import { formatTime, formatBookingDate } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
-import {
-  BOOKING_TYPE_COLORS,
-  UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
-} from "@/lib/constants";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import { MessageSquare, Check, X } from "lucide-react";
 import { LocationBadge } from "@/components/booking/location-badge";
 import { BookingWithUser } from "@/server/booking/schema";
@@ -17,7 +12,6 @@ interface ActionHandlers {
   onCancel: (booking: BookingWithUser) => void;
   onNote: (booking: BookingWithUser) => void;
   isPending: boolean;
-  bookingTypes: BookingType[];
 }
 
 const columnHelper = createColumnHelper<BookingWithUser>();
@@ -27,7 +21,6 @@ export function getRequestsColumns({
   onCancel,
   onNote,
   isPending,
-  bookingTypes,
 }: ActionHandlers) {
   return [
     columnHelper.display({
@@ -37,8 +30,7 @@ export function getRequestsColumns({
         const booking = info.row.original;
         const clientName =
           booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
-        const bookingType =
-          bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+        const bookingType = booking.bookingType;
         const inner = (
           <div className="flex items-center gap-3 group">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
@@ -53,9 +45,7 @@ export function getRequestsColumns({
                   <span
                     className="inline-block w-2 h-2 rounded-full shrink-0"
                     style={{
-                      backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                        DEFAULT_THERAPY_COLOR,
+                      backgroundColor: bookingType.color,
                     }}
                   />
                   <span className="truncate">{bookingType.name}</span>

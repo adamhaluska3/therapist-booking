@@ -18,14 +18,15 @@ import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/admin/pagination-controls";
 import { formatTime } from "@/lib/date-utils";
 import { useEffect, useMemo, useState } from "react";
-import { bookingStatusTranslate } from "@/lib/utils";
+import { bookingStatusTranslate } from "@/lib/booking-types";
 import { BOOKING_STATE_COLORS, DEFAULT_THERAPY_COLOR } from "@/lib/constants";
+import type { statusEnum } from "@/lib/booking-types";
 
 type BookingItem = {
   id: string;
   start: string | number | Date;
   end: string | number | Date;
-  status?: string;
+  status?: (typeof statusEnum)[number];
   notes?: string | null;
 };
 

@@ -5,15 +5,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { booking, BookingType } from "@/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { cancelClientBooking } from "@/server/booking/mutations";
 import { toast } from "sonner";
+import { cancelClientBookingAction } from "@/server/booking/actions";
 
 export type ClientEditBookingDialogProps = {
   item: InferSelectModel<typeof booking> & { bookingType: BookingType | null };
@@ -26,17 +25,24 @@ export const ClientCancelBookingDialog = ({
 }: ClientEditBookingDialogProps) => {
   const [open, setOpen] = useState(false);
 
-  const { mutate: confirmCancel, isPending, error: cancelError, isSuccess: cancelDone, reset } = useMutation({
-    mutationFn: () => cancelClientBooking(item.id),
+  const {
+    mutate: confirmCancel,
+    isPending,
+    error: cancelError,
+    isSuccess: cancelDone,
+    reset,
+  } = useMutation({
+    mutationFn: () => cancelClientBookingAction({ bookingId: item.id }),
     onSuccess: (result) => {
-      if (!result.ok) throw new Error(result.error ?? "Nepodarilo sa zrušiť rezerváciu.");
+      if (!result.ok)
+        throw new Error(result.error ?? "Nepodarilo sa zrušiť rezerváciu.");
       toast.success("Rezervácia zrušená");
     },
   });
 
   return (
     <Dialog open={open} onOpenChange={() => setOpen(s => !s)}>
-      <DialogTrigger nativeButton={false} render={<span>{children}</span>} />
+      <DialogTrigger nativeButton={true} render={<span>{children}</span>} />
       <DialogContent className="max-w-fit max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle>Zrušenie rezervácie</DialogTitle>
@@ -60,7 +66,10 @@ export const ClientCancelBookingDialog = ({
                 </button>
                 <button
                   className="flex-1 py-2.5 bg-surface-100 text-neutral-700 rounded-xl text-sm font-medium hover:bg-surface-200 transition-colors disabled:opacity-50"
-                  onClick={() => { setOpen(false); reset(); }}
+                  onClick={() => {
+                    setOpen(false);
+                    reset();
+                  }}
                   disabled={isPending}
                 >
                   Späť
@@ -79,4 +88,3 @@ export const ClientCancelBookingDialog = ({
     </Dialog>
   );
 };
-

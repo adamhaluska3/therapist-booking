@@ -4,28 +4,16 @@ import { LocationBadge } from "@/components/booking/location-badge"
 import type { BookingWithUser } from "@/server/booking/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
-import {
-  BOOKING_TYPE_COLORS,
-  UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
-} from "@/lib/constants";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import { AdminCard } from "@/components/admin/admin-card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { BookingType } from "@/db/schema";
 
-export function ArchiveCard({
-  booking,
-  bookingTypes,
-}: {
-  booking: BookingWithUser;
-  bookingTypes: BookingType[];
-}) {
+export function ArchiveCard({ booking }: { booking: BookingWithUser }) {
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
   const isLinked = Boolean(booking.userId);
-  const bookingType =
-    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+  const bookingType = booking.bookingType;
 
   const inner = (
     <AdminCard
@@ -76,9 +64,7 @@ export function ArchiveCard({
                     <span
                       className="inline-block w-2 h-2 rounded-full shrink-0"
                       style={{
-                        backgroundColor:
-                          BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                          DEFAULT_THERAPY_COLOR,
+                        backgroundColor: bookingType.color,
                       }}
                     />
                     <span>{bookingType.name}</span>
@@ -124,9 +110,7 @@ export function ArchiveCard({
                 <span
                   className="inline-block w-2 h-2 rounded-full shrink-0"
                   style={{
-                    backgroundColor:
-                      BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                      DEFAULT_THERAPY_COLOR,
+                    backgroundColor: bookingType.color,
                   }}
                 />
                 <span className="truncate min-w-0 flex-1">

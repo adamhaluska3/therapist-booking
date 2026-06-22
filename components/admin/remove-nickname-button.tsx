@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { updateUserNickname } from "@/server/user/mutations";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +14,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { updateUserNicknameAction } from "@/server/user/actions";
 
 export function RemoveNicknameButton({ userId }: { userId: string }) {
   const router = useRouter();
@@ -24,7 +24,7 @@ export function RemoveNicknameButton({ userId }: { userId: string }) {
   async function handleRemove() {
     startTransition(async () => {
       try {
-        await updateUserNickname(userId, "");
+        await updateUserNicknameAction({ userId, nickname: "" });
         setOpen(false);
         router.refresh();
         toast.success("Prezývka odstránená");

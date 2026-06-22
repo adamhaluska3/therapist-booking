@@ -17,11 +17,7 @@ import {
 import type { Booking, BookingType } from "@/db/schema";
 import { formatTime, formatMonthShort } from "@/lib/date-utils";
 import { getInitials, formatPrice } from "@/lib/formatting";
-import {
-  BOOKING_TYPE_COLORS,
-  UNKNOWN_CLIENT,
-  DEFAULT_THERAPY_COLOR,
-} from "@/lib/constants";
+import { UNKNOWN_CLIENT } from "@/lib/constants";
 import { AdminCard } from "@/components/admin/admin-card";
 import { BookingDialog } from "@/components/admin/booking-dialog";
 import { BookingNoteDialog } from "@/components/admin/booking-note-dialog";
@@ -47,9 +43,9 @@ import { toast } from "sonner";
 import { BookingWithUser } from "@/server/booking/schema";
 import { UserOption } from "@/server/user/schema";
 import {
-  updateBookingFromDialog,
-  updateBookingStatus,
-} from "@/server/booking/mutations";
+  updateBookingFromDialogAction,
+  updateBookingStatusAction,
+} from "@/server/booking/actions";
 
 type ConfirmAction = "finished" | "cancelled";
 
@@ -98,8 +94,7 @@ export function SessionCard({
 
   const clientName =
     booking.user?.nickname ?? booking.user?.name ?? UNKNOWN_CLIENT;
-  const bookingType =
-    bookingTypes.find((t) => t.id === booking.bookingTypeId) ?? null;
+  const bookingType = booking.bookingType;
   const config = confirmDialog ? CONFIRM_CONFIG[confirmDialog] : null;
 
   function invalidateAndRefresh() {
@@ -112,7 +107,7 @@ export function SessionCard({
     const action = confirmDialog;
     startTransition(async () => {
       try {
-        await updateBookingStatus(booking.id, action);
+        await updateBookingStatusAction({ id: booking.id, status: action });
         setConfirmDialog(null);
         invalidateAndRefresh();
         toast.success(
@@ -128,9 +123,9 @@ export function SessionCard({
   function handleSave(updated: Booking) {
     startTransition(async () => {
       try {
-        const result = await updateBookingFromDialog(
-          updated.id,
-          {
+        const result = await updateBookingFromDialogAction({
+          id: updated.id,
+          updates: {
             start: updated.start,
             end: updated.end,
             userId: updated.userId ?? null,
@@ -138,8 +133,9 @@ export function SessionCard({
             note: updated.note ?? null,
             locationType: updated.locationType,
           },
-          booking.start,
-        );
+          previousStart: booking.start,
+        });
+
         if (!result.ok) {
           toast.error(result.error ?? "Nepodarilo sa uložiť sedenie");
           return;
@@ -222,8 +218,7 @@ export function SessionCard({
                     className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                     style={{
                       backgroundColor:
-                        BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                        DEFAULT_THERAPY_COLOR,
+                        bookingType.color,
                     }}
                   />
                   <span>{bookingType.name}</span>
@@ -288,9 +283,7 @@ export function SessionCard({
               <span
                 className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                 style={{
-                  backgroundColor:
-                    BOOKING_TYPE_COLORS[bookingType.id]?.bg ??
-                    DEFAULT_THERAPY_COLOR,
+                  backgroundColor: bookingType.color,
                 }}
               />
               <span>{bookingType.name}</span>
@@ -320,7 +313,7 @@ export function SessionCard({
                 Absolvované
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setNoteOpen(true)}>
                 <MessageSquare size={13} />
                 Poznámka
               </DropdownMenuItem>
@@ -353,12 +346,6 @@ export function SessionCard({
         }}
         onClose={() => setEditOpen(false)}
         onUserCreated={() => {}}
-      />
-
-      <BookingNoteDialog
-        open={noteOpen}
-        booking={booking}
-        onClose={() => setNoteOpen(false)}
       />
 
       <BookingNoteDialog
